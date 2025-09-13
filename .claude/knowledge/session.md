@@ -54,3 +54,13 @@ This means we could potentially use EIP-7702 for EOA gas sponsorship on Optimism
 **Files**: tap-stake/packages/frontend/src/lib/nfc.ts, tap-stake/packages/frontend/src/App.tsx
 ---
 
+### [20:16] [nfc] NFC implementation uses libhalo WebAuthn
+**Details**: The NFC implementation uses @arx-research/libhalo/api/web which appears to be using WebAuthn under the hood. The rpId parameter is set to window.location.hostname in both get_pkeys and sign commands (lines 13 and 36). This is causing the error when accessing over network because WebAuthn requires the rpId to match the origin domain.
+**Files**: packages/frontend/src/lib/nfc.ts
+---
+
+### [20:19] [webauthn] WebAuthn RP ID cannot use IP addresses
+**Details**: WebAuthn requires RP ID to be a domain, not an IP address. The error occurs because window.location.hostname returns '10.88.0.74' (IP address) which is not allowed as an RP ID. Only domain format of host is allowed, not IP addresses. For network access, either use a domain name or configure localhost with port forwarding.
+**Files**: packages/frontend/src/lib/nfc.ts
+---
+
