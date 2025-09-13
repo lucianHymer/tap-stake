@@ -44,3 +44,13 @@ This means we could potentially use EIP-7702 for EOA gas sponsorship on Optimism
 **Files**: viem_account.ts
 ---
 
+### [19:21] [architecture] Tap-Stake NFC wallet implementation
+**Details**: Created a minimal NFC wallet app using libhalo for card interaction and viem for Ethereum operations. The app is structured as a monorepo with a frontend package built with Vite + React + TypeScript. Key components:
+- nfc.ts module handles NFC card communication using libhalo's execHaloCmdWeb API
+- Creates viem-compatible accounts that delegate signing to NFC cards  
+- Two-step flow: first read card address, then sign messages
+- Signature verification by recovering address from signature
+- Phase 2 will add EIP-7702 support for gasless transactions via paymaster
+**Files**: tap-stake/packages/frontend/src/lib/nfc.ts, tap-stake/packages/frontend/src/App.tsx
+---
+
