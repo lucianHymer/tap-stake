@@ -6,10 +6,30 @@ export interface NFCCardData {
   publicKey: string;
 }
 
+// Helper function to get valid RP ID for WebAuthn
+const getRpId = () => {
+  const hostname = window.location.hostname;
+  // WebAuthn doesn't support IP addresses as RP ID
+  // Check if hostname is an IP address (IPv4 or IPv6)
+  const isIPAddress = /^(\d{1,3}\.){3}\d{1,3}$|^\[?[0-9a-fA-F:]+\]?$/.test(hostname);
+  
+  if (isIPAddress) {
+    throw new Error(
+      `WebAuthn cannot be used with IP address (${hostname}). ` +
+      `Please access this app using a domain name instead. ` +
+      `Add "${hostname} nfc-wallet.local" to your /etc/hosts file ` +
+      `and access via https://nfc-wallet.local:3000`
+    );
+  }
+  
+  return hostname;
+};
+
 export const getCardData = async (): Promise<NFCCardData> => {
   try {
     const result = await execHaloCmdWeb({
-      name: 'get_pkeys'
+      name: 'get_pkeys',
+      rpId: getRpId()
     });
     
     const address = result.etherAddresses?.['1'] as `0x${string}`;
@@ -31,7 +51,8 @@ export const signWithNFC = async (message: string | Hex): Promise<Hex> => {
     const command = {
       name: 'sign',
       message: message,
-      keyNo: 1
+      keyNo: 1,
+      rpId: getRpId()
     };
     
     const result = await execHaloCmdWeb(command);
