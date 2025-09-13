@@ -10,3 +10,4 @@
 
 ## ⚠️ Gotchas
 - [WebAuthn Restrictions](gotchas/webauthn-restrictions.md) - RP ID limitations and NotAllowedError causes
+- [NFC Signature Verification](gotchas/nfc-signature-verification.md) - Message hashing and Ethereum prefix handling
