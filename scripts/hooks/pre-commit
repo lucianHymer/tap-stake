@@ -1,0 +1,16 @@
+#!/bin/sh
+# Pre-commit hook to run build check before committing
+
+echo "🔨 Running build check before commit..."
+
+# Run the build command
+npm run build
+
+# Check if build succeeded
+if [ $? -ne 0 ]; then
+    echo "❌ Build failed! Please fix the errors before committing."
+    exit 1
+fi
+
+echo "✅ Build successful! Proceeding with commit..."
+exit 0
