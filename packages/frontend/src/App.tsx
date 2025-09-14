@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { getCardData, createNFCAccount } from './lib/nfc';
 import { recoverMessageAddress, type Hex } from 'viem';
+import moloch1 from '../moloch1.png';
+import moloch2 from '../moloch2.png';
 import './App.css';
 
 interface SignatureResult {
@@ -16,6 +18,18 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [signatureResult, setSignatureResult] = useState<SignatureResult | null>(null);
   const [cardAddress, setCardAddress] = useState<`0x${string}` | null>(null);
+  const [isStaked, setIsStaked] = useState(false);
+
+  const handleMolochClick = async () => {
+    setIsStaked(true);
+    setTimeout(() => setIsStaked(false), 500);
+    
+    if (!cardAddress) {
+      await handleGetCardInfo();
+    } else if (!signatureResult) {
+      await handleSignMessage();
+    }
+  };
 
   const handleGetCardInfo = async () => {
     setIsLoading(true);
@@ -43,7 +57,7 @@ function App() {
     setError(null);
     
     try {
-      const message = "Hello from NFC Wallet!";
+      const message = "I SLAY MOLOCH, DEMON OF DIS-COORDINATION!";
       const account = createNFCAccount(cardAddress);
       const signature = await account.signMessage({ message });
       
@@ -75,98 +89,97 @@ function App() {
     setSignatureResult(null);
     setCardAddress(null);
     setError(null);
+    setIsStaked(false);
   };
 
   return (
-    <div className="container">
-      <header>
-        <h1>Tap-Stake NFC Wallet</h1>
-        <p className="subtitle">Sign messages with your NFC card</p>
+    <div className="demon-container">
+      <header className="demon-header">
+        <h1 className="title">
+          <span>TAP</span>
+          <span>STAKE</span>
+        </h1>
       </header>
 
-      <main>
-        {!cardAddress && (
-          <div className="card">
-            <h2>Step 1: Read NFC Card</h2>
-            <p>First, tap your NFC card to read its address</p>
-            <button 
-              onClick={handleGetCardInfo}
-              disabled={isLoading}
-              className="btn btn-primary"
-            >
-              {isLoading ? 'Reading...' : 'Read NFC Card'}
-            </button>
+      <main className="demon-main">
+        <div className="moloch-section">
+          <div 
+            className={`moloch-image-container ${isStaked ? 'staked' : ''}`}
+            onClick={handleMolochClick}
+          >
+            <img 
+              src={isStaked ? moloch2 : moloch1} 
+              alt="Moloch - Demon of Dis-coordination"
+              className="moloch-image"
+            />
+          </div>
+          
+          <div className="demon-status">
+            {!cardAddress && (
+              <p className="demon-text">TAP THE STAKE TO BEGIN THE RITUAL</p>
+            )}
+            {cardAddress && !signatureResult && (
+              <p className="demon-text">TAP AGAIN TO DRIVE THE STAKE DEEPER</p>
+            )}
+            {signatureResult && signatureResult.verified && (
+              <p className="demon-text victory">MOLOCH IS SLAIN! COORDINATION RESTORED!</p>
+            )}
+          </div>
+        </div>
+
+        {error && (
+          <div className="blood-box">
+            <strong>RITUAL FAILED:</strong> {error}
           </div>
         )}
 
-        {cardAddress && !signatureResult && (
-          <div className="card">
-            <div className="info-box">
-              <strong>Card Address:</strong>
-              <code>{cardAddress}</code>
+        {cardAddress && (
+          <div className="tech-section">
+            <div className="tech-card">
+              <div className="tech-label">SLAYER'S SIGIL</div>
+              <code className="address-display">{cardAddress}</code>
             </div>
-            
-            <h2>Step 2: Sign Message</h2>
-            <p>Now tap your card again to sign a message</p>
-            <button 
-              onClick={handleSignMessage}
-              disabled={isLoading}
-              className="btn btn-primary"
-            >
-              {isLoading ? 'Signing...' : 'Sign Message'}
-            </button>
           </div>
         )}
 
         {signatureResult && (
-          <div className="card result-card">
-            <h2>Signature Created!</h2>
-            
-            <div className="result-section">
-              <strong>Message:</strong>
-              <p>{signatureResult.message}</p>
+          <div className="tech-section">
+            <div className="tech-card">
+              <div className="tech-label">INCANTATION</div>
+              <p className="incantation">{signatureResult.message}</p>
             </div>
             
-            <div className="result-section">
-              <strong>Signer Address:</strong>
-              <code className="address">{signatureResult.signerAddress}</code>
-            </div>
-            
-            <div className="result-section">
-              <strong>Signature:</strong>
-              <code className="signature">{signatureResult.signature}</code>
+            <div className="tech-card">
+              <div className="tech-label">BLOOD SEAL</div>
+              <code className="signature-display">{signatureResult.signature}</code>
             </div>
             
             {signatureResult.recoveredAddress && (
-              <div className="result-section">
-                <strong>Recovered Address:</strong>
-                <code className="address">{signatureResult.recoveredAddress}</code>
+              <div className="tech-card">
+                <div className="tech-label">VERIFIED SLAYER</div>
+                <code className="address-display">{signatureResult.recoveredAddress}</code>
               </div>
             )}
             
-            <div className={`verification ${signatureResult.verified ? 'verified' : 'not-verified'}`}>
-              {signatureResult.verified ? 'Signature Verified' : 'Signature Verification Failed'}
+            <div className={`verification-ritual ${signatureResult.verified ? 'sanctified' : 'corrupted'}`}>
+              {signatureResult.verified ? '✓ RITUAL SANCTIFIED' : '✗ RITUAL CORRUPTED'}
             </div>
             
-            <button onClick={handleClear} className="btn btn-secondary">
-              Start Over
+            <button onClick={handleClear} className="btn-demon">
+              RESURRECT MOLOCH (START OVER)
             </button>
           </div>
         )}
 
-        {error && (
-          <div className="error-box">
-            <strong>Error:</strong> {error}
-          </div>
-        )}
-
-        <div className="info-card">
-          <h3>Requirements</h3>
-          <ul>
-            <li>NFC-enabled device (Android phone or desktop with NFC reader)</li>
-            <li>Chrome browser with Web NFC API support</li>
-            <li>Initialized HaLo NFC card with ECDSA keys</li>
-          </ul>
+        <div className="footer-info">
+          <details className="tech-details">
+            <summary>ARCANE REQUIREMENTS</summary>
+            <ul>
+              <li>NFC-enabled device (Android phone or desktop with NFC reader)</li>
+              <li>Chrome browser with Web NFC API support</li>
+              <li>Initialized HaLo NFC card with ECDSA keys</li>
+            </ul>
+          </details>
         </div>
       </main>
     </div>
