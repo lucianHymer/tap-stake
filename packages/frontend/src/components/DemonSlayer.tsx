@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { recoverMessageAddress, type Hex } from 'viem';
-import moloch1 from '../../moloch1.png';
-import moloch2 from '../../moloch2.png';
+import moloch1 from '../assets/images/moloch1.png';
+import moloch2 from '../assets/images/moloch2.png';
 import type { NFCConnection } from '../lib/nfcResource';
 
 interface SignatureResult {

@@ -14,7 +14,7 @@ export function NFCPrompt() {
             <div className="nfc-pulse"></div>
             <div className="nfc-pulse-delayed"></div>
             <img 
-              src="/baphomet.jpg" 
+              src="/src/assets/images/baphomet.jpg" 
               alt="Baphomet" 
               className="nfc-symbol"
               style={{width: '120px', height: '120px', objectFit: 'contain', filter: 'invert(1)'}}
