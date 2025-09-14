@@ -1,5 +1,5 @@
 import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
-import { hashMessage, keccak256, serializeTransaction, parseSignature, type Hex } from 'viem';
+import { keccak256, serializeTransaction, type Hex } from 'viem';
 
 export interface NFCCardData {
   address: `0x${string}`;
@@ -112,7 +112,7 @@ export const createNFCAccount = (address: `0x${string}`) => {
       const signature = await signWithNFC(hash, true);
       return signature;
     },
-    signTypedData: async (typedData: any) => {
+    signTypedData: async () => {
       throw new Error('Typed data signing not yet implemented');
     }
   };

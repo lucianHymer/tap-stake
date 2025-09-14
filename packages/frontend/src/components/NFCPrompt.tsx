@@ -1,4 +1,3 @@
-import React from 'react';
 import './NFCPrompt.css';
 
 export function NFCPrompt() {
