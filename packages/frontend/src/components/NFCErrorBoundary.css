@@ -1,0 +1,99 @@
+.nfc-error-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a0000 0%, #000000 100%);
+}
+
+.nfc-error-content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 600px;
+}
+
+.nfc-error-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 3rem;
+  color: #ff3333;
+  text-shadow: 0 0 10px rgba(255, 51, 51, 0.8);
+  margin-bottom: 2rem;
+}
+
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 0 20px rgba(255, 165, 0, 0.6));
+}
+
+.nfc-error-message {
+  color: #cccccc;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  font-family: 'Courier New', monospace;
+}
+
+.nfc-error-details {
+  margin-bottom: 2rem;
+}
+
+.nfc-error-details details {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.nfc-error-details summary {
+  color: #888;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.nfc-error-details pre {
+  color: #ff6666;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+  text-align: left;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.retry-button {
+  background: linear-gradient(135deg, #ff0000, #990000);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1.5rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+}
+
+.retry-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5);
+  background: linear-gradient(135deg, #ff3333, #cc0000);
+}
+
+.retry-button:active {
+  transform: translateY(0);
+}
+
+.future-wallet-options {
+  margin-top: 3rem;
+  min-height: 2rem;
+  /* Reserved space for future wallet connection options */
+}

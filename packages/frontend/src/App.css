@@ -110,6 +110,11 @@ body {
   animation: stakeImpact 0.3s ease;
 }
 
+.moloch-image-container.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
 @keyframes stakeImpact {
   0% {
     transform: scale(1);
