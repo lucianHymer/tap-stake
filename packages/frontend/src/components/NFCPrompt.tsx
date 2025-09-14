@@ -1,4 +1,5 @@
 import './NFCPrompt.css';
+import baphometImage from '../assets/images/baphomet.jpg';
 
 export function NFCPrompt() {
   return (
@@ -14,7 +15,7 @@ export function NFCPrompt() {
             <div className="nfc-pulse"></div>
             <div className="nfc-pulse-delayed"></div>
             <img 
-              src="/src/assets/images/baphomet.jpg" 
+              src={baphometImage} 
               alt="Baphomet" 
               className="nfc-symbol"
               style={{width: '120px', height: '120px', objectFit: 'contain', filter: 'invert(1)'}}
