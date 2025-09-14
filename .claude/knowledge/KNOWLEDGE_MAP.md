@@ -10,6 +10,7 @@
 
 ## 🎨 Frontend
 - [Tap-Stake Demon-Slayer Theme](frontend/tap-stake-demon-slayer-theme.md) - Dark themed UI with demon-slaying metaphors
+- [NFC Auto-Connect Suspense](frontend/nfc-auto-connect-suspense.md) - React Suspense pattern for automatic NFC connection
 
 ## ⚠️ Gotchas
 - [WebAuthn Restrictions](gotchas/webauthn-restrictions.md) - RP ID limitations and NotAllowedError causes
