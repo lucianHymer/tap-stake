@@ -115,7 +115,7 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
           
           <div className="demon-status">
             {!signatureResult && !isLoading && (
-              <p className="demon-text">TAP THE STAKE TO SLAY THE DEMON</p>
+              <p className="demon-text">TAP THE STAKE TO SLAY MOLOCH</p>
             )}
             {isLoading && (
               <p className="demon-text" style={{color: '#ffaa00'}}>AWAITING NFC SIGNATURE...</p>
