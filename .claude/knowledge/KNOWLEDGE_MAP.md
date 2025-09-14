@@ -1,12 +1,15 @@
 # 📚 Project Knowledge Map
 
-*Last updated: 2025-09-13*
+*Last updated: 2025-09-14*
 
 ## 🏗️ Architecture
 - [NFC Wallet Integration](architecture/nfc-wallet-integration.md) - LibHalo NFC patterns, EOA paymaster support, EIP-7702 implementation
 
 ## 📦 Dependencies
 - [LibHalo NFC Library](dependencies/libhalo.md) - WebAuthn integration and platform requirements
+
+## 🎨 Frontend
+- [Tap-Stake Demon-Slayer Theme](frontend/tap-stake-demon-slayer-theme.md) - Dark themed UI with demon-slaying metaphors
 
 ## ⚠️ Gotchas
 - [WebAuthn Restrictions](gotchas/webauthn-restrictions.md) - RP ID limitations and NotAllowedError causes
