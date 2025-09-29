@@ -6,6 +6,7 @@ import { NFCErrorBoundary } from './components/NFCErrorBoundary';
 import { NFCPrompt } from './components/NFCPrompt';
 import { DemonSlayer } from './components/DemonSlayer';
 import { EIP7702Experimental } from './pages/EIP7702Experimental';
+import { EIP7702NFC } from './pages/EIP7702NFC';
 import { readNFCConnection } from './lib/nfcResource';
 import { wagmiConfig } from './config/wagmi';
 import './App.css';
@@ -50,15 +51,24 @@ function App() {
               <Link to="/eip7702" style={{
                 color: '#ff0000',
                 textDecoration: 'none',
+                marginRight: '20px',
                 fontWeight: 'bold'
               }}>
-                EIP-7702 DEMO
+                EIP-7702 (PRIVATE KEY)
+              </Link>
+              <Link to="/eip7702-nfc" style={{
+                color: '#ff0000',
+                textDecoration: 'none',
+                fontWeight: 'bold'
+              }}>
+                EIP-7702 NFC
               </Link>
             </nav>
 
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/eip7702" element={<EIP7702Experimental />} />
+              <Route path="/eip7702-nfc" element={<EIP7702NFC />} />
             </Routes>
           </div>
         </BrowserRouter>

@@ -1,5 +1,12 @@
 import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
-import { keccak256, serializeTransaction, type Hex } from 'viem';
+import {
+  keccak256,
+  serializeTransaction,
+  type Hex,
+  concat,
+  numberToHex
+} from 'viem';
+import { encode as rlpEncode } from '@ethereumjs/rlp';
 
 export interface NFCCardData {
   address: `0x${string}`;
@@ -98,10 +105,10 @@ export const createNFCAccount = (address: `0x${string}`) => {
     signMessage: async ({ message }: { message: string | { raw: Hex } }) => {
       // For string messages, we need to pass the raw message to the NFC card
       // The NFC card will handle the Ethereum prefix and hashing
-      const messageToSign = typeof message === 'string' 
+      const messageToSign = typeof message === 'string'
         ? message  // Pass raw message, not hash
         : message.raw;
-      
+
       const signature = await signWithNFC(messageToSign);
       return signature;
     },
@@ -114,6 +121,54 @@ export const createNFCAccount = (address: `0x${string}`) => {
     },
     signTypedData: async () => {
       throw new Error('Typed data signing not yet implemented');
+    },
+    signAuthorization: async (authorization: any) => {
+      // Build the authorization hash according to EIP-7702 spec
+      // Format: keccak256(0x05 || rlp([chain_id, address, nonce]))
+
+      const chainId = authorization.chainId || 11155420; // Default to OP Sepolia
+      const nonce = authorization.nonce || 0n;
+
+      // Prepare values for RLP encoding
+      const rlpData = [
+        // Chain ID as hex (0x for 0, otherwise hex number)
+        chainId === 0 ? '0x' : numberToHex(chainId),
+        // Contract address
+        authorization.contractAddress,
+        // Nonce as hex (0x for 0, otherwise hex number)
+        nonce === 0n ? '0x' : numberToHex(nonce),
+      ];
+
+      // RLP encode the data
+      const rlpEncoded = rlpEncode(rlpData);
+
+      // Prepend magic byte 0x05 for EIP-7702
+      const MAGIC_BYTE = 0x05;
+      const message = concat([
+        new Uint8Array([MAGIC_BYTE]),
+        rlpEncoded
+      ]);
+
+      // Hash the complete message
+      const digest = keccak256(message);
+
+      // Sign the raw digest with NFC
+      const signature = await signWithNFC(digest, true);
+
+      // Parse signature components
+      const r = `0x${signature.slice(2, 66)}` as Hex;
+      const s = `0x${signature.slice(66, 130)}` as Hex;
+      const v = parseInt(signature.slice(130, 132), 16);
+      const yParity = v === 27 ? 0 : 1;
+
+      return {
+        contractAddress: authorization.contractAddress,
+        chainId,
+        nonce,
+        r,
+        s,
+        yParity
+      };
     }
   };
 };
