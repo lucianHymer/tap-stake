@@ -70,6 +70,7 @@ export function EIP7702NFC() {
   const [txHash, setTxHash] = useState<string>("");
   const [nfcAccount, setNfcAccount] = useState<any>(null);
   const [cardAddress, setCardAddress] = useState<Address | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string>("");
 
   const publicClient = createPublicClient({
     chain: optimismSepolia,
@@ -79,6 +80,7 @@ export function EIP7702NFC() {
   const connectNFCCard = async () => {
     try {
       setStatus("🔴 TAP YOUR NFC CARD TO CONNECT...");
+      setErrorDetails("");
       const cardData = await getCardData();
       const account = createNFCAccount(cardData.address);
       setNfcAccount(account);
@@ -86,7 +88,8 @@ export function EIP7702NFC() {
       setStatus(`✅ Connected to NFC Card: ${cardData.address.slice(0, 10)}...`);
     } catch (error: any) {
       console.error("Failed to connect NFC card:", error);
-      setStatus(`❌ Error: ${error.message}`);
+      setStatus(`❌ Connection Failed`);
+      setErrorDetails(`${error.message}\n\nStack: ${error.stack?.split('\n').slice(0, 3).join('\n')}`);
     }
   };
 
@@ -96,6 +99,8 @@ export function EIP7702NFC() {
         setStatus("Please connect your NFC card first!");
         return;
       }
+
+      setErrorDetails("");
 
       // Create wallet client with NFC account
       const walletClient = createWalletClient({
@@ -111,6 +116,8 @@ export function EIP7702NFC() {
         address: cardAddress!,
       });
 
+      setErrorDetails(`Signing authorization:\n- Contract: ${CONTRACTS.batchExecutor}\n- Chain: ${optimismSepolia.id}\n- Nonce: ${nonce}`);
+
       // Sign authorization for BatchExecutor contract
       // Call signAuthorization directly on the NFC account
       const authorization = await nfcAccount.signAuthorization({
@@ -120,6 +127,7 @@ export function EIP7702NFC() {
       });
 
       setStatus("✅ Authorization signed! Preparing transaction...");
+      setErrorDetails(`Authorization signed:\n- r: ${authorization.r}\n- s: ${authorization.s}\n- yParity: ${authorization.yParity}`);
 
       // Prepare batch calls
       const approveAmount = parseEther("100");
@@ -170,13 +178,28 @@ export function EIP7702NFC() {
 
       setTxHash(hash);
       setStatus(`🎉 Transaction sent! Hash: ${hash}`);
+      setErrorDetails(`Transaction sent:\nHash: ${hash}\nWaiting for confirmation...`);
 
       // Wait for confirmation
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
       setStatus(`✅ MOLOCH SLAIN! Block: ${receipt.blockNumber}`);
+      setErrorDetails(`Success!\nBlock: ${receipt.blockNumber}\nGas Used: ${receipt.gasUsed}`);
     } catch (error: any) {
       console.error("Transaction failed:", error);
-      setStatus(`❌ Error: ${error.message}`);
+      setStatus(`❌ EIP-7702 Failed`);
+
+      let detailedError = error.message || 'Unknown error';
+      if (error.cause) {
+        detailedError += `\n\nCause: ${JSON.stringify(error.cause, null, 2)}`;
+      }
+      if (error.details) {
+        detailedError += `\n\nDetails: ${error.details}`;
+      }
+      if (error.shortMessage) {
+        detailedError += `\n\nShort: ${error.shortMessage}`;
+      }
+
+      setErrorDetails(detailedError);
     }
   };
 
@@ -187,28 +210,114 @@ export function EIP7702NFC() {
         return;
       }
 
+      setErrorDetails("");
+
       const walletClient = createWalletClient({
         account: nfcAccount,
         chain: optimismSepolia,
         transport: http(),
       });
 
-      setStatus("🔴 TAP CARD TO SIGN MINT TRANSACTION...");
+      setStatus("Preparing mint transaction...");
 
-      const hash = await walletClient.writeContract({
-        account: nfcAccount,
-        address: CONTRACTS.testToken,
-        abi: ERC20_ABI,
+      // Log the transaction parameters
+      const mintAmount = parseEther("1000");
+      console.log("Mint Transaction Parameters:", {
+        from: cardAddress,
+        to: CONTRACTS.testToken,
         functionName: "mint",
-        args: [cardAddress!, parseEther("1000")],
+        args: {
+          to: cardAddress,
+          amount: mintAmount.toString()
+        },
+        abi: "ERC20_ABI",
+        chain: "optimismSepolia"
       });
 
+      // First, try to simulate the transaction to check if it will succeed
+      try {
+        console.log("Simulating mint transaction...");
+        const { request } = await publicClient.simulateContract({
+          account: cardAddress!,
+          address: CONTRACTS.testToken,
+          abi: ERC20_ABI,
+          functionName: "mint",
+          args: [cardAddress!, mintAmount],
+        });
+        console.log("Simulation successful, request:", request);
+        setErrorDetails(`Simulation successful!\n- From: ${cardAddress}\n- To: ${cardAddress}\n- Amount: ${mintAmount.toString()} wei (1000 TEST)\n- Contract: ${CONTRACTS.testToken}`);
+      } catch (simError: any) {
+        console.error("Simulation failed:", simError);
+        setErrorDetails(`Simulation failed!\nError: ${simError.message}\n\nThis might mean:\n1. Contract doesn't have public mint function\n2. Insufficient gas\n3. Contract paused or restricted`);
+        // Continue anyway to get the actual error
+      }
+
+      setStatus("🔴 TAP CARD TO SIGN MINT TRANSACTION...");
+
+      console.log("Calling writeContract with:", {
+        account: nfcAccount.address,
+        address: CONTRACTS.testToken,
+        functionName: "mint",
+        args: [cardAddress!, mintAmount]
+      });
+
+      let hash;
+      try {
+        hash = await walletClient.writeContract({
+          account: nfcAccount,
+          address: CONTRACTS.testToken,
+          abi: ERC20_ABI,
+          functionName: "mint",
+          args: [cardAddress!, mintAmount],
+        });
+      } catch (writeError: any) {
+        console.error("writeContract failed:", writeError);
+
+        // Extract transaction request details if available
+        let txDetails = "Transaction Request Details:\n";
+        if (writeError.request) {
+          txDetails += `From: ${writeError.request.from}\n`;
+          txDetails += `To: ${writeError.request.to}\n`;
+          txDetails += `Data: ${writeError.request.data}\n`;
+        }
+
+        setErrorDetails(`${txDetails}\nError: ${writeError.message}\n\nFull error: ${JSON.stringify(writeError, null, 2)}`);
+        throw writeError;
+      }
+
       setStatus(`Mint transaction sent: ${hash}`);
+      setErrorDetails(`Transaction sent:\nHash: ${hash}\nWaiting for confirmation...`);
+
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
       setStatus(`✅ Tokens minted! Block: ${receipt.blockNumber}`);
+      setErrorDetails(`Success!\nBlock: ${receipt.blockNumber}\nGas Used: ${receipt.gasUsed}`);
     } catch (error: any) {
-      console.error("Mint failed:", error);
-      setStatus(`❌ Error: ${error.message}`);
+      console.error("Mint failed - Full error:", error);
+      setStatus(`❌ Mint Failed`);
+
+      // Extract detailed error information
+      let detailedError = error.message || 'Unknown error';
+
+      // Check for viem specific error properties
+      if (error.cause) {
+        detailedError += `\n\nCause: ${JSON.stringify(error.cause, null, 2)}`;
+      }
+      if (error.details) {
+        detailedError += `\n\nDetails: ${error.details}`;
+      }
+      if (error.shortMessage) {
+        detailedError += `\n\nShort: ${error.shortMessage}`;
+      }
+      if (error.metaMessages) {
+        detailedError += `\n\nMeta: ${error.metaMessages.join(' | ')}`;
+      }
+
+      // Add request details if available
+      if (error.request) {
+        detailedError += `\n\nRequest Args:\nFrom: ${error.request.from || 'N/A'}\nTo: ${error.request.to || 'N/A'}\nData: ${error.request.data || 'N/A'}`;
+      }
+
+      setErrorDetails(detailedError);
     }
   };
 
@@ -219,20 +328,30 @@ export function EIP7702NFC() {
         return;
       }
 
-      setStatus("Checking balance...");
+      setStatus("Checking balances...");
+      setErrorDetails("");
 
-      const balance = await publicClient.readContract({
+      // Check ETH balance for gas
+      const ethBalance = await publicClient.getBalance({
+        address: cardAddress,
+      });
+      const ethInEther = Number(ethBalance) / 1e18;
+
+      // Check token balance
+      const tokenBalance = await publicClient.readContract({
         address: CONTRACTS.testToken,
         abi: ERC20_ABI,
         functionName: "balanceOf",
         args: [cardAddress],
       });
+      const tokenInEther = Number(tokenBalance as bigint) / 1e18;
 
-      const balanceInEther = Number(balance) / 1e18;
-      setStatus(`💰 Balance: ${balanceInEther.toFixed(4)} TEST`);
+      setStatus(`💰 ETH: ${ethInEther.toFixed(6)} | TEST: ${tokenInEther.toFixed(4)}`);
+      setErrorDetails(`Address: ${cardAddress}\nETH Balance: ${ethBalance.toString()} wei (${ethInEther} ETH)\nTEST Balance: ${(tokenBalance as bigint).toString()} wei (${tokenInEther} TEST)`);
     } catch (error: any) {
       console.error("Balance check failed:", error);
-      setStatus(`❌ Error: ${error.message}`);
+      setStatus(`❌ Balance check failed`);
+      setErrorDetails(error.message);
     }
   };
 
@@ -367,6 +486,28 @@ export function EIP7702NFC() {
         )}
       </div>
 
+      {errorDetails && (
+        <div
+          style={{
+            background: "rgba(139,0,0,0.3)",
+            border: "1px solid #ff0000",
+            borderRadius: "5px",
+            padding: "15px",
+            marginBottom: "20px",
+            color: "#ff9999",
+            fontFamily: "monospace",
+            fontSize: "12px",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-all",
+            maxHeight: "300px",
+            overflowY: "auto",
+          }}
+        >
+          <strong>📜 DEBUG SCROLL:</strong>
+          <pre style={{ margin: "10px 0 0 0" }}>{errorDetails}</pre>
+        </div>
+      )}
+
       {cardAddress && (
         <div
           style={{
@@ -405,7 +546,7 @@ export function EIP7702NFC() {
               cursor: "pointer",
             }}
           >
-            Check Balance
+            Check ETH + Token Balance
           </button>
         </div>
       )}

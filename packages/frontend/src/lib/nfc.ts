@@ -71,7 +71,7 @@ export const signWithNFC = async (message: string | Hex, isRawDigest: boolean = 
       keyNo: 1,
       rpId: getRpId()
     };
-    
+
     if (isRawDigest) {
       // For raw digests (like transaction hashes), use digest parameter
       command.digest = message;
@@ -85,17 +85,29 @@ export const signWithNFC = async (message: string | Hex, isRawDigest: boolean = 
       command.message = message;
       command.format = 'hex';
     }
-    
+
+    console.log('NFC Sign Command:', JSON.stringify(command, null, 2));
     const result = await execHaloCmdWeb(command);
-    
+    console.log('NFC Sign Result:', JSON.stringify(result, null, 2));
+
     if (!result.signature) {
-      throw new Error('No signature returned from card');
+      throw new Error(`No signature returned from card. Result: ${JSON.stringify(result)}`);
     }
-    
+
     return result.signature.ether as Hex;
-  } catch (error) {
-    console.error('NFC signing failed:', error);
-    throw new Error('Failed to sign with NFC card. Please try again.');
+  } catch (error: any) {
+    console.error('NFC signing failed - Full Error:', error);
+
+    // Create detailed error message
+    const errorDetails = {
+      message: error.message || 'Unknown error',
+      type: error.name || 'Error',
+      stack: error.stack?.split('\n').slice(0, 3).join(' | '),
+      command: isRawDigest ? 'digest' : 'message',
+      rpId: window.location.hostname
+    };
+
+    throw new Error(`NFC Sign Failed:\nType: ${errorDetails.type}\nMessage: ${errorDetails.message}\nCommand: ${errorDetails.command}\nRpId: ${errorDetails.rpId}`);
   }
 };
 
@@ -114,62 +126,96 @@ export const createNFCAccount = (address: `0x${string}`) => {
       return signature;
     },
     signTransaction: async (transaction: any) => {
+      console.log('NFC signTransaction called with:', {
+        to: transaction.to,
+        from: address,
+        value: transaction.value?.toString(),
+        data: transaction.data?.slice(0, 10) + '...',
+        nonce: transaction.nonce,
+        gasLimit: transaction.gasLimit?.toString(),
+        chainId: transaction.chainId
+      });
+
       const serialized = serializeTransaction(transaction);
+      console.log('Serialized transaction:', serialized);
+
       const hash = keccak256(serialized);
+      console.log('Transaction hash to sign:', hash);
+
       // Pass true for isRawDigest since this is a transaction hash
       const signature = await signWithNFC(hash, true);
+      console.log('Transaction signature received:', signature);
+
       return signature;
     },
     signTypedData: async () => {
       throw new Error('Typed data signing not yet implemented');
     },
     signAuthorization: async (authorization: any) => {
-      // Build the authorization hash according to EIP-7702 spec
-      // Format: keccak256(0x05 || rlp([chain_id, address, nonce]))
+      try {
+        // Build the authorization hash according to EIP-7702 spec
+        // Format: keccak256(0x05 || rlp([chain_id, address, nonce]))
 
-      const chainId = authorization.chainId || 11155420; // Default to OP Sepolia
-      const nonce = authorization.nonce || 0n;
+        const chainId = authorization.chainId || 11155420; // Default to OP Sepolia
+        const nonce = authorization.nonce || 0n;
 
-      // Prepare values for RLP encoding
-      const rlpData = [
-        // Chain ID as hex (0x for 0, otherwise hex number)
-        chainId === 0 ? '0x' : numberToHex(chainId),
-        // Contract address
-        authorization.contractAddress,
-        // Nonce as hex (0x for 0, otherwise hex number)
-        nonce === 0n ? '0x' : numberToHex(nonce),
-      ];
+        console.log('EIP-7702 Authorization Request:', {
+          contractAddress: authorization.contractAddress,
+          chainId,
+          nonce: nonce.toString()
+        });
 
-      // RLP encode the data
-      const rlpEncoded = rlpEncode(rlpData);
+        // Prepare values for RLP encoding
+        const rlpData = [
+          // Chain ID as hex (0x for 0, otherwise hex number)
+          chainId === 0 ? '0x' : numberToHex(chainId),
+          // Contract address
+          authorization.contractAddress,
+          // Nonce as hex (0x for 0, otherwise hex number)
+          nonce === 0n ? '0x' : numberToHex(nonce),
+        ];
 
-      // Prepend magic byte 0x05 for EIP-7702
-      const MAGIC_BYTE = 0x05;
-      const message = concat([
-        new Uint8Array([MAGIC_BYTE]),
-        rlpEncoded
-      ]);
+        console.log('RLP Data:', rlpData);
 
-      // Hash the complete message
-      const digest = keccak256(message);
+        // RLP encode the data
+        const rlpEncoded = rlpEncode(rlpData);
 
-      // Sign the raw digest with NFC
-      const signature = await signWithNFC(digest, true);
+        // Prepend magic byte 0x05 for EIP-7702
+        const MAGIC_BYTE = 0x05;
+        const message = concat([
+          new Uint8Array([MAGIC_BYTE]),
+          rlpEncoded
+        ]);
 
-      // Parse signature components
-      const r = `0x${signature.slice(2, 66)}` as Hex;
-      const s = `0x${signature.slice(66, 130)}` as Hex;
-      const v = parseInt(signature.slice(130, 132), 16);
-      const yParity = v === 27 ? 0 : 1;
+        // Hash the complete message
+        const digest = keccak256(message);
+        console.log('Authorization digest to sign:', digest);
 
-      return {
-        contractAddress: authorization.contractAddress,
-        chainId,
-        nonce,
-        r,
-        s,
-        yParity
-      };
+        // Sign the raw digest with NFC
+        const signature = await signWithNFC(digest, true);
+        console.log('Authorization signature:', signature);
+
+        // Parse signature components
+        const r = `0x${signature.slice(2, 66)}` as Hex;
+        const s = `0x${signature.slice(66, 130)}` as Hex;
+        const v = parseInt(signature.slice(130, 132), 16);
+        const yParity = v === 27 ? 0 : 1;
+
+        const result = {
+          contractAddress: authorization.contractAddress,
+          chainId,
+          nonce,
+          r,
+          s,
+          yParity
+        };
+
+        console.log('Authorization result:', result);
+        return result;
+      } catch (error: any) {
+        console.error('signAuthorization failed:', error);
+        throw new Error(`EIP-7702 Auth Failed: ${error.message}`);
+      }
     }
   };
 };
