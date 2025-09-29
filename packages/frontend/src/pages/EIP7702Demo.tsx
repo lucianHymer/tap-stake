@@ -66,9 +66,9 @@ const ERC20_ABI = [
 
 // Deployed contract addresses (update after deployment)
 const CONTRACTS = {
-  batchExecutor: '0x...' as Address,
-  testToken: '0x...' as Address,
-  stake: '0x...' as Address
+  batchExecutor: '0xC6325BB22cacDb2481C527131d426861Caf44A40' as Address,
+  testToken: '0xbC493c76D6Fa835DA7DB2310ED1Ab5d03A0F4602' as Address,
+  stake: '0xA13E9b97ade8561FFf7bfA11DE8203d81D0880C1' as Address
 };
 
 export function EIP7702Demo() {
