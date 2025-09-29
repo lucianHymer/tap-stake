@@ -2,12 +2,14 @@ import { useState } from 'react';
 import {
   createWalletClient,
   createPublicClient,
-  custom,
+  http,
   parseEther,
   encodeFunctionData,
   type Address
 } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { optimismSepolia } from 'viem/chains';
+// EIP-7702 support is now in main viem, not experimental
 
 // Contract ABIs
 const BATCH_EXECUTOR_ABI = [
@@ -38,15 +40,6 @@ const ERC20_ABI = [
     outputs: [{ name: '', type: 'bool' }]
   },
   {
-    name: 'transfer',
-    type: 'function',
-    inputs: [
-      { name: 'to', type: 'address' },
-      { name: 'amount', type: 'uint256' }
-    ],
-    outputs: [{ name: '', type: 'bool' }]
-  },
-  {
     name: 'balanceOf',
     type: 'function',
     inputs: [{ name: 'account', type: 'address' }],
@@ -64,67 +57,51 @@ const ERC20_ABI = [
   }
 ] as const;
 
-// Deployed contract addresses (update after deployment)
+// Deployed contract addresses
 const CONTRACTS = {
   batchExecutor: '0xC6325BB22cacDb2481C527131d426861Caf44A40' as Address,
   testToken: '0xbC493c76D6Fa835DA7DB2310ED1Ab5d03A0F4602' as Address,
   stake: '0xA13E9b97ade8561FFf7bfA11DE8203d81D0880C1' as Address
 };
 
-export function EIP7702Demo() {
+export function EIP7702Experimental() {
   const [status, setStatus] = useState('');
   const [txHash, setTxHash] = useState<string>('');
+  const [privateKey, setPrivateKey] = useState<string>('');
 
-  const connectWallet = async () => {
-    if (!window.ethereum) {
-      setStatus('MetaMask not found');
-      return null;
-    }
+  const publicClient = createPublicClient({
+    chain: optimismSepolia,
+    transport: http()
+  });
 
-    // Request accounts first
-    const accounts = await window.ethereum.request({
-      method: 'eth_requestAccounts'
-    });
-
-    const walletClient = createWalletClient({
-      chain: optimismSepolia,
-      transport: custom(window.ethereum)
-    });
-
-    const publicClient = createPublicClient({
-      chain: optimismSepolia,
-      transport: custom(window.ethereum)
-    });
-
-    const address = accounts[0] as `0x${string}`;
-    setStatus(`Connected: ${address}`);
-    return { walletClient, publicClient, address };
-  };
-
-  const executeBatchTransaction = async () => {
+  const executeBatchWithPrivateKey = async () => {
     try {
-      setStatus('Connecting wallet...');
-      const wallet = await connectWallet();
-      if (!wallet) return;
-
-      const { walletClient, publicClient, address } = wallet;
-
-      // Request chain switch if needed
-      try {
-        await walletClient.switchChain({ id: optimismSepolia.id });
-      } catch (switchError: any) {
-        // If chain doesn't exist, add it
-        if (switchError.code === 4902) {
-          await walletClient.addChain({ chain: optimismSepolia });
-        } else {
-          throw switchError;
-        }
+      if (!privateKey) {
+        setStatus('Please enter a private key first');
+        return;
       }
+
+      setStatus('Signing EIP-7702 authorization...');
+
+      const account = privateKeyToAccount(privateKey as `0x${string}`);
+
+      // Create wallet client with the private key account
+      const walletClient = createWalletClient({
+        account,
+        chain: optimismSepolia,
+        transport: http()
+      });
+
+      setStatus('Signing EIP-7702 authorization...');
+
+      // Sign authorization for BatchExecutor contract
+      const authorization = await walletClient.signAuthorization({
+        contractAddress: CONTRACTS.batchExecutor,
+      });
 
       // Prepare batch calls
       const approveAmount = parseEther('100');
 
-      // Call 1: Approve Stake contract to spend tokens
       const approveCall = {
         target: CONTRACTS.testToken,
         value: 0n,
@@ -135,7 +112,6 @@ export function EIP7702Demo() {
         })
       };
 
-      // Call 2: Stake tokens
       const stakeCall = {
         target: CONTRACTS.stake,
         value: 0n,
@@ -151,15 +127,6 @@ export function EIP7702Demo() {
         })
       };
 
-      setStatus('Signing EIP-7702 authorization...');
-
-      // Sign authorization for BatchExecutor contract
-      // @ts-ignore - signAuthorization is a new method for EIP-7702
-      const authorization = await walletClient.signAuthorization({
-        account: address,
-        contractAddress: CONTRACTS.batchExecutor,
-      });
-
       setStatus('Sending batch transaction...');
 
       // Encode batch execution
@@ -171,12 +138,9 @@ export function EIP7702Demo() {
 
       // Send EIP-7702 transaction
       const hash = await walletClient.sendTransaction({
-        account: address,
-        to: address, // Call to self (delegated)
+        to: account.address,
         data: batchData,
-        // @ts-ignore - authorizationList is a new field for EIP-7702
         authorizationList: [authorization],
-        chain: optimismSepolia
       });
 
       setTxHash(hash);
@@ -194,32 +158,25 @@ export function EIP7702Demo() {
 
   const mintTestTokens = async () => {
     try {
-      setStatus('Connecting wallet...');
-      const wallet = await connectWallet();
-      if (!wallet) return;
-
-      const { walletClient, publicClient, address } = wallet;
-
-      // Request chain switch if needed
-      try {
-        await walletClient.switchChain({ id: optimismSepolia.id });
-      } catch (switchError: any) {
-        // If chain doesn't exist, add it
-        if (switchError.code === 4902) {
-          await walletClient.addChain({ chain: optimismSepolia });
-        } else {
-          throw switchError;
-        }
+      if (!privateKey) {
+        setStatus('Please enter a private key first');
+        return;
       }
 
       setStatus('Minting test tokens...');
+
+      const account = privateKeyToAccount(privateKey as `0x${string}`);
+      const walletClient = createWalletClient({
+        account,
+        chain: optimismSepolia,
+        transport: http()
+      });
+
       const hash = await walletClient.writeContract({
-        account: address,
         address: CONTRACTS.testToken,
         abi: ERC20_ABI,
         functionName: 'mint',
-        args: [address, parseEther('1000')],
-        chain: optimismSepolia
+        args: [account.address, parseEther('1000')]
       });
 
       setStatus(`Mint transaction sent: ${hash}`);
@@ -233,51 +190,33 @@ export function EIP7702Demo() {
 
   const checkBalance = async () => {
     try {
-      setStatus('Checking balance...');
-      const wallet = await connectWallet();
-      if (!wallet) return;
-
-      const { walletClient, publicClient, address } = wallet;
-
-      // Request chain switch if needed
-      try {
-        await walletClient.switchChain({ id: optimismSepolia.id });
-      } catch (switchError: any) {
-        // If chain doesn't exist, add it
-        if (switchError.code === 4902) {
-          await walletClient.addChain({ chain: optimismSepolia });
-        } else {
-          throw switchError;
-        }
+      if (!privateKey) {
+        setStatus('Please enter a private key first');
+        return;
       }
 
-      // Add a small delay to ensure chain switch is complete
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const account = privateKeyToAccount(privateKey as `0x${string}`);
+      setStatus('Checking balance...');
 
       const balance = await publicClient.readContract({
         address: CONTRACTS.testToken,
         abi: ERC20_ABI,
         functionName: 'balanceOf',
-        args: [address]
+        args: [account.address]
       });
 
       const balanceInEther = Number(balance) / 1e18;
       setStatus(`Balance: ${balanceInEther.toFixed(4)} TEST`);
     } catch (error: any) {
       console.error('Balance check failed:', error);
-      // Check if it's a revert error and provide more context
-      if (error.message?.includes('reverted')) {
-        setStatus(`Error reading balance. Make sure you're on OP Sepolia and the contract is deployed.`);
-      } else {
-        setStatus(`Error: ${error.message}`);
-      }
+      setStatus(`Error: ${error.message}`);
     }
   };
 
   return (
     <div className="eip7702-demo" style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
       <h1 style={{ color: '#ff0000', textShadow: '0 0 10px #ff0000' }}>
-        EIP-7702 BATCH TRANSACTION DEMO
+        EIP-7702 EXPERIMENTAL DEMO
       </h1>
 
       <div style={{
@@ -297,8 +236,31 @@ export function EIP7702Demo() {
       </div>
 
       <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: '10px' }}>
+          <input
+            type="text"
+            placeholder="Enter private key (0x...)"
+            value={privateKey}
+            onChange={(e) => setPrivateKey(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              background: 'rgba(0,0,0,0.8)',
+              border: '1px solid #666',
+              color: '#fff',
+              fontFamily: 'monospace',
+              fontSize: '14px',
+              borderRadius: '3px'
+            }}
+          />
+        </div>
+        {privateKey && (
+          <p style={{ color: '#00ff00', marginBottom: '10px', fontSize: '14px' }}>
+            Address: {privateKey ? privateKeyToAccount(privateKey as `0x${string}`).address : ''}
+          </p>
+        )}
         <button
-          onClick={executeBatchTransaction}
+          onClick={executeBatchWithPrivateKey}
           style={{
             background: 'linear-gradient(45deg, #ff0000, #660000)',
             color: 'white',
@@ -307,12 +269,11 @@ export function EIP7702Demo() {
             fontSize: '18px',
             borderRadius: '5px',
             cursor: 'pointer',
-            marginRight: '10px',
             fontWeight: 'bold',
             textTransform: 'uppercase'
           }}
         >
-          Execute Batch (Approve + Stake)
+          Execute Batch Transaction
         </button>
       </div>
 
@@ -385,7 +346,9 @@ export function EIP7702Demo() {
         borderRadius: '5px',
         color: '#ffff00'
       }}>
-        <p><strong>⚠️ Note:</strong> Update contract addresses after deployment!</p>
+        <p><strong>⚠️ Important:</strong> This demo uses experimental EIP-7702 features.</p>
+        <p>For the batch transaction, you'll need to provide a private key (demo only!).</p>
+        <p>MetaMask doesn't yet support signAuthorization natively.</p>
       </div>
     </div>
   );
