@@ -52,3 +52,37 @@ Minimal NFC wallet app using libhalo for card interaction and viem for Ethereum 
 - Phase 2 will add EIP-7702 support for gasless transactions via paymaster
 
 **Related files**: tap-stake/packages/frontend/src/lib/nfc.ts, tap-stake/packages/frontend/src/App.tsx
+
+## EIP-7702 Approve and Transfer Batching Pattern
+EIP-7702 enables EOAs to execute smart contract logic by temporarily delegating to a contract implementation. Key pattern for approve+transfer in single transaction:
+
+1. EOA signs an authorization to delegate to implementation contract
+2. Implementation contract has executeBatch() function that accepts array of calls
+3. Within single tx, EOA can:
+   - Call ERC20.approve(spender, amount)
+   - Call contract.transferFrom(EOA, dest, amount)
+
+This solves the two-transaction problem for DEX swaps and similar operations. The authorization includes chainId, nonce, contractAddress for replay protection.
+
+Viem provides helpers: signAuthorization(), writeContract() with authorizationList parameter.
+
+Status: EIP-7702 scheduled for Ethereum mainnet May 7, 2025 but already live on some OP-Stack chains (Base, Optimism, Zora) and BSC mainnet. Testing can be done on Sepolia testnet or local Foundry with Prague hardfork.
+
+**Related files**: packages/contracts/
+
+## EIP-7702 Frontend Integration Strategy
+The EIP-7702 demo will be integrated into the existing frontend framework at packages/frontend/ which already has:
+- Vite + React + TypeScript setup
+- Demon-slayer themed UI
+- NFC integration via libhalo
+
+For the POC, we'll add a new page/route for EIP-7702 testing that can be accessed separately from the main NFC flow. This allows testing with MetaMask while keeping the existing NFC functionality intact.
+
+The design document (EIP7702_DESIGN.md) provides complete implementation details including:
+- BatchExecutor contract for delegated execution
+- TestERC20 for easy testing on OP Sepolia
+- MockDEX to simulate approve+swap patterns
+- Frontend component with Viem integration
+- Full deployment and testing instructions
+
+**Related files**: packages/contracts/EIP7702_DESIGN.md, packages/frontend/
