@@ -10,5 +10,9 @@
     "build": "npm run build --workspace=frontend",
     "lint": "npm run lint --workspace=frontend",
     "install-hooks": "sh scripts/install-hooks.sh"
+  },
+  "dependencies": {
+    "react-router-dom": "^7.9.3",
+    "viem": "^2.37.9"
   }
 }

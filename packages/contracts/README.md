@@ -1,25 +1,66 @@
-# Contracts
+## Foundry
 
-This package will contain the Foundry-based smart contracts for the Tap-Stake project.
+**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
-## Setup
+Foundry consists of:
 
-To initialize this package:
+- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
+- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
+- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
+- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
 
-```bash
-cd packages/contracts
-forge init --no-commit .
+## Documentation
+
+https://book.getfoundry.sh/
+
+## Usage
+
+### Build
+
+```shell
+$ forge build
 ```
 
-## Planned Contracts
+### Test
 
-- `TapStakeImplementation.sol` - EIP-7702 implementation contract for delegated execution
-  - `execute()` - Single call execution
-  - `executeBatch()` - Batched operations
+```shell
+$ forge test
+```
 
-## Phase 2 Implementation
+### Format
 
-The contracts in this package will enable:
-- EIP-7702 delegation from EOAs to smart contract code
-- Paymaster-sponsored transactions
-- Gasless transactions for NFC card holders
+```shell
+$ forge fmt
+```
+
+### Gas Snapshots
+
+```shell
+$ forge snapshot
+```
+
+### Anvil
+
+```shell
+$ anvil
+```
+
+### Deploy
+
+```shell
+$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+```
+
+### Cast
+
+```shell
+$ cast <subcommand>
+```
+
+### Help
+
+```shell
+$ forge --help
+$ anvil --help
+$ cast --help
+```

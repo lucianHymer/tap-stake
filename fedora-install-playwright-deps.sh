@@ -30,6 +30,9 @@ sudo dnf install -y \
   pango \
   alsa-lib
 
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+
 echo ""
 echo "✅ Essential dependencies installed!"
 echo ""
