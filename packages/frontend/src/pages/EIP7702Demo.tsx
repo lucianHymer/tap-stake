@@ -104,6 +104,18 @@ export function EIP7702Demo() {
 
       const { walletClient, publicClient, address } = wallet;
 
+      // Request chain switch if needed
+      try {
+        await walletClient.switchChain({ id: optimismSepolia.id });
+      } catch (switchError: any) {
+        // If chain doesn't exist, add it
+        if (switchError.code === 4902) {
+          await walletClient.addChain({ chain: optimismSepolia });
+        } else {
+          throw switchError;
+        }
+      }
+
       // Prepare batch calls
       const approveAmount = parseEther('100');
 
@@ -183,13 +195,26 @@ export function EIP7702Demo() {
 
       const { walletClient, publicClient, address } = wallet;
 
+      // Request chain switch if needed
+      try {
+        await walletClient.switchChain({ id: optimismSepolia.id });
+      } catch (switchError: any) {
+        // If chain doesn't exist, add it
+        if (switchError.code === 4902) {
+          await walletClient.addChain({ chain: optimismSepolia });
+        } else {
+          throw switchError;
+        }
+      }
+
       setStatus('Minting test tokens...');
       const hash = await walletClient.writeContract({
         account: address,
         address: CONTRACTS.testToken,
         abi: ERC20_ABI,
         functionName: 'mint',
-        args: [address, parseEther('1000')]
+        args: [address, parseEther('1000')],
+        chain: optimismSepolia
       });
 
       setStatus(`Mint transaction sent: ${hash}`);
