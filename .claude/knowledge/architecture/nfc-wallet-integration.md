@@ -86,3 +86,12 @@ The design document (EIP7702_DESIGN.md) provides complete implementation details
 - Full deployment and testing instructions
 
 **Related files**: packages/contracts/EIP7702_DESIGN.md, packages/frontend/
+
+## EIP-7702 BatchExecutor Implementation Pattern
+The BatchExecutor contract uses a self-referential security check (msg.sender == address(this)) to ensure it only executes when an EOA delegates to it via EIP-7702. This is the core pattern for delegation contracts. The contract provides:
+- **executeBatch()**: For multiple arbitrary calls in a single transaction
+- **approveAndStake()**: Convenience function for common approve+stake pattern
+
+Key implementation detail: This pattern can't be fully tested locally in Foundry since EIP-7702 delegation can't be simulated - the self-referential check will always fail in tests. Production testing requires actual on-chain deployment.
+
+**Related files**: packages/contracts/src/BatchExecutor.sol, packages/contracts/test/BatchExecutor.t.sol

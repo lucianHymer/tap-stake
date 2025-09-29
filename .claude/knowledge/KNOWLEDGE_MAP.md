@@ -3,15 +3,19 @@
 *Last updated: 2025-09-29*
 
 ## 🏗️ Architecture
-- [NFC Wallet Integration](architecture/nfc-wallet-integration.md) - LibHalo NFC patterns, EOA paymaster support, EIP-7702 implementation, approve+transfer batching, frontend integration strategy
+- [NFC Wallet Integration](architecture/nfc-wallet-integration.md) - LibHalo NFC patterns, EOA paymaster support, EIP-7702 implementation, approve+transfer batching, frontend integration strategy, BatchExecutor pattern
 
 ## 📦 Dependencies
 - [LibHalo NFC Library](dependencies/libhalo.md) - WebAuthn integration and platform requirements
 - [Foundry](dependencies/foundry.md) - Smart contract development framework installation and setup
 
+## 🚀 Deployment
+- [EIP-7702 Optimism Sepolia](deployment/eip-7702-optimism-sepolia.md) - Deployment configuration for EIP-7702 contracts on OP Sepolia
+
 ## 🎨 Frontend
 - [Tap-Stake Demon-Slayer Theme](frontend/tap-stake-demon-slayer-theme.md) - Dark themed UI with demon-slaying metaphors
 - [NFC Auto-Connect Suspense](frontend/nfc-auto-connect-suspense.md) - React Suspense pattern for automatic NFC connection
+- [EIP-7702 Viem Integration](frontend/eip-7702-viem-integration.md) - Viem client integration for EIP-7702 delegation features
 
 ## ⚠️ Gotchas
 - [WebAuthn Restrictions](gotchas/webauthn-restrictions.md) - RP ID limitations and NotAllowedError causes
