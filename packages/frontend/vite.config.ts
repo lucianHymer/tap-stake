@@ -5,7 +5,8 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/tap-stake/",
+  // TODO
+  // base: "/tap-stake/",
   plugins: [
     react(),
     basicSsl(),

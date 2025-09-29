@@ -101,6 +101,7 @@ export const signWithNFC = async (message: string | Hex, isRawDigest: boolean = 
 
 export const createNFCAccount = (address: `0x${string}`) => {
   return {
+    type: 'local' as const,
     address,
     signMessage: async ({ message }: { message: string | { raw: Hex } }) => {
       // For string messages, we need to pass the raw message to the NFC card
