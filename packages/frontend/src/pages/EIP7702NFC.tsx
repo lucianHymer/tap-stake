@@ -190,7 +190,12 @@ export function EIP7702NFC() {
 
       let detailedError = error.message || 'Unknown error';
       if (error.cause) {
-        detailedError += `\n\nCause: ${JSON.stringify(error.cause, null, 2)}`;
+        // Handle potential BigInt in error.cause
+        try {
+          detailedError += `\n\nCause: ${JSON.stringify(error.cause, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)}`;
+        } catch {
+          detailedError += `\n\nCause: ${String(error.cause)}`;
+        }
       }
       if (error.details) {
         detailedError += `\n\nDetails: ${error.details}`;
@@ -300,7 +305,12 @@ export function EIP7702NFC() {
 
       // Check for viem specific error properties
       if (error.cause) {
-        detailedError += `\n\nCause: ${JSON.stringify(error.cause, null, 2)}`;
+        // Handle potential BigInt in error.cause
+        try {
+          detailedError += `\n\nCause: ${JSON.stringify(error.cause, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)}`;
+        } catch {
+          detailedError += `\n\nCause: ${String(error.cause)}`;
+        }
       }
       if (error.details) {
         detailedError += `\n\nDetails: ${error.details}`;

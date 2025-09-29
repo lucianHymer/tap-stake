@@ -74,7 +74,17 @@ export const signWithNFC = async (message: string | Hex, isRawDigest: boolean = 
 
     if (isRawDigest) {
       // For raw digests (like transaction hashes), use digest parameter
-      command.digest = message;
+      // Ensure digest is properly formatted as hex string
+      let digestHex = typeof message === 'string' ? message : message;
+      // Remove 0x prefix if present for libhalo
+      if (digestHex.startsWith('0x')) {
+        digestHex = digestHex.slice(2);
+      }
+      // Validate it's exactly 32 bytes (64 hex chars)
+      if (digestHex.length !== 64) {
+        throw new Error(`Digest must be exactly 32 bytes (64 hex chars), got ${digestHex.length} chars`);
+      }
+      command.digest = digestHex;
     } else if (typeof message === 'string' && !message.startsWith('0x')) {
       // For text messages, use message with text format
       // libhalo will add Ethereum prefix and hash it
@@ -86,9 +96,9 @@ export const signWithNFC = async (message: string | Hex, isRawDigest: boolean = 
       command.format = 'hex';
     }
 
-    console.log('NFC Sign Command:', JSON.stringify(command, null, 2));
+    console.log('NFC Sign Command:', command);
     const result = await execHaloCmdWeb(command);
-    console.log('NFC Sign Result:', JSON.stringify(result, null, 2));
+    console.log('NFC Sign Result:', result);
 
     if (!result.signature) {
       throw new Error(`No signature returned from card. Result: ${JSON.stringify(result)}`);
@@ -161,8 +171,8 @@ export const createNFCAccount = (address: `0x${string}`) => {
 
         console.log('EIP-7702 Authorization Request:', {
           contractAddress: authorization.contractAddress,
-          chainId,
-          nonce: nonce.toString()
+          chainId: typeof chainId === 'bigint' ? chainId.toString() : chainId,
+          nonce: typeof nonce === 'bigint' ? nonce.toString() : String(nonce)
         });
 
         // Prepare values for RLP encoding
@@ -210,7 +220,11 @@ export const createNFCAccount = (address: `0x${string}`) => {
           yParity
         };
 
-        console.log('Authorization result:', result);
+        console.log('Authorization result:', {
+          ...result,
+          chainId: typeof result.chainId === 'bigint' ? result.chainId.toString() : result.chainId,
+          nonce: typeof result.nonce === 'bigint' ? result.nonce.toString() : result.nonce
+        });
         return result;
       } catch (error: any) {
         console.error('signAuthorization failed:', error);
