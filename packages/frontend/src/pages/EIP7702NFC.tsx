@@ -112,16 +112,11 @@ export function EIP7702NFC() {
       });
 
       // Sign authorization for BatchExecutor contract
-      // @ts-ignore - TypeScript doesn't know about signAuthorization yet
-      const authorization = await walletClient.signAuthorization({
-        account: nfcAccount,
+      // Call signAuthorization directly on the NFC account
+      const authorization = await nfcAccount.signAuthorization({
         contractAddress: CONTRACTS.batchExecutor,
-        // @ts-ignore - chainId type issue
         chainId: optimismSepolia.id,
-        // @ts-ignore - nonce type issue
         nonce: BigInt(nonce),
-        // @ts-ignore
-        executor: "self",
       });
 
       setStatus("✅ Authorization signed! Preparing transaction...");
