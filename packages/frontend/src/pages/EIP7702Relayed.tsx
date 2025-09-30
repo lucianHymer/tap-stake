@@ -41,7 +41,7 @@ const ERC20_ABI = [
 const CONTRACTS = {
   testToken: "0xC7480B7CAaDc8Aaa8b0ddD0552EC5F77A464F649" as Address,
   stake: "0x334559433296D9Dd9a861c200aFB1FEAF77388AA" as Address,
-  stakerWallet: "0xB9f60eb68B55396CEb1a0a347aEfA48AE6473F33" as Address, // Gasless staking via EIP-7702
+  stakerWallet: "0x39fe042d517031a812aBf6f2e15a2615A6c08f3f" as Address, // Gasless staking via EIP-7702 with relayer 0x872D0Cf468Ee82cC7D6828f63DDceebb7F19eA19
 };
 
 // Relayer URL from environment or default
