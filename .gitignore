@@ -25,3 +25,17 @@ dist-ssr
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# Wrangler/Cloudflare Worker temp files
+.wrangler/
+*.wrangler/
+
+# Core dumps
+core
+core.*
+*.core
+
+# Environment files
+.env
+.env.local
+.env.*.local
