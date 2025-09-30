@@ -1,0 +1,18 @@
+name = "eip7702-relayer"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+# Environment variables - set these with wrangler secret
+# PRIVATE_KEY - The relayer's private key
+# RPC_URL - The RPC endpoint URL
+# CHAIN_ID - The chain ID (e.g. 11155420 for OP Sepolia)
+
+[vars]
+# Non-sensitive config can go here
+ENVIRONMENT = "development"
+
+# Allow all origins in development
+[[cors]]
+origins = ["*"]
+headers = ["*"]
+methods = ["GET", "POST", "OPTIONS"]
