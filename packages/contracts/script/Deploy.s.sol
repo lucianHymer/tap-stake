@@ -23,12 +23,24 @@ contract DeployScript is Script {
         Stake stakeContract = new Stake(address(token));
         console.log("Stake deployed at:", address(stakeContract));
 
-        // Deploy new StakerWallet
+        // Deploy new StakerWallet with relayer address
+        // Check if RELAYER_ADDRESS is set, otherwise use deployer as relayer
+        address relayerAddress;
+        try vm.envAddress("RELAYER_ADDRESS") returns (address addr) {
+            relayerAddress = addr;
+            console.log("Using RELAYER_ADDRESS from env:", relayerAddress);
+        } catch {
+            relayerAddress = msg.sender; // Use deployer as relayer for testing
+            console.log("Using deployer as relayer:", relayerAddress);
+        }
+
         StakerWallet stakerWallet = new StakerWallet(
             address(token),
-            address(stakeContract)
+            address(stakeContract),
+            relayerAddress
         );
         console.log("StakerWallet deployed at:", address(stakerWallet));
+        console.log("  Whitelisted relayer:", relayerAddress);
 
         vm.stopBroadcast();
     }

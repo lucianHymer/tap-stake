@@ -3,32 +3,12 @@ import {
   createPublicClient,
   http,
   parseEther,
-  encodeFunctionData,
   type Address,
 } from "viem";
 import { optimismSepolia } from "viem/chains";
 import { getCardData, createNFCAccount } from "../lib/nfc";
 
 // Contract ABIs
-const BATCH_EXECUTOR_ABI = [
-  {
-    name: "executeBatch",
-    type: "function",
-    inputs: [
-      {
-        name: "calls",
-        type: "tuple[]",
-        components: [
-          { name: "target", type: "address" },
-          { name: "value", type: "uint256" },
-          { name: "data", type: "bytes" },
-        ],
-      },
-    ],
-    outputs: [{ name: "results", type: "bytes[]" }],
-  },
-] as const;
-
 const ERC20_ABI = [
   {
     name: "approve",
@@ -60,9 +40,8 @@ const ERC20_ABI = [
 // Deployed contract addresses (Updated: Sep 30, 2025)
 const CONTRACTS = {
   testToken: "0xC7480B7CAaDc8Aaa8b0ddD0552EC5F77A464F649" as Address,
-  batchExecutor: "0x7Edd1EBd251eE6D943Ae64A20969Cf40a1aa236C" as Address, // SelfBatchExecutor
   stake: "0x334559433296D9Dd9a861c200aFB1FEAF77388AA" as Address,
-  stakerWallet: "0xB9f60eb68B55396CEb1a0a347aEfA48AE6473F33" as Address, // NEW: Gasless staking
+  stakerWallet: "0xB9f60eb68B55396CEb1a0a347aEfA48AE6473F33" as Address, // Gasless staking via EIP-7702
 };
 
 // Relayer URL from environment or default
@@ -102,7 +81,7 @@ export function EIP7702Relayed() {
     }
   };
 
-  const executeRelayedBatch = async () => {
+  const executeRelayedStake = async () => {
     try {
       if (!nfcAccount) {
         setStatus("Please connect your NFC card first!");
@@ -110,105 +89,60 @@ export function EIP7702Relayed() {
       }
 
       setErrorDetails("");
-      setStatus("🔴 TAP CARD TO SIGN EIP-7702 AUTHORIZATION...");
+      setStatus("🔴 ONE TAP: SIGN EIP-7702 AUTHORIZATION...");
 
-      // Get current nonce for the account
-      console.log('🎮 EIP7702Relayed: Getting nonce for account:', cardAddress);
-      const nonce = await publicClient.getTransactionCount({
+      // Get current transaction nonce for the EIP-7702 authorization
+      console.log('🎮 EIP7702Relayed: Getting tx nonce for account:', cardAddress);
+      const txNonce = await publicClient.getTransactionCount({
         address: cardAddress!,
       });
-      console.log('🎮 EIP7702Relayed: Current nonce:', nonce);
+      console.log('🎮 EIP7702Relayed: Current tx nonce:', txNonce);
 
-      setErrorDetails(`Signing authorization:\n- Contract: ${CONTRACTS.batchExecutor}\n- Chain: ${optimismSepolia.id}\n- Nonce: ${nonce}`);
+      // Prepare stake amount
+      const stakeAmount = parseEther("100");
 
-      // Sign authorization for BatchExecutor contract
+      setErrorDetails(`ONE-TAP AUTHORIZATION:\n- Contract: ${CONTRACTS.stakerWallet}\n- Amount: 100 TEST\n- Chain: ${optimismSepolia.id}\n- Nonce: ${txNonce}`);
+
+      // Sign authorization for StakerWallet contract (SINGLE TAP!)
       console.log('🎮 EIP7702Relayed: Requesting authorization signature...');
       console.log('🎮 EIP7702Relayed: Using account:', nfcAccount);
-      console.log('🎮 EIP7702Relayed: Delegating to contract:', CONTRACTS.batchExecutor);
+      console.log('🎮 EIP7702Relayed: Delegating to contract:', CONTRACTS.stakerWallet);
 
       // @ts-ignore - TypeScript doesn't know about signAuthorization yet
       const authorization = await nfcAccount.signAuthorization({
-        contractAddress: CONTRACTS.batchExecutor,
+        contractAddress: CONTRACTS.stakerWallet,
         chainId: optimismSepolia.id,
-        nonce: BigInt(nonce),
+        nonce: BigInt(txNonce),
       });
       console.log('🎮 EIP7702Relayed: Authorization signed successfully:', authorization);
 
-      setStatus("✅ Authorization signed! Sending to relayer...");
-      setErrorDetails(`Authorization signed:\n- r: ${authorization.r}\n- s: ${authorization.s}\n- yParity: ${authorization.yParity}`);
+      setStatus("✅ SIGNED! Sending to relayer...");
+      setErrorDetails(`Authorization complete! Relayer will execute the stake.`);
 
-      // Prepare batch calls
-      const approveAmount = parseEther("100");
-
-      const approveCall = {
-        target: CONTRACTS.testToken,
-        value: 0n,
-        data: encodeFunctionData({
-          abi: ERC20_ABI,
-          functionName: "approve",
-          args: [CONTRACTS.stake, approveAmount],
-        }),
-      };
-
-      const stakeCall = {
-        target: CONTRACTS.stake,
-        value: 0n,
-        data: encodeFunctionData({
-          abi: [
-            {
-              name: "stake",
-              type: "function",
-              inputs: [{ name: "amount", type: "uint256" }],
-              outputs: [],
-            },
-          ],
-          functionName: "stake",
-          args: [approveAmount],
-        }),
-      };
-
-      // Encode batch execution
-      const batchData = encodeFunctionData({
-        abi: BATCH_EXECUTOR_ABI,
-        functionName: "executeBatch",
-        args: [[approveCall, stakeCall]],
-      });
-
-      // Send to relayer
+      // Send to relayer (SIMPLE!)
       console.log('🎮 EIP7702Relayed: Sending transaction to relayer...');
       console.log('🎮 EIP7702Relayed: Relayer URL:', RELAYER_URL);
-      console.log('🎮 EIP7702Relayed: Request payload:', {
+
+      const relayPayload = {
         authorization: {
           contractAddress: authorization.contractAddress,
-          chainId: authorization.chainId.toString(),
+          chainId: authorization.chainId,
           nonce: authorization.nonce.toString(),
           r: authorization.r,
           s: authorization.s,
           yParity: authorization.yParity,
         },
-        to: cardAddress,
-        data: batchData,
-        value: "0",
-      });
+        amount: stakeAmount.toString(), // Just the amount, no signatures needed!
+      };
 
-      const response = await fetch(`${RELAYER_URL}/relay`, {
+      console.log('🎮 EIP7702Relayed: Request payload:', relayPayload);
+
+      const response = await fetch(RELAYER_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          authorization: {
-            contractAddress: authorization.contractAddress,
-            chainId: authorization.chainId.toString(),
-            nonce: authorization.nonce.toString(),
-            r: authorization.r,
-            s: authorization.s,
-            yParity: authorization.yParity,
-          },
-          to: cardAddress,
-          data: batchData,
-          value: "0",
-        }),
+        body: JSON.stringify(relayPayload),
       });
 
       const result = await response.json();
@@ -268,80 +202,31 @@ export function EIP7702Relayed() {
 
   const mintTestTokens = async () => {
     try {
-      if (!nfcAccount) {
+      if (!cardAddress) {
         setStatus("Please connect your NFC card first!");
         return;
       }
 
       setErrorDetails("");
-      setStatus("🔴 TAP CARD TO SIGN MINT TRANSACTION...");
+      setStatus("Minting test tokens directly...");
 
-      // For minting, we'll use the relayer as well
-      console.log('🎮 EIP7702Relayed: Preparing mint via relayer...');
+      // For simplicity, let's just mint directly without the relayer
+      // since TestERC20 has a public mint function
+      // In production, you'd want a proper minting mechanism
 
-      // Get current nonce
-      const nonce = await publicClient.getTransactionCount({
-        address: cardAddress!,
-      });
+      console.log('🎮 EIP7702Relayed: Minting tokens directly to:', cardAddress);
 
-      // Sign authorization
-      // @ts-ignore
-      const authorization = await nfcAccount.signAuthorization({
-        contractAddress: CONTRACTS.batchExecutor,
-        chainId: optimismSepolia.id,
-        nonce: BigInt(nonce),
-      });
+      // Create a simple wallet client that can send transactions
+      // This would normally require the user to have ETH for gas
+      setStatus("⚠️ Direct minting requires ETH for gas");
+      setErrorDetails("Note: TestERC20 has a public mint function.\nFor gasless minting, you'd need a dedicated mint relayer or faucet.");
 
-      // Prepare mint call wrapped in batch executor
-      const mintAmount = parseEther("1000");
-      const mintCall = {
-        target: CONTRACTS.testToken,
-        value: 0n,
-        data: encodeFunctionData({
-          abi: ERC20_ABI,
-          functionName: "mint",
-          args: [cardAddress!, mintAmount],
-        }),
-      };
-
-      const batchData = encodeFunctionData({
-        abi: BATCH_EXECUTOR_ABI,
-        functionName: "executeBatch",
-        args: [[mintCall]],
-      });
-
-      // Send to relayer
-      const response = await fetch(`${RELAYER_URL}/relay`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          authorization: {
-            contractAddress: authorization.contractAddress,
-            chainId: authorization.chainId.toString(),
-            nonce: authorization.nonce.toString(),
-            r: authorization.r,
-            s: authorization.s,
-            yParity: authorization.yParity,
-          },
-          to: cardAddress,
-          data: batchData,
-          value: "0",
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Mint relay failed');
-      }
-
-      setStatus(`✅ Tokens minted gaselessly! Hash: ${result.txHash}`);
-      setErrorDetails(`Mint successful!\nHash: ${result.txHash}\n\n✨ GASLESS MINT ✨`);
+      // For now, just show instructions
+      setStatus("💡 To mint tokens: Use a wallet with ETH or request from faucet");
+      setErrorDetails(`Your address: ${cardAddress}\n\nTo mint tokens:\n1. Get some ETH on Optimism Sepolia\n2. Call mint() on token contract: ${CONTRACTS.testToken}\n\nOr use the faucet at: https://sepolia-optimism.etherscan.io/address/${CONTRACTS.testToken}#writeContract`);
     } catch (error: any) {
-      console.error('🎮 EIP7702Relayed: Mint failed:', error);
-      setStatus(`❌ Mint Failed`);
+      console.error('🎮 EIP7702Relayed: Mint info failed:', error);
+      setStatus(`❌ Error`);
       setErrorDetails(error.message);
     }
   };
@@ -414,13 +299,13 @@ export function EIP7702Relayed() {
         }}
       >
         <h2 style={{ color: "#ff6666", marginBottom: "15px" }}>
-          ✨ GASLESS BLOOD RITUAL (RELAYED):
+          ✨ GASLESS BLOOD RITUAL (ONE TAP!):
         </h2>
         <ol style={{ color: "#ff9999", lineHeight: "2", fontSize: "18px" }}>
           <li>Connect your NFC Slayer's Seal</li>
-          <li>ONE TAP: Sign authorization with your blood</li>
-          <li>Relayer executes approve + stake for you</li>
-          <li>Moloch falls WITHOUT PAYING GAS!</li>
+          <li>ONE TAP: Sign EIP-7702 authorization</li>
+          <li>Relayer executes approve + stake WITHOUT GAS!</li>
+          <li>Moloch falls with a SINGLE BLOW!</li>
         </ol>
         <div style={{
           marginTop: "15px",
@@ -472,7 +357,7 @@ export function EIP7702Relayed() {
           </div>
 
           <button
-            onClick={executeRelayedBatch}
+            onClick={executeRelayedStake}
             style={{
               background: "linear-gradient(45deg, #660000, #ff0000)",
               color: "white",
@@ -601,9 +486,9 @@ export function EIP7702Relayed() {
         </p>
         <ul style={{ listStyle: "none", padding: 0 }}>
           <li>💎 NO ETH NEEDED - Relayer pays all gas!</li>
-          <li>🩸 ONE TAP ONLY - Just sign the authorization</li>
-          <li>⚡ Instant execution via relayer service</li>
-          <li>🗡️ Works on Optimism Sepolia (testnet)</li>
+          <li>🩸 ONE TAP ONLY - Just the authorization!</li>
+          <li>⚡ Whitelisted relayer for security</li>
+          <li>🗡️ Works on Optimism Sepolia with StakerWallet</li>
           <li>🔥 Guard your NFC card - it holds your key!</li>
         </ul>
       </div>

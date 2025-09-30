@@ -5,7 +5,8 @@ import {
   type Hex,
   type Address,
   parseTransaction,
-  serializeTransaction
+  serializeTransaction,
+  encodeFunctionData
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { optimismSepolia } from 'viem/chains';
@@ -27,9 +28,7 @@ interface RelayRequest {
     s: Hex;
     yParity: number;
   };
-  to: Address;
-  data: Hex;
-  value?: bigint | string;
+  amount: string; // Amount to stake in wei - no signatures needed!
 }
 
 interface RelayResponse {
@@ -83,12 +82,12 @@ export default {
       const body = await request.json() as RelayRequest;
 
       // Validate required fields
-      if (!body.authorization || !body.to || !body.data) {
+      if (!body.authorization || !body.amount) {
         return new Response(
           JSON.stringify({
             success: false,
             error: 'Missing required fields',
-            details: 'Request must include authorization, to, and data fields'
+            details: 'Request must include authorization and amount fields'
           }),
           {
             status: 400,
@@ -145,55 +144,84 @@ export default {
         yParity: body.authorization.yParity,
       };
 
-      const value = body.value
-        ? (typeof body.value === 'string' ? BigInt(body.value) : body.value)
-        : 0n;
 
       // Verify the authorization was signed by the expected address
+      // We recover the address from the authorization to ensure it matches what we expect
+      let signerAddress: Address;
       try {
         // @ts-ignore - TypeScript doesn't know about EIP-7702 types yet
-        const recoveredAddress = await recoverAuthorizationAddress({
+        signerAddress = await recoverAuthorizationAddress({
           authorization,
         });
         console.log('Authorization verification:', {
-          recoveredAddress,
-          expectedAddress: body.to,
-          match: recoveredAddress.toLowerCase() === body.to.toLowerCase(),
+          recoveredAddress: signerAddress,
+          contractAddress: authorization.address,
         });
-
-        if (recoveredAddress.toLowerCase() !== body.to.toLowerCase()) {
-          return new Response(
-            JSON.stringify({
-              success: false,
-              error: 'Authorization signature mismatch',
-              details: `Authorization was not signed by ${body.to}. Recovered: ${recoveredAddress}`
-            }),
-            {
-              status: 400,
-              headers: corsHeaders
-            }
-          );
-        }
       } catch (verifyError: any) {
         console.error('Failed to verify authorization:', verifyError);
-        // Continue anyway for now, since verification might fail for other reasons
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Invalid authorization signature',
+            details: 'Could not recover signer from authorization'
+          }),
+          {
+            status: 400,
+            headers: corsHeaders
+          }
+        );
       }
+
+      // Parse and validate amount
+      const amount = BigInt(body.amount);
+      const MAX_STAKE_PER_TX = BigInt("1000000000000000000000"); // 1000 tokens
+
+      if (amount > MAX_STAKE_PER_TX) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Amount too high',
+            details: `Amount ${amount.toString()} exceeds maximum ${MAX_STAKE_PER_TX.toString()}`
+          }),
+          {
+            status: 400,
+            headers: corsHeaders
+          }
+        );
+      }
+
+      // Build the stake call data - simple!
+      const STAKER_WALLET_ABI = [
+        {
+          name: "stake",
+          type: "function",
+          inputs: [
+            { name: "amount", type: "uint256" }
+          ],
+          outputs: [],
+        },
+      ] as const;
+
+      const callData = encodeFunctionData({
+        abi: STAKER_WALLET_ABI,
+        functionName: "stake",
+        args: [amount],
+      });
 
       console.log('Relaying transaction:', {
         from: account.address,
-        to: body.to,
+        to: signerAddress, // Send to the EOA that signed the authorization
         authorizationList: [authorization],
-        data: body.data,
-        value: value.toString(),
+        data: callData,
       });
 
       // Send the transaction with the authorization
       // @ts-ignore - TypeScript doesn't know about authorizationList yet
       const txHash = await walletClient.sendTransaction({
         account,
-        to: body.to,
-        data: body.data,
-        value,
+        to: signerAddress, // The EOA that will be delegated
+        data: callData,
+        value: 0n,
         authorizationList: [authorization],
         chain,
       });
@@ -208,7 +236,9 @@ export default {
           details: {
             relayer: account.address,
             chainId,
-            to: body.to,
+            eoa: signerAddress,
+            delegatedTo: authorization.address,
+            amount: amount.toString(),
           }
         } as RelayResponse),
         {
