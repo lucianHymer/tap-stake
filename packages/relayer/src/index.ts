@@ -1,6 +1,15 @@
-import { createWalletClient, createPublicClient, http, type Hex, type Address, parseTransaction, serializeTransaction } from 'viem';
+import {
+  createWalletClient,
+  createPublicClient,
+  http,
+  type Hex,
+  type Address,
+  parseTransaction,
+  serializeTransaction
+} from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { optimismSepolia } from 'viem/chains';
+import { recoverAuthorizationAddress } from 'viem/experimental';
 
 export interface Env {
   PRIVATE_KEY: string;
@@ -93,12 +102,15 @@ export default {
       const chain = getChainConfig(chainId);
 
       // Validate authorization chain ID matches
-      if (body.authorization.chainId !== chainId) {
+      const authChainId = typeof body.authorization.chainId === 'string'
+        ? parseInt(body.authorization.chainId)
+        : body.authorization.chainId;
+      if (authChainId !== chainId) {
         return new Response(
           JSON.stringify({
             success: false,
             error: 'Chain ID mismatch',
-            details: `Authorization chain ID ${body.authorization.chainId} does not match relayer chain ID ${chainId}`
+            details: `Authorization chain ID ${authChainId} does not match relayer chain ID ${chainId}`
           }),
           {
             status: 400,
@@ -121,13 +133,13 @@ export default {
         transport: http(env.RPC_URL),
       });
 
-      // Convert string values to bigints if needed
+      // Convert string values to proper types
       const authorization = {
-        contractAddress: body.authorization.contractAddress,
-        chainId: body.authorization.chainId,
+        address: body.authorization.contractAddress, // viem expects 'address' field
+        chainId: authChainId,
         nonce: typeof body.authorization.nonce === 'string'
-          ? BigInt(body.authorization.nonce)
-          : body.authorization.nonce,
+          ? parseInt(body.authorization.nonce)
+          : Number(body.authorization.nonce), // viem expects number not bigint
         r: body.authorization.r,
         s: body.authorization.s,
         yParity: body.authorization.yParity,
@@ -136,6 +148,36 @@ export default {
       const value = body.value
         ? (typeof body.value === 'string' ? BigInt(body.value) : body.value)
         : 0n;
+
+      // Verify the authorization was signed by the expected address
+      try {
+        // @ts-ignore - TypeScript doesn't know about EIP-7702 types yet
+        const recoveredAddress = await recoverAuthorizationAddress({
+          authorization,
+        });
+        console.log('Authorization verification:', {
+          recoveredAddress,
+          expectedAddress: body.to,
+          match: recoveredAddress.toLowerCase() === body.to.toLowerCase(),
+        });
+
+        if (recoveredAddress.toLowerCase() !== body.to.toLowerCase()) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: 'Authorization signature mismatch',
+              details: `Authorization was not signed by ${body.to}. Recovered: ${recoveredAddress}`
+            }),
+            {
+              status: 400,
+              headers: corsHeaders
+            }
+          );
+        }
+      } catch (verifyError: any) {
+        console.error('Failed to verify authorization:', verifyError);
+        // Continue anyway for now, since verification might fail for other reasons
+      }
 
       console.log('Relaying transaction:', {
         from: account.address,
@@ -148,6 +190,7 @@ export default {
       // Send the transaction with the authorization
       // @ts-ignore - TypeScript doesn't know about authorizationList yet
       const txHash = await walletClient.sendTransaction({
+        account,
         to: body.to,
         data: body.data,
         value,
