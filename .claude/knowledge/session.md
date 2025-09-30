@@ -16,3 +16,45 @@
 **Files**: packages/frontend/src/lib/nfc.ts
 ---
 
+### [04:13] [architecture] EIP-7702 Relayer Architecture
+**Details**: Implemented minimal Cloudflare Worker relayer for gasless EIP-7702 transactions. The relayer accepts signed authorizations from NFC cards and submits transactions on behalf of users.
+
+Key implementation details:
+- POST /relay endpoint accepts authorization + transaction details
+- Relayer constructs transaction with authorizationList containing user's signed authorization
+- Transaction sent to user's EOA address with relayer paying gas
+- Chain configurable via CHAIN_ID environment variable
+- Uses same viem version (2.37.5) as frontend for compatibility
+- CORS enabled for development (accepts all origins)
+- Detailed error responses for debugging
+
+Transaction flow:
+1. Frontend sends NFC-signed authorization to relayer
+2. Relayer validates chain ID matches
+3. Constructs transaction with from=relayer, to=user EOA, authorizationList=[authorization]
+4. Signs with relayer's private key and submits
+5. Returns transaction hash
+
+Package structure at packages/relayer/:
+- src/index.ts - Worker implementation
+- wrangler.toml - Cloudflare configuration
+- Uses wrangler for local dev and deployment
+
+Future enhancements planned: access control, rate limiting, gas management, nonce tracking
+**Files**: packages/relayer/src/index.ts, packages/relayer/wrangler.toml, packages/relayer/README.md
+---
+
+### [04:24] [frontend] EIP-7702 Relayer Integration Implementation
+**Details**: Created EIP7702Relayed.tsx page that integrates with the gasless relayer service. Key changes from the direct NFC flow:
+1. Single NFC tap - only signs authorization, no second tap for transaction
+2. Sends signed authorization to relayer API at VITE_RELAYER_URL
+3. Relayer pays all gas fees - truly gasless experience
+4. Removed MetaMask/wallet connection requirement
+5. Authorization payload converted to JSON-safe format (BigInt to string)
+6. Mint function also uses relayer for gasless minting
+7. UI highlights gasless benefits with green accents
+8. Error handling includes relayer-specific failures
+9. Production relayer deployed at: https://eip7702-relayer.lucianfiallos.workers.dev
+**Files**: packages/frontend/src/pages/EIP7702Relayed.tsx, packages/frontend/.env, packages/frontend/src/App.tsx
+---
+

@@ -1,0 +1,619 @@
+import { useState } from "react";
+import {
+  createPublicClient,
+  http,
+  parseEther,
+  encodeFunctionData,
+  type Address,
+} from "viem";
+import { optimismSepolia } from "viem/chains";
+import { getCardData, createNFCAccount } from "../lib/nfc";
+
+// Contract ABIs
+const BATCH_EXECUTOR_ABI = [
+  {
+    name: "executeBatch",
+    type: "function",
+    inputs: [
+      {
+        name: "calls",
+        type: "tuple[]",
+        components: [
+          { name: "target", type: "address" },
+          { name: "value", type: "uint256" },
+          { name: "data", type: "bytes" },
+        ],
+      },
+    ],
+    outputs: [{ name: "results", type: "bytes[]" }],
+  },
+] as const;
+
+const ERC20_ABI = [
+  {
+    name: "approve",
+    type: "function",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    name: "balanceOf",
+    type: "function",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    name: "mint",
+    type: "function",
+    inputs: [
+      { name: "to", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [],
+  },
+] as const;
+
+// Deployed contract addresses
+const CONTRACTS = {
+  testToken: "0xC6325BB22cacDb2481C527131d426861Caf44A40" as Address,
+  batchExecutor: "0xbC493c76D6Fa835DA7DB2310ED1Ab5d03A0F4602" as Address,
+  stake: "0xA13E9b97ade8561FFf7bfA11DE8203d81D0880C1" as Address,
+};
+
+// Relayer URL from environment or default
+const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || "http://localhost:8787";
+
+export function EIP7702Relayed() {
+  const [status, setStatus] = useState("");
+  const [txHash, setTxHash] = useState<string>("");
+  const [nfcAccount, setNfcAccount] = useState<any>(null);
+  const [cardAddress, setCardAddress] = useState<Address | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string>("");
+
+  const publicClient = createPublicClient({
+    chain: optimismSepolia,
+    transport: http(),
+  });
+
+  const connectNFCCard = async () => {
+    console.log('🎮 EIP7702Relayed: Starting NFC card connection...');
+    try {
+      setStatus("🔴 TAP YOUR NFC CARD TO CONNECT...");
+      setErrorDetails("");
+      console.log('🎮 EIP7702Relayed: Waiting for card tap...');
+      const cardData = await getCardData();
+      console.log('🎮 EIP7702Relayed: Card data received:', cardData.address);
+
+      const account = createNFCAccount(cardData.address);
+      setNfcAccount(account);
+      setCardAddress(cardData.address);
+
+      console.log('🎮 EIP7702Relayed: NFC account created successfully');
+      setStatus(`✅ Connected to NFC Card: ${cardData.address.slice(0, 10)}...`);
+    } catch (error: any) {
+      console.error('🎮 EIP7702Relayed: Failed to connect NFC card:', error);
+      setStatus(`❌ Connection Failed`);
+      setErrorDetails(`${error.message}\n\nStack: ${error.stack?.split('\n').slice(0, 3).join('\n')}`);
+    }
+  };
+
+  const executeRelayedBatch = async () => {
+    try {
+      if (!nfcAccount) {
+        setStatus("Please connect your NFC card first!");
+        return;
+      }
+
+      setErrorDetails("");
+      setStatus("🔴 TAP CARD TO SIGN EIP-7702 AUTHORIZATION...");
+
+      // Get current nonce for the account
+      console.log('🎮 EIP7702Relayed: Getting nonce for account:', cardAddress);
+      const nonce = await publicClient.getTransactionCount({
+        address: cardAddress!,
+      });
+      console.log('🎮 EIP7702Relayed: Current nonce:', nonce);
+
+      setErrorDetails(`Signing authorization:\n- Contract: ${CONTRACTS.batchExecutor}\n- Chain: ${optimismSepolia.id}\n- Nonce: ${nonce}`);
+
+      // Sign authorization for BatchExecutor contract
+      console.log('🎮 EIP7702Relayed: Requesting authorization signature...');
+      console.log('🎮 EIP7702Relayed: Using account:', nfcAccount);
+      console.log('🎮 EIP7702Relayed: Delegating to contract:', CONTRACTS.batchExecutor);
+
+      // @ts-ignore - TypeScript doesn't know about signAuthorization yet
+      const authorization = await nfcAccount.signAuthorization({
+        contractAddress: CONTRACTS.batchExecutor,
+        chainId: optimismSepolia.id,
+        nonce: BigInt(nonce),
+      });
+      console.log('🎮 EIP7702Relayed: Authorization signed successfully:', authorization);
+
+      setStatus("✅ Authorization signed! Sending to relayer...");
+      setErrorDetails(`Authorization signed:\n- r: ${authorization.r}\n- s: ${authorization.s}\n- yParity: ${authorization.yParity}`);
+
+      // Prepare batch calls
+      const approveAmount = parseEther("100");
+
+      const approveCall = {
+        target: CONTRACTS.testToken,
+        value: 0n,
+        data: encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "approve",
+          args: [CONTRACTS.stake, approveAmount],
+        }),
+      };
+
+      const stakeCall = {
+        target: CONTRACTS.stake,
+        value: 0n,
+        data: encodeFunctionData({
+          abi: [
+            {
+              name: "stake",
+              type: "function",
+              inputs: [{ name: "amount", type: "uint256" }],
+              outputs: [],
+            },
+          ],
+          functionName: "stake",
+          args: [approveAmount],
+        }),
+      };
+
+      // Encode batch execution
+      const batchData = encodeFunctionData({
+        abi: BATCH_EXECUTOR_ABI,
+        functionName: "executeBatch",
+        args: [[approveCall, stakeCall]],
+      });
+
+      // Send to relayer
+      console.log('🎮 EIP7702Relayed: Sending transaction to relayer...');
+      console.log('🎮 EIP7702Relayed: Relayer URL:', RELAYER_URL);
+      console.log('🎮 EIP7702Relayed: Request payload:', {
+        authorization: {
+          contractAddress: authorization.contractAddress,
+          chainId: authorization.chainId.toString(),
+          nonce: authorization.nonce.toString(),
+          r: authorization.r,
+          s: authorization.s,
+          yParity: authorization.yParity,
+        },
+        to: cardAddress,
+        data: batchData,
+        value: "0",
+      });
+
+      const response = await fetch(`${RELAYER_URL}/relay`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          authorization: {
+            contractAddress: authorization.contractAddress,
+            chainId: authorization.chainId.toString(),
+            nonce: authorization.nonce.toString(),
+            r: authorization.r,
+            s: authorization.s,
+            yParity: authorization.yParity,
+          },
+          to: cardAddress,
+          data: batchData,
+          value: "0",
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        console.error('🎮 EIP7702Relayed: Relay failed:', result);
+        throw new Error(result.error || 'Relay failed');
+      }
+
+      console.log('🎮 EIP7702Relayed: Transaction relayed successfully! Hash:', result.txHash);
+      setTxHash(result.txHash);
+      setStatus(`🎉 Transaction relayed! Hash: ${result.txHash}`);
+      setErrorDetails(`Transaction relayed successfully!\nHash: ${result.txHash}\n\n✨ GASLESS TRANSACTION ✨\nThe relayer paid the gas for you!`);
+
+      // Wait for confirmation
+      console.log('🎮 EIP7702Relayed: Waiting for transaction confirmation...');
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: result.txHash });
+      console.log('🎮 EIP7702Relayed: Transaction confirmed!', {
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString()
+      });
+      setStatus(`✅ MOLOCH SLAIN GASELESSLY! Block: ${receipt.blockNumber}`);
+      setErrorDetails(`Success!\nBlock: ${receipt.blockNumber}\nGas Used: ${receipt.gasUsed}\n\n✨ GASLESS VICTORY ✨\nYou didn't pay any gas!`);
+    } catch (error: any) {
+      console.error('🎮 EIP7702Relayed: Transaction failed:', error);
+      console.error('🎮 EIP7702Relayed: Error details:', {
+        message: error.message,
+        cause: error.cause,
+        details: error.details,
+        shortMessage: error.shortMessage
+      });
+      setStatus(`❌ Relayed Transaction Failed`);
+
+      let detailedError = error.message || 'Unknown error';
+
+      // Check for specific relayer errors
+      if (error.message.includes('Chain ID mismatch')) {
+        detailedError = 'Chain mismatch - relayer is on different network';
+      } else if (error.message.includes('fetch')) {
+        detailedError = `Relayer service unavailable at ${RELAYER_URL}`;
+      }
+
+      if (error.cause) {
+        try {
+          detailedError += `\n\nCause: ${JSON.stringify(error.cause, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)}`;
+        } catch {
+          detailedError += `\n\nCause: ${String(error.cause)}`;
+        }
+      }
+      if (error.details) {
+        detailedError += `\n\nDetails: ${error.details}`;
+      }
+
+      setErrorDetails(detailedError);
+    }
+  };
+
+  const mintTestTokens = async () => {
+    try {
+      if (!nfcAccount) {
+        setStatus("Please connect your NFC card first!");
+        return;
+      }
+
+      setErrorDetails("");
+      setStatus("🔴 TAP CARD TO SIGN MINT TRANSACTION...");
+
+      // For minting, we'll use the relayer as well
+      console.log('🎮 EIP7702Relayed: Preparing mint via relayer...');
+
+      // Get current nonce
+      const nonce = await publicClient.getTransactionCount({
+        address: cardAddress!,
+      });
+
+      // Sign authorization
+      // @ts-ignore
+      const authorization = await nfcAccount.signAuthorization({
+        contractAddress: CONTRACTS.batchExecutor,
+        chainId: optimismSepolia.id,
+        nonce: BigInt(nonce),
+      });
+
+      // Prepare mint call wrapped in batch executor
+      const mintAmount = parseEther("1000");
+      const mintCall = {
+        target: CONTRACTS.testToken,
+        value: 0n,
+        data: encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "mint",
+          args: [cardAddress!, mintAmount],
+        }),
+      };
+
+      const batchData = encodeFunctionData({
+        abi: BATCH_EXECUTOR_ABI,
+        functionName: "executeBatch",
+        args: [[mintCall]],
+      });
+
+      // Send to relayer
+      const response = await fetch(`${RELAYER_URL}/relay`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          authorization: {
+            contractAddress: authorization.contractAddress,
+            chainId: authorization.chainId.toString(),
+            nonce: authorization.nonce.toString(),
+            r: authorization.r,
+            s: authorization.s,
+            yParity: authorization.yParity,
+          },
+          to: cardAddress,
+          data: batchData,
+          value: "0",
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Mint relay failed');
+      }
+
+      setStatus(`✅ Tokens minted gaselessly! Hash: ${result.txHash}`);
+      setErrorDetails(`Mint successful!\nHash: ${result.txHash}\n\n✨ GASLESS MINT ✨`);
+    } catch (error: any) {
+      console.error('🎮 EIP7702Relayed: Mint failed:', error);
+      setStatus(`❌ Mint Failed`);
+      setErrorDetails(error.message);
+    }
+  };
+
+  const checkBalance = async () => {
+    try {
+      if (!cardAddress) {
+        setStatus("Please connect your NFC card first!");
+        return;
+      }
+
+      setStatus("Checking balances...");
+      setErrorDetails("");
+
+      // Check ETH balance for gas
+      const ethBalance = await publicClient.getBalance({
+        address: cardAddress,
+      });
+      const ethInEther = Number(ethBalance) / 1e18;
+
+      // Check token balance
+      const tokenBalance = await publicClient.readContract({
+        address: CONTRACTS.testToken,
+        abi: ERC20_ABI,
+        functionName: "balanceOf",
+        args: [cardAddress],
+      });
+      const tokenInEther = Number(tokenBalance as bigint) / 1e18;
+
+      setStatus(`💰 ETH: ${ethInEther.toFixed(6)} | TEST: ${tokenInEther.toFixed(4)}`);
+      setErrorDetails(`Address: ${cardAddress}\nETH Balance: ${ethBalance.toString()} wei (${ethInEther} ETH)\nTEST Balance: ${(tokenBalance as bigint).toString()} wei (${tokenInEther} TEST)\n\n💡 Note: With relayer, you don't need ETH for gas!`);
+    } catch (error: any) {
+      console.error('🎮 EIP7702Relayed: Balance check failed:', error);
+      setStatus(`❌ Balance check failed`);
+      setErrorDetails(error.message);
+    }
+  };
+
+  return (
+    <div
+      className="eip7702-relayed-demo"
+      style={{
+        padding: "20px",
+        maxWidth: "800px",
+        margin: "0 auto",
+        background: "black",
+        minHeight: "100vh",
+      }}
+    >
+      <h1
+        style={{
+          color: "#ff0000",
+          textShadow: "0 0 20px #ff0000",
+          fontFamily: "Bebas Neue, sans-serif",
+          fontSize: "48px",
+          textAlign: "center",
+        }}
+      >
+        ⚔️ GASLESS EIP-7702 DEMON SLAYING ⚔️
+      </h1>
+
+      <div
+        style={{
+          background: "rgba(139,0,0,0.2)",
+          border: "2px solid #8B0000",
+          borderRadius: "10px",
+          padding: "20px",
+          marginBottom: "20px",
+          boxShadow: "0 0 30px rgba(139,0,0,0.5)",
+        }}
+      >
+        <h2 style={{ color: "#ff6666", marginBottom: "15px" }}>
+          ✨ GASLESS BLOOD RITUAL (RELAYED):
+        </h2>
+        <ol style={{ color: "#ff9999", lineHeight: "2", fontSize: "18px" }}>
+          <li>Connect your NFC Slayer's Seal</li>
+          <li>ONE TAP: Sign authorization with your blood</li>
+          <li>Relayer executes approve + stake for you</li>
+          <li>Moloch falls WITHOUT PAYING GAS!</li>
+        </ol>
+        <div style={{
+          marginTop: "15px",
+          padding: "10px",
+          background: "rgba(0,255,0,0.1)",
+          border: "1px solid #00ff00",
+          borderRadius: "5px",
+          color: "#00ff00"
+        }}>
+          💎 <strong>NO ETH NEEDED!</strong> The relayer pays all gas fees!
+        </div>
+      </div>
+
+      {!cardAddress ? (
+        <button
+          onClick={connectNFCCard}
+          style={{
+            background: "linear-gradient(45deg, #8B0000, #ff0000)",
+            color: "white",
+            border: "none",
+            padding: "20px 40px",
+            fontSize: "24px",
+            borderRadius: "10px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            textTransform: "uppercase",
+            width: "100%",
+            marginBottom: "20px",
+            animation: "pulse 2s infinite",
+            boxShadow: "0 0 40px rgba(255,0,0,0.7)",
+          }}
+        >
+          🩸 CONNECT NFC SLAYER'S SEAL 🩸
+        </button>
+      ) : (
+        <div>
+          <div
+            style={{
+              background: "rgba(0,255,0,0.1)",
+              border: "1px solid #00ff00",
+              borderRadius: "5px",
+              padding: "15px",
+              marginBottom: "20px",
+              color: "#00ff00",
+              fontFamily: "monospace",
+            }}
+          >
+            <strong>SLAYER'S SIGIL:</strong> {cardAddress}
+          </div>
+
+          <button
+            onClick={executeRelayedBatch}
+            style={{
+              background: "linear-gradient(45deg, #660000, #ff0000)",
+              color: "white",
+              border: "none",
+              padding: "20px 40px",
+              fontSize: "22px",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              width: "100%",
+              marginBottom: "20px",
+              boxShadow: "0 0 30px rgba(255,0,0,0.5)",
+            }}
+          >
+            ⚔️ SLAY MOLOCH (GASLESS) ⚔️
+          </button>
+        </div>
+      )}
+
+      <div
+        style={{
+          background: "rgba(0,0,0,0.8)",
+          border: "1px solid #666",
+          borderRadius: "5px",
+          padding: "15px",
+          marginBottom: "20px",
+          color: "#00ff00",
+          fontFamily: "monospace",
+          minHeight: "60px",
+        }}
+      >
+        <strong>BLOOD SEAL STATUS:</strong> {status}
+        {txHash && (
+          <div style={{ marginTop: "10px" }}>
+            <strong>VICTORY RECORD:</strong>{" "}
+            <a
+              href={`https://sepolia-optimism.etherscan.io/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#00ffff" }}
+            >
+              {txHash.slice(0, 10)}...
+            </a>
+          </div>
+        )}
+      </div>
+
+      {errorDetails && (
+        <div
+          style={{
+            background: "rgba(139,0,0,0.3)",
+            border: "1px solid #ff0000",
+            borderRadius: "5px",
+            padding: "15px",
+            marginBottom: "20px",
+            color: "#ff9999",
+            fontFamily: "monospace",
+            fontSize: "12px",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-all",
+            maxHeight: "300px",
+            overflowY: "auto",
+          }}
+        >
+          <strong>📜 DEBUG SCROLL:</strong>
+          <pre style={{ margin: "10px 0 0 0" }}>{errorDetails}</pre>
+        </div>
+      )}
+
+      {cardAddress && (
+        <div
+          style={{
+            background: "rgba(0,0,0,0.9)",
+            border: "1px solid #333",
+            borderRadius: "5px",
+            padding: "15px",
+            marginTop: "20px",
+          }}
+        >
+          <h3 style={{ color: "#ff9999", marginBottom: "15px" }}>
+            🔮 ARCANE PREPARATIONS:
+          </h3>
+          <button
+            onClick={mintTestTokens}
+            style={{
+              background: "#333",
+              color: "white",
+              border: "1px solid #666",
+              padding: "10px 20px",
+              marginRight: "10px",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Mint Test Tokens (Gasless)
+          </button>
+          <button
+            onClick={checkBalance}
+            style={{
+              background: "#333",
+              color: "white",
+              border: "1px solid #666",
+              padding: "10px 20px",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Check Balances
+          </button>
+        </div>
+      )}
+
+      <div
+        style={{
+          marginTop: "30px",
+          padding: "15px",
+          background: "rgba(139,0,0,0.1)",
+          border: "1px solid #8B0000",
+          borderRadius: "5px",
+          color: "#ff6666",
+        }}
+      >
+        <p style={{ marginBottom: "10px" }}>
+          <strong>✨ GASLESS SLAYER'S ADVANTAGE:</strong>
+        </p>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          <li>💎 NO ETH NEEDED - Relayer pays all gas!</li>
+          <li>🩸 ONE TAP ONLY - Just sign the authorization</li>
+          <li>⚡ Instant execution via relayer service</li>
+          <li>🗡️ Works on Optimism Sepolia (testnet)</li>
+          <li>🔥 Guard your NFC card - it holds your key!</li>
+        </ul>
+      </div>
+
+      <style>{`
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+      `}</style>
+    </div>
+  );
+}

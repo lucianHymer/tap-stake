@@ -33,6 +33,8 @@ sudo dnf install -y \
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 
+sudo npm i -g wrangler
+
 echo ""
 echo "✅ Essential dependencies installed!"
 echo ""

@@ -123,10 +123,14 @@ export default {
 
       // Convert string values to bigints if needed
       const authorization = {
-        ...body.authorization,
+        contractAddress: body.authorization.contractAddress,
+        chainId: body.authorization.chainId,
         nonce: typeof body.authorization.nonce === 'string'
           ? BigInt(body.authorization.nonce)
           : body.authorization.nonce,
+        r: body.authorization.r,
+        s: body.authorization.s,
+        yParity: body.authorization.yParity,
       };
 
       const value = body.value
