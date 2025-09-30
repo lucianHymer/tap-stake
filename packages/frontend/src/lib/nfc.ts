@@ -2,11 +2,13 @@ import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
 import {
   keccak256,
   serializeTransaction,
-  type Hex,
-  concat,
-  numberToHex
+  type Hex
 } from 'viem';
-import { encode as rlpEncode } from '@ethereumjs/rlp';
+import {
+  hashAuthorization,
+  recoverAuthorizationAddress,
+  verifyAuthorization
+} from 'viem/experimental';
 
 export interface NFCCardData {
   address: `0x${string}`;
@@ -157,13 +159,31 @@ export const createNFCAccount = (address: `0x${string}`) => {
     type: 'local' as const,
     address,
     signMessage: async ({ message }: { message: string | { raw: Hex } }) => {
-      // For string messages, we need to pass the raw message to the NFC card
-      // The NFC card will handle the Ethereum prefix and hashing
-      const messageToSign = typeof message === 'string'
-        ? message  // Pass raw message, not hash
-        : message.raw;
+      // Check if this is an EIP-7702 authorization message
+      // EIP-7702 messages start with 0x05 magic byte
+      let isEIP7702 = false;
+      let messageToSign;
 
-      const signature = await signWithNFC(messageToSign);
+      if (typeof message === 'object' && 'raw' in message) {
+        const rawHex = message.raw;
+        // Check if this looks like an EIP-7702 message (starts with 0x05)
+        if (rawHex.length > 4 && rawHex.slice(0, 4) === '0x05') {
+          console.log('📱 NFC: Detected EIP-7702 authorization message');
+          isEIP7702 = true;
+          // For EIP-7702, we need to hash the message and sign the raw digest
+          const digest = keccak256(message.raw);
+          console.log('📱 NFC: EIP-7702 digest to sign:', digest);
+          messageToSign = digest;
+        } else {
+          messageToSign = message.raw;
+        }
+      } else {
+        // String message
+        messageToSign = message;
+      }
+
+      // Sign with NFC - use raw digest mode for EIP-7702
+      const signature = await signWithNFC(messageToSign, isEIP7702);
       return signature;
     },
     signTransaction: async (transaction: any) => {
@@ -207,76 +227,52 @@ export const createNFCAccount = (address: `0x${string}`) => {
       throw new Error('Typed data signing not yet implemented');
     },
     signAuthorization: async (authorization: any) => {
+      console.log('📱 NFC: signAuthorization called with:', authorization);
+
+      // Use viem's hashAuthorization to get the proper hash
+      const hash = hashAuthorization(authorization);
+      console.log('📱 NFC: Authorization hash from viem:', hash);
+
+      // Sign the raw digest with NFC
+      const signature = await signWithNFC(hash, true);
+      console.log('📱 NFC: Authorization signature:', signature);
+
+      // Parse signature components
+      const r = `0x${signature.slice(2, 66)}` as Hex;
+      const s = `0x${signature.slice(66, 130)}` as Hex;
+      const v = parseInt(signature.slice(130, 132), 16);
+      const yParity = v === 27 ? 0 : 1;
+
+      // Return the signed authorization with all required fields
+      const result = {
+        ...authorization,
+        r,
+        s,
+        yParity,
+        v: BigInt(v)
+      };
+
+      console.log('📱 NFC: Signed authorization:', result);
+
+      // Verify the signature and recover the address
       try {
-        // Build the authorization hash according to EIP-7702 spec
-        // Format: keccak256(0x05 || rlp([chain_id, address, nonce]))
-
-        const chainId = authorization.chainId || 11155420; // Default to OP Sepolia
-        const nonce = authorization.nonce || 0n;
-
-        console.log('📱 NFC: EIP-7702 Authorization Request:', {
-          contractAddress: authorization.contractAddress,
-          chainId: typeof chainId === 'bigint' ? chainId.toString() : chainId,
-          nonce: typeof nonce === 'bigint' ? nonce.toString() : String(nonce)
+        const recoveredAddress = await recoverAuthorizationAddress({
+          authorization: result
         });
+        console.log('📱 NFC: Recovered address from authorization:', recoveredAddress);
+        console.log('📱 NFC: Expected address (EOA):', address);
+        console.log('📱 NFC: Address match:', recoveredAddress.toLowerCase() === address.toLowerCase());
 
-        // Prepare values for RLP encoding
-        const rlpData = [
-          // Chain ID as hex (0x for 0, otherwise hex number)
-          chainId === 0 ? '0x' : numberToHex(chainId),
-          // Contract address
-          authorization.contractAddress,
-          // Nonce as hex (0x for 0, otherwise hex number)
-          nonce === 0n ? '0x' : numberToHex(nonce),
-        ];
-
-        console.log('📱 NFC: RLP Data for authorization:', rlpData);
-
-        // RLP encode the data
-        const rlpEncoded = rlpEncode(rlpData);
-        console.log('📱 NFC: RLP Encoded length:', rlpEncoded.length);
-
-        // Prepend magic byte 0x05 for EIP-7702
-        const MAGIC_BYTE = 0x05;
-        const message = concat([
-          new Uint8Array([MAGIC_BYTE]),
-          rlpEncoded
-        ]);
-
-        // Hash the complete message
-        const digest = keccak256(message);
-        console.log('📱 NFC: Authorization digest to sign:', digest);
-        console.log('📱 NFC: Requesting NFC signature for authorization...');
-
-        // Sign the raw digest with NFC
-        const signature = await signWithNFC(digest, true);
-        console.log('📱 NFC: Authorization signature received:', signature);
-
-        // Parse signature components
-        const r = `0x${signature.slice(2, 66)}` as Hex;
-        const s = `0x${signature.slice(66, 130)}` as Hex;
-        const v = parseInt(signature.slice(130, 132), 16);
-        const yParity = v === 27 ? 0 : 1;
-
-        const result = {
-          contractAddress: authorization.contractAddress,
-          chainId,
-          nonce,
-          r,
-          s,
-          yParity
-        };
-
-        console.log('📱 NFC: Authorization result:', {
-          ...result,
-          chainId: typeof result.chainId === 'bigint' ? result.chainId.toString() : result.chainId,
-          nonce: typeof result.nonce === 'bigint' ? result.nonce.toString() : result.nonce
+        const isValid = await verifyAuthorization({
+          authorization: result,
+          address: address
         });
-        return result;
-      } catch (error: any) {
-        console.error('signAuthorization failed:', error);
-        throw new Error(`EIP-7702 Auth Failed: ${error.message}`);
+        console.log('📱 NFC: Authorization verification result:', isValid);
+      } catch (error) {
+        console.error('📱 NFC: Failed to verify authorization:', error);
       }
+
+      return result;
     }
   };
 };

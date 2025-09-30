@@ -126,13 +126,16 @@ export function EIP7702NFC() {
 
       setErrorDetails(`Signing authorization:\n- Contract: ${CONTRACTS.batchExecutor}\n- Chain: ${optimismSepolia.id}\n- Nonce: ${nonce}`);
 
-      // Sign authorization for BatchExecutor contract
-      // Call signAuthorization directly on the NFC account
+      // Sign authorization for BatchExecutor contract - EXACTLY like the non-NFC version
       console.log('🎮 EIP7702NFC: Requesting authorization signature...');
-      const authorization = await nfcAccount.signAuthorization({
+      console.log('🎮 EIP7702NFC: Using account:', nfcAccount);
+      console.log('🎮 EIP7702NFC: Delegating to contract:', CONTRACTS.batchExecutor);
+
+      // @ts-ignore - TypeScript doesn't know about signAuthorization yet
+      const authorization = await walletClient.signAuthorization({
+        account: nfcAccount,
         contractAddress: CONTRACTS.batchExecutor,
-        chainId: optimismSepolia.id,
-        nonce: BigInt(nonce),
+        executor: "self",
       });
       console.log('🎮 EIP7702NFC: Authorization signed successfully:', authorization);
 
