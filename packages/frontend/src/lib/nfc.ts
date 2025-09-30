@@ -31,26 +31,53 @@ const getRpId = () => {
 };
 
 export const getCardData = async (): Promise<NFCCardData> => {
+  console.log('📱 NFC: Starting getCardData...');
+  console.log('📱 NFC: Platform:', {
+    userAgent: navigator.userAgent,
+    hostname: window.location.hostname,
+    protocol: window.location.protocol,
+  });
+
   try {
     // Note: This requires either:
     // 1. HaLo Bridge running on desktop (with USB NFC reader)
     // 2. Android Chrome with NFC enabled
     // Will fail on desktop browsers without HaLo Bridge
+    const rpId = getRpId();
+    console.log('📱 NFC: Using rpId:', rpId);
+
+    console.log('📱 NFC: Calling execHaloCmdWeb with get_pkeys...');
     const result = await execHaloCmdWeb({
       name: 'get_pkeys',
-      rpId: getRpId()
+      rpId: rpId
     });
+    console.log('📱 NFC: get_pkeys result:', result);
     
     const address = result.etherAddresses?.['1'] as `0x${string}`;
     const publicKey = result.publicKeys?.['1'];
-    
+
     if (!address || !publicKey) {
+      console.error('📱 NFC: Missing data in result:', {
+        hasAddress: !!address,
+        hasPublicKey: !!publicKey,
+        etherAddresses: result.etherAddresses,
+        publicKeys: result.publicKeys
+      });
       throw new Error('Failed to extract card data');
     }
-    
+
+    console.log('📱 NFC: Card data retrieved successfully:', {
+      address,
+      publicKeyLength: publicKey.length
+    });
+
     return { address, publicKey };
   } catch (error: any) {
-    console.error('Failed to get card data:', error);
+    console.error('📱 NFC: Failed to get card data:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack?.split('\n').slice(0, 3).join('\n')
+    });
     
     // Check for common errors
     if (error.message?.includes('NotAllowedError') || error.message?.includes("device can't be used")) {
@@ -96,8 +123,12 @@ export const signWithNFC = async (message: string | Hex, isRawDigest: boolean = 
       command.format = 'hex';
     }
 
-    console.log('NFC Sign Command:', command);
+    console.log('📱 NFC: Sign Command:', command);
+    console.log('📱 NFC: Executing sign command...');
+    const startTime = Date.now();
     const result = await execHaloCmdWeb(command);
+    const elapsed = Date.now() - startTime;
+    console.log(`📱 NFC: Sign completed in ${elapsed}ms, result:`, result);
     console.log('NFC Sign Result:', result);
 
     if (!result.signature) {
@@ -147,16 +178,30 @@ export const createNFCAccount = (address: `0x${string}`) => {
       });
 
       const serialized = serializeTransaction(transaction);
-      console.log('Serialized transaction:', serialized);
+      console.log('📱 NFC: Serialized transaction:', serialized);
 
       const hash = keccak256(serialized);
-      console.log('Transaction hash to sign:', hash);
+      console.log('📱 NFC: Transaction hash to sign:', hash);
 
       // Pass true for isRawDigest since this is a transaction hash
       const signature = await signWithNFC(hash, true);
-      console.log('Transaction signature received:', signature);
+      console.log('📱 NFC: Transaction signature received:', signature);
 
-      return signature;
+      // Parse signature components
+      const r = `0x${signature.slice(2, 66)}` as Hex;
+      const s = `0x${signature.slice(66, 130)}` as Hex;
+      const v = parseInt(signature.slice(130, 132), 16);
+      const yParity = v === 27 ? 0 : 1;
+
+      // Serialize the signed transaction
+      const signedTx = serializeTransaction(transaction, {
+        r,
+        s,
+        yParity
+      });
+
+      console.log('📱 NFC: Signed transaction:', signedTx);
+      return signedTx;
     },
     signTypedData: async () => {
       throw new Error('Typed data signing not yet implemented');
@@ -169,7 +214,7 @@ export const createNFCAccount = (address: `0x${string}`) => {
         const chainId = authorization.chainId || 11155420; // Default to OP Sepolia
         const nonce = authorization.nonce || 0n;
 
-        console.log('EIP-7702 Authorization Request:', {
+        console.log('📱 NFC: EIP-7702 Authorization Request:', {
           contractAddress: authorization.contractAddress,
           chainId: typeof chainId === 'bigint' ? chainId.toString() : chainId,
           nonce: typeof nonce === 'bigint' ? nonce.toString() : String(nonce)
@@ -185,10 +230,11 @@ export const createNFCAccount = (address: `0x${string}`) => {
           nonce === 0n ? '0x' : numberToHex(nonce),
         ];
 
-        console.log('RLP Data:', rlpData);
+        console.log('📱 NFC: RLP Data for authorization:', rlpData);
 
         // RLP encode the data
         const rlpEncoded = rlpEncode(rlpData);
+        console.log('📱 NFC: RLP Encoded length:', rlpEncoded.length);
 
         // Prepend magic byte 0x05 for EIP-7702
         const MAGIC_BYTE = 0x05;
@@ -199,11 +245,12 @@ export const createNFCAccount = (address: `0x${string}`) => {
 
         // Hash the complete message
         const digest = keccak256(message);
-        console.log('Authorization digest to sign:', digest);
+        console.log('📱 NFC: Authorization digest to sign:', digest);
+        console.log('📱 NFC: Requesting NFC signature for authorization...');
 
         // Sign the raw digest with NFC
         const signature = await signWithNFC(digest, true);
-        console.log('Authorization signature:', signature);
+        console.log('📱 NFC: Authorization signature received:', signature);
 
         // Parse signature components
         const r = `0x${signature.slice(2, 66)}` as Hex;
@@ -220,7 +267,7 @@ export const createNFCAccount = (address: `0x${string}`) => {
           yParity
         };
 
-        console.log('Authorization result:', {
+        console.log('📱 NFC: Authorization result:', {
           ...result,
           chainId: typeof result.chainId === 'bigint' ? result.chainId.toString() : result.chainId,
           nonce: typeof result.nonce === 'bigint' ? result.nonce.toString() : result.nonce

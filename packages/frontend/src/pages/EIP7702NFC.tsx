@@ -78,16 +78,22 @@ export function EIP7702NFC() {
   });
 
   const connectNFCCard = async () => {
+    console.log('🎮 EIP7702NFC: Starting NFC card connection...');
     try {
       setStatus("🔴 TAP YOUR NFC CARD TO CONNECT...");
       setErrorDetails("");
+      console.log('🎮 EIP7702NFC: Waiting for card tap...');
       const cardData = await getCardData();
+      console.log('🎮 EIP7702NFC: Card data received:', cardData.address);
+
       const account = createNFCAccount(cardData.address);
       setNfcAccount(account);
       setCardAddress(cardData.address);
+
+      console.log('🎮 EIP7702NFC: NFC account created successfully');
       setStatus(`✅ Connected to NFC Card: ${cardData.address.slice(0, 10)}...`);
     } catch (error: any) {
-      console.error("Failed to connect NFC card:", error);
+      console.error('🎮 EIP7702NFC: Failed to connect NFC card:', error);
       setStatus(`❌ Connection Failed`);
       setErrorDetails(`${error.message}\n\nStack: ${error.stack?.split('\n').slice(0, 3).join('\n')}`);
     }
@@ -112,19 +118,23 @@ export function EIP7702NFC() {
       setStatus("🔴 TAP CARD TO SIGN EIP-7702 AUTHORIZATION...");
 
       // Get current nonce for the account
+      console.log('🎮 EIP7702NFC: Getting nonce for account:', cardAddress);
       const nonce = await publicClient.getTransactionCount({
         address: cardAddress!,
       });
+      console.log('🎮 EIP7702NFC: Current nonce:', nonce);
 
       setErrorDetails(`Signing authorization:\n- Contract: ${CONTRACTS.batchExecutor}\n- Chain: ${optimismSepolia.id}\n- Nonce: ${nonce}`);
 
       // Sign authorization for BatchExecutor contract
       // Call signAuthorization directly on the NFC account
+      console.log('🎮 EIP7702NFC: Requesting authorization signature...');
       const authorization = await nfcAccount.signAuthorization({
         contractAddress: CONTRACTS.batchExecutor,
         chainId: optimismSepolia.id,
         nonce: BigInt(nonce),
       });
+      console.log('🎮 EIP7702NFC: Authorization signed successfully:', authorization);
 
       setStatus("✅ Authorization signed! Preparing transaction...");
       setErrorDetails(`Authorization signed:\n- r: ${authorization.r}\n- s: ${authorization.s}\n- yParity: ${authorization.yParity}`);
@@ -169,6 +179,13 @@ export function EIP7702NFC() {
       setStatus("🔴 TAP CARD TO SIGN TRANSACTION...");
 
       // Send EIP-7702 transaction
+      console.log('🎮 EIP7702NFC: Sending transaction with authorization...');
+      console.log('🎮 EIP7702NFC: Transaction params:', {
+        to: cardAddress,
+        dataLength: batchData.length,
+        authorizationList: [authorization]
+      });
+
       // @ts-ignore - TypeScript doesn't know about authorizationList yet
       const hash = await walletClient.sendTransaction({
         to: cardAddress!,
@@ -176,16 +193,28 @@ export function EIP7702NFC() {
         authorizationList: [authorization],
       });
 
+      console.log('🎮 EIP7702NFC: Transaction sent! Hash:', hash);
       setTxHash(hash);
       setStatus(`🎉 Transaction sent! Hash: ${hash}`);
       setErrorDetails(`Transaction sent:\nHash: ${hash}\nWaiting for confirmation...`);
 
       // Wait for confirmation
+      console.log('🎮 EIP7702NFC: Waiting for transaction confirmation...');
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      console.log('🎮 EIP7702NFC: Transaction confirmed!', {
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString()
+      });
       setStatus(`✅ MOLOCH SLAIN! Block: ${receipt.blockNumber}`);
       setErrorDetails(`Success!\nBlock: ${receipt.blockNumber}\nGas Used: ${receipt.gasUsed}`);
     } catch (error: any) {
-      console.error("Transaction failed:", error);
+      console.error('🎮 EIP7702NFC: Transaction failed:', error);
+      console.error('🎮 EIP7702NFC: Error details:', {
+        message: error.message,
+        cause: error.cause,
+        details: error.details,
+        shortMessage: error.shortMessage
+      });
       setStatus(`❌ EIP-7702 Failed`);
 
       let detailedError = error.message || 'Unknown error';
@@ -227,7 +256,7 @@ export function EIP7702NFC() {
 
       // Log the transaction parameters
       const mintAmount = parseEther("1000");
-      console.log("Mint Transaction Parameters:", {
+      console.log('🎮 EIP7702NFC: Mint Transaction Parameters:', {
         from: cardAddress,
         to: CONTRACTS.testToken,
         functionName: "mint",
@@ -241,7 +270,7 @@ export function EIP7702NFC() {
 
       // First, try to simulate the transaction to check if it will succeed
       try {
-        console.log("Simulating mint transaction...");
+        console.log('🎮 EIP7702NFC: Simulating mint transaction...');
         const { request } = await publicClient.simulateContract({
           account: cardAddress!,
           address: CONTRACTS.testToken,
@@ -249,17 +278,17 @@ export function EIP7702NFC() {
           functionName: "mint",
           args: [cardAddress!, mintAmount],
         });
-        console.log("Simulation successful, request:", request);
+        console.log('🎮 EIP7702NFC: Simulation successful, request:', request);
         setErrorDetails(`Simulation successful!\n- From: ${cardAddress}\n- To: ${cardAddress}\n- Amount: ${mintAmount.toString()} wei (1000 TEST)\n- Contract: ${CONTRACTS.testToken}`);
       } catch (simError: any) {
-        console.error("Simulation failed:", simError);
+        console.error('🎮 EIP7702NFC: Simulation failed:', simError);
         setErrorDetails(`Simulation failed!\nError: ${simError.message}\n\nThis might mean:\n1. Contract doesn't have public mint function\n2. Insufficient gas\n3. Contract paused or restricted`);
         // Continue anyway to get the actual error
       }
 
       setStatus("🔴 TAP CARD TO SIGN MINT TRANSACTION...");
 
-      console.log("Calling writeContract with:", {
+      console.log('🎮 EIP7702NFC: Calling writeContract with:', {
         account: nfcAccount.address,
         address: CONTRACTS.testToken,
         functionName: "mint",
@@ -276,7 +305,7 @@ export function EIP7702NFC() {
           args: [cardAddress!, mintAmount],
         });
       } catch (writeError: any) {
-        console.error("writeContract failed:", writeError);
+        console.error('🎮 EIP7702NFC: writeContract failed:', writeError);
 
         // Extract transaction request details if available
         let txDetails = "Transaction Request Details:\n";
@@ -297,7 +326,7 @@ export function EIP7702NFC() {
       setStatus(`✅ Tokens minted! Block: ${receipt.blockNumber}`);
       setErrorDetails(`Success!\nBlock: ${receipt.blockNumber}\nGas Used: ${receipt.gasUsed}`);
     } catch (error: any) {
-      console.error("Mint failed - Full error:", error);
+      console.error('🎮 EIP7702NFC: Mint failed - Full error:', error);
       setStatus(`❌ Mint Failed`);
 
       // Extract detailed error information
@@ -359,7 +388,7 @@ export function EIP7702NFC() {
       setStatus(`💰 ETH: ${ethInEther.toFixed(6)} | TEST: ${tokenInEther.toFixed(4)}`);
       setErrorDetails(`Address: ${cardAddress}\nETH Balance: ${ethBalance.toString()} wei (${ethInEther} ETH)\nTEST Balance: ${(tokenBalance as bigint).toString()} wei (${tokenInEther} TEST)`);
     } catch (error: any) {
-      console.error("Balance check failed:", error);
+      console.error('🎮 EIP7702NFC: Balance check failed:', error);
       setStatus(`❌ Balance check failed`);
       setErrorDetails(error.message);
     }
