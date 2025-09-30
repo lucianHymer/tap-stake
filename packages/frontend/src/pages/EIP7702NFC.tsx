@@ -58,11 +58,12 @@ const ERC20_ABI = [
   },
 ] as const;
 
-// Deployed contract addresses
+// Deployed contract addresses (Updated: Sep 30, 2025)
 const CONTRACTS = {
-  testToken: "0xC6325BB22cacDb2481C527131d426861Caf44A40" as Address,
-  batchExecutor: "0xbC493c76D6Fa835DA7DB2310ED1Ab5d03A0F4602" as Address,
-  stake: "0xA13E9b97ade8561FFf7bfA11DE8203d81D0880C1" as Address,
+  testToken: "0xC7480B7CAaDc8Aaa8b0ddD0552EC5F77A464F649" as Address,
+  batchExecutor: "0x7Edd1EBd251eE6D943Ae64A20969Cf40a1aa236C" as Address, // SelfBatchExecutor
+  stake: "0x334559433296D9Dd9a861c200aFB1FEAF77388AA" as Address,
+  stakerWallet: "0xB9f60eb68B55396CEb1a0a347aEfA48AE6473F33" as Address, // NEW: Gasless staking
 };
 
 export function EIP7702NFC() {
