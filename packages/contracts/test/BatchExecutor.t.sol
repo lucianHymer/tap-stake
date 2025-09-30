@@ -2,12 +2,12 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {BatchExecutor} from "../src/BatchExecutor.sol";
+import {SelfBatchExecutor} from "../src/SelfBatchExecutor.sol";
 import {TestERC20} from "../src/TestERC20.sol";
 import {Stake} from "../src/Stake.sol";
 
 contract BatchExecutorTest is Test {
-    BatchExecutor public executor;
+    SelfBatchExecutor public executor;
     TestERC20 public token;
     Stake public stakeContract;
 
@@ -15,7 +15,7 @@ contract BatchExecutorTest is Test {
     address public recipient = address(0x2);
 
     function setUp() public {
-        executor = new BatchExecutor();
+        executor = new SelfBatchExecutor();
         token = new TestERC20();
         stakeContract = new Stake(address(token));
 
@@ -27,17 +27,17 @@ contract BatchExecutorTest is Test {
         // This test verifies the batch execution would work if called through delegation
         // In production, EIP-7702 delegation would make msg.sender == address(this)
 
-        BatchExecutor.Call[] memory calls = new BatchExecutor.Call[](2);
+        SelfBatchExecutor.Call[] memory calls = new SelfBatchExecutor.Call[](2);
 
         // Approve call
-        calls[0] = BatchExecutor.Call({
+        calls[0] = SelfBatchExecutor.Call({
             target: address(token),
             value: 0,
             data: abi.encodeCall(token.approve, (recipient, 100 ether))
         });
 
         // Transfer call
-        calls[1] = BatchExecutor.Call({
+        calls[1] = SelfBatchExecutor.Call({
             target: address(token),
             value: 0,
             data: abi.encodeCall(token.transfer, (recipient, 10 ether))
