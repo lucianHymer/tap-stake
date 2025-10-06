@@ -8,6 +8,7 @@ import { DemonSlayer } from './components/DemonSlayer';
 import { EIP7702Experimental } from './pages/EIP7702Experimental';
 import { EIP7702NFC } from './pages/EIP7702NFC';
 import { EIP7702Relayed } from './pages/EIP7702Relayed';
+import { Demo } from './pages/Demo';
 import { readNFCConnection } from './lib/nfcResource';
 import { wagmiConfig } from './config/wagmi';
 import './App.css';
@@ -33,7 +34,7 @@ function App() {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
+        <BrowserRouter basename="/tap-stake">
           <div>
             <nav style={{
               background: 'rgba(0,0,0,0.9)',
@@ -68,10 +69,19 @@ function App() {
               <Link to="/eip7702-relayed" style={{
                 color: '#00ff00',
                 textDecoration: 'none',
+                marginRight: '20px',
                 fontWeight: 'bold',
                 textShadow: '0 0 10px #00ff00'
               }}>
                 ✨ EIP-7702 GASLESS
+              </Link>
+              <Link to="/demo" style={{
+                color: '#ffff00',
+                textDecoration: 'none',
+                fontWeight: 'bold',
+                textShadow: '0 0 10px #ffff00'
+              }}>
+                🧪 DEMO (NO NFC)
               </Link>
             </nav>
 
@@ -80,6 +90,7 @@ function App() {
               <Route path="/eip7702" element={<EIP7702Experimental />} />
               <Route path="/eip7702-nfc" element={<EIP7702NFC />} />
               <Route path="/eip7702-relayed" element={<EIP7702Relayed />} />
+              <Route path="/demo" element={<Demo />} />
             </Routes>
           </div>
         </BrowserRouter>
