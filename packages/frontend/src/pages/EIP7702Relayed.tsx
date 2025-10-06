@@ -112,7 +112,7 @@ export function EIP7702Relayed() {
       const authorization = await nfcAccount.signAuthorization({
         contractAddress: CONTRACTS.stakerWallet,
         chainId: optimismSepolia.id,
-        nonce: BigInt(txNonce),
+        nonce: txNonce,
       });
       console.log('🎮 EIP7702Relayed: Authorization signed successfully:', authorization);
 
@@ -125,7 +125,7 @@ export function EIP7702Relayed() {
 
       const relayPayload = {
         authorization: {
-          contractAddress: authorization.contractAddress,
+          contractAddress: authorization.address, // viem returns 'address' not 'contractAddress'
           chainId: authorization.chainId,
           nonce: authorization.nonce.toString(),
           r: authorization.r,
