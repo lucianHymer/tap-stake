@@ -116,50 +116,26 @@ export const getCardData = async (): Promise<NFCCardData> => {
 
     const browser = detectBrowser();
 
-    // Check for common errors and provide browser-specific guidance
+    // Simplified error handling: Mobile users vs Desktop users
     if (errorObj.message?.includes('NotAllowedError') ||
         errorObj.message?.includes("device can't be used") ||
         errorObj.message?.includes('not supported')) {
 
-      // Desktop users need HaLo Bridge
-      if (!browser.isMobile) {
-        throw new Error(
-          'NFC_DESKTOP_UNSUPPORTED: Desktop browsers require HaLo Bridge with USB NFC reader. ' +
-          'Visit https://halo.arx.org/bridge for installation instructions.'
-        );
-      }
-
-      // Mobile users on incompatible browsers
-      if (browser.isMobile && !browser.isCompatible) {
+      if (browser.isMobile) {
+        // On mobile: recommend Chrome/Safari or refresh
         throw new Error(
           'NFC_BROWSER_UNSUPPORTED: Use Chrome or Safari on mobile for NFC support. ' +
           'If you\'re already using a compatible browser, try refreshing the page.'
         );
-      }
-
-      // iOS has limited NFC support
-      if (browser.isIOS) {
+      } else {
+        // On desktop: recommend using mobile instead
         throw new Error(
-          'NFC_IOS_LIMITED: iOS has limited Web NFC support. ' +
-          'Ensure NFC is enabled in Settings and try using Safari.'
+          'NFC_DESKTOP_UNSUPPORTED: Please use Chrome or Safari on your mobile device for NFC support.'
         );
       }
-
-      // Android Chrome but NFC might be disabled
-      throw new Error(
-        'NFC_DISABLED: NFC may be disabled. ' +
-        'Enable NFC in your device settings and try again.'
-      );
     }
 
-    // Generic error with browser context
-    if (!browser.isCompatible) {
-      throw new Error(
-        'NFC_BROWSER_UNSUPPORTED: Use Chrome or Safari on mobile. ' +
-        'Desktop users need HaLo Bridge with USB NFC reader.'
-      );
-    }
-
+    // Generic fallback error
     throw new Error('NFC_CARD_READ_FAILED: Failed to read NFC card. Please ensure your card is properly positioned and try again.');
   }
 };
