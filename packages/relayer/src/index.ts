@@ -1,11 +1,8 @@
 import {
   createWalletClient,
-  createPublicClient,
   http,
   type Hex,
   type Address,
-  parseTransaction,
-  serializeTransaction,
   encodeFunctionData
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -35,11 +32,11 @@ interface RelayResponse {
   success: boolean;
   txHash?: Hex;
   error?: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 // Helper to get chain config from chain ID
-function getChainConfig(chainId: number) {
+function getChainConfig(chainId: number): typeof optimismSepolia {
   // For now just support OP Sepolia, can add more chains later
   if (chainId === 11155420) {
     return optimismSepolia;
@@ -126,12 +123,6 @@ export default {
         transport: http(env.RPC_URL),
       });
 
-      // Create public client for reading chain data
-      const publicClient = createPublicClient({
-        chain,
-        transport: http(env.RPC_URL),
-      });
-
       // Convert string values to proper types
       const authorization = {
         address: body.authorization.address,
@@ -149,16 +140,22 @@ export default {
       // We recover the address from the authorization to ensure it matches what we expect
       let signerAddress: Address;
       try {
-        // @ts-ignore - TypeScript doesn't know about EIP-7702 types yet
+        // @ts-expect-error - TypeScript doesn't know about EIP-7702 types yet
         signerAddress = await recoverAuthorizationAddress({
           authorization,
         });
-        console.log('Authorization verification:', {
-          recoveredAddress: signerAddress,
-          contractAddress: authorization.address,
-        });
-      } catch (verifyError: any) {
-        console.error('Failed to verify authorization:', verifyError);
+        if (env.ENVIRONMENT !== 'production') {
+          // eslint-disable-next-line no-console
+          console.log('Authorization verification:', {
+            recoveredAddress: signerAddress,
+            contractAddress: authorization.address,
+          });
+        }
+      } catch (verifyError) {
+        if (env.ENVIRONMENT !== 'production') {
+          // eslint-disable-next-line no-console
+          console.error('Failed to verify authorization:', verifyError);
+        }
         return new Response(
           JSON.stringify({
             success: false,
@@ -208,15 +205,18 @@ export default {
         args: [amount],
       });
 
-      console.log('Relaying transaction:', {
-        from: account.address,
-        to: signerAddress, // Send to the EOA that signed the authorization
-        authorizationList: [authorization],
-        data: callData,
-      });
+      if (env.ENVIRONMENT !== 'production') {
+        // eslint-disable-next-line no-console
+        console.log('Relaying transaction:', {
+          from: account.address,
+          to: signerAddress, // Send to the EOA that signed the authorization
+          authorizationList: [authorization],
+          data: callData,
+        });
+      }
 
       // Send the transaction with the authorization
-      // @ts-ignore - TypeScript doesn't know about authorizationList yet
+      // @ts-expect-error - TypeScript doesn't know about authorizationList yet
       const txHash = await walletClient.sendTransaction({
         account,
         to: signerAddress, // The EOA that will be delegated
@@ -226,7 +226,10 @@ export default {
         chain,
       });
 
-      console.log('Transaction sent:', txHash);
+      if (env.ENVIRONMENT !== 'production') {
+        // eslint-disable-next-line no-console
+        console.log('Transaction sent:', txHash);
+      }
 
       // Return success response
       return new Response(
@@ -247,22 +250,32 @@ export default {
         }
       );
 
-    } catch (error: any) {
-      console.error('Relay error:', error);
+    } catch (error) {
+      if (env.ENVIRONMENT !== 'production') {
+        // eslint-disable-next-line no-console
+        console.error('Relay error:', error);
+      }
 
       // Extract useful error information
+      const err = error as Error & {
+        cause?: unknown;
+        details?: unknown;
+        shortMessage?: string;
+        metaMessages?: unknown;
+      };
+
       const errorDetails = {
-        message: error.message || 'Unknown error',
-        cause: error.cause,
-        details: error.details,
-        shortMessage: error.shortMessage,
-        metaMessages: error.metaMessages,
+        message: err.message || 'Unknown error',
+        cause: err.cause,
+        details: err.details,
+        shortMessage: err.shortMessage,
+        metaMessages: err.metaMessages,
       };
 
       return new Response(
         JSON.stringify({
           success: false,
-          error: error.shortMessage || error.message || 'Transaction failed',
+          error: err.shortMessage || err.message || 'Transaction failed',
           details: errorDetails,
         } as RelayResponse),
         {
