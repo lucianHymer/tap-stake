@@ -26,20 +26,23 @@ interface HaloSignCommand {
   format?: 'text' | 'hex';
 }
 
+// Simple mobile detection
+const isMobile = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 // Helper function to get valid RP ID for WebAuthn
 const getRpId = () => {
   const hostname = window.location.hostname;
   // WebAuthn doesn't support IP addresses as RP ID
   // Check if hostname is an IP address (IPv4 or IPv6)
   const isIPAddress = /^(\d{1,3}\.){3}\d{1,3}$|^\[?[0-9a-fA-F:]+\]?$/.test(hostname);
-  
+
   if (isIPAddress) {
     throw new Error(
       `Cannot use NFC with IP address (${hostname}). ` +
       `Use ngrok for mobile testing: npx ngrok http 3001`
     );
   }
-  
+
   return hostname;
 };
 
@@ -92,16 +95,28 @@ export const getCardData = async (): Promise<NFCCardData> => {
       name: errorObj.name,
       stack: errorObj.stack?.split('\n').slice(0, 3).join('\n')
     });
-    
-    // Check for common errors
-    if (errorObj.message?.includes('NotAllowedError') || errorObj.message?.includes("device can't be used")) {
-      throw new Error(
-        'NFC reader not available. Desktop users: Install HaLo Bridge with USB NFC reader. ' +
-        'Mobile users: Use Android Chrome with NFC enabled.'
-      );
+
+    // Simple error handling: Mobile users vs Desktop users
+    if (errorObj.message?.includes('NotAllowedError') ||
+        errorObj.message?.includes("device can't be used") ||
+        errorObj.message?.includes('not supported')) {
+
+      if (isMobile()) {
+        // On mobile: recommend Chrome/Safari or refresh
+        throw new Error(
+          'NFC_BROWSER_UNSUPPORTED: Use Chrome or Safari on mobile for NFC support. ' +
+          'If you\'re already using a compatible browser, try refreshing the page.'
+        );
+      } else {
+        // On desktop: direct to mobile
+        throw new Error(
+          'NFC_DESKTOP_UNSUPPORTED: Please use Chrome or Safari on your mobile device for NFC support.'
+        );
+      }
     }
 
-    throw new Error('Failed to read NFC card. Please ensure NFC is enabled and try again.');
+    // Generic fallback error
+    throw new Error('NFC_CARD_READ_FAILED: Failed to read NFC card. Please ensure your card is properly positioned and try again.');
   }
 };
 
