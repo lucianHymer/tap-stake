@@ -125,7 +125,7 @@ export function EIP7702Relayed() {
 
       const relayPayload = {
         authorization: {
-          contractAddress: authorization.address, // viem returns 'address' not 'contractAddress'
+          contractAddress: authorization.contractAddress,
           chainId: authorization.chainId,
           nonce: authorization.nonce.toString(),
           r: authorization.r,
