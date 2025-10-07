@@ -28,6 +28,9 @@ class NFCResource {
 
   private static async connect(): Promise<NFCConnection> {
     try {
+      // Reset any previous connection state before first read
+      this.reset();
+
       // Delay to ensure WebAuthn context is ready and prevent premature errors
       // This gives the NFC SDK time to initialize and prevents showing errors
       // before the user has had a chance to interact with the page
