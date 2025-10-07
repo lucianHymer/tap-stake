@@ -5,10 +5,14 @@ const LOG_ENDPOINT = '/api/log';
 const LOG_LEVELS = ['log', 'warn', 'error', 'info', 'debug'] as const;
 type LogLevel = typeof LOG_LEVELS[number];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ConsoleMethod = (...args: any[]) => void;
+
 // Store original console methods
-const originalConsole: Record<LogLevel, Function> = {} as any;
+const originalConsole: Partial<Record<LogLevel, ConsoleMethod>> = {};
 
 // Format log arguments for display
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function formatArgs(args: any[]): string {
   return args.map(arg => {
     if (typeof arg === 'object') {
@@ -24,6 +28,7 @@ function formatArgs(args: any[]): string {
 }
 
 // Send log to server
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendLogToServer(level: LogLevel, args: any[]) {
   try {
     const message = formatArgs(args);
@@ -61,9 +66,10 @@ export function initializeServerLogging() {
   LOG_LEVELS.forEach(level => {
     originalConsole[level] = console[level];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (console as any)[level] = function(...args: any[]) {
       // Call original console method
-      originalConsole[level].apply(console, args);
+      originalConsole[level]?.apply(console, args);
 
       // Send to server
       sendLogToServer(level, args);
@@ -92,6 +98,7 @@ export function initializeServerLogging() {
 export function disableServerLogging() {
   LOG_LEVELS.forEach(level => {
     if (originalConsole[level]) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (console as any)[level] = originalConsole[level];
     }
   });

@@ -2,17 +2,28 @@ import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
 import {
   keccak256,
   serializeTransaction,
-  type Hex
+  type Hex,
+  type TransactionSerializable
 } from 'viem';
 import {
   hashAuthorization,
   recoverAuthorizationAddress,
-  verifyAuthorization
+  verifyAuthorization,
+  type Authorization
 } from 'viem/experimental';
 
 export interface NFCCardData {
   address: `0x${string}`;
   publicKey: string;
+}
+
+interface HaloSignCommand {
+  name: 'sign';
+  keyNo: number;
+  rpId: string;
+  digest?: string;
+  message?: string | Hex;
+  format?: 'text' | 'hex';
 }
 
 // Helper function to get valid RP ID for WebAuthn
@@ -74,28 +85,29 @@ export const getCardData = async (): Promise<NFCCardData> => {
     });
 
     return { address, publicKey };
-  } catch (error: any) {
+  } catch (error) {
+    const errorObj = error instanceof Error ? error : new Error(String(error));
     console.error('📱 NFC: Failed to get card data:', {
-      message: error.message,
-      name: error.name,
-      stack: error.stack?.split('\n').slice(0, 3).join('\n')
+      message: errorObj.message,
+      name: errorObj.name,
+      stack: errorObj.stack?.split('\n').slice(0, 3).join('\n')
     });
     
     // Check for common errors
-    if (error.message?.includes('NotAllowedError') || error.message?.includes("device can't be used")) {
+    if (errorObj.message?.includes('NotAllowedError') || errorObj.message?.includes("device can't be used")) {
       throw new Error(
         'NFC reader not available. Desktop users: Install HaLo Bridge with USB NFC reader. ' +
         'Mobile users: Use Android Chrome with NFC enabled.'
       );
     }
-    
+
     throw new Error('Failed to read NFC card. Please ensure NFC is enabled and try again.');
   }
 };
 
 export const signWithNFC = async (message: string | Hex, isRawDigest: boolean = false): Promise<Hex> => {
   try {
-    const command: any = {
+    const command: HaloSignCommand = {
       name: 'sign',
       keyNo: 1,
       rpId: getRpId()
@@ -138,14 +150,15 @@ export const signWithNFC = async (message: string | Hex, isRawDigest: boolean = 
     }
 
     return result.signature.ether as Hex;
-  } catch (error: any) {
+  } catch (error) {
     console.error('NFC signing failed - Full Error:', error);
 
+    const errorObj = error instanceof Error ? error : new Error(String(error));
     // Create detailed error message
     const errorDetails = {
-      message: error.message || 'Unknown error',
-      type: error.name || 'Error',
-      stack: error.stack?.split('\n').slice(0, 3).join(' | '),
+      message: errorObj.message || 'Unknown error',
+      type: errorObj.name || 'Error',
+      stack: errorObj.stack?.split('\n').slice(0, 3).join(' | '),
       command: isRawDigest ? 'digest' : 'message',
       rpId: window.location.hostname
     };
@@ -186,14 +199,14 @@ export const createNFCAccount = (address: `0x${string}`) => {
       const signature = await signWithNFC(messageToSign, isEIP7702);
       return signature;
     },
-    signTransaction: async (transaction: any) => {
+    signTransaction: async (transaction: TransactionSerializable) => {
       console.log('NFC signTransaction called with:', {
         to: transaction.to,
         from: address,
         value: transaction.value?.toString(),
-        data: transaction.data?.slice(0, 10) + '...',
+        data: typeof transaction.data === 'string' ? transaction.data.slice(0, 10) + '...' : transaction.data,
         nonce: transaction.nonce,
-        gasLimit: transaction.gasLimit?.toString(),
+        gas: transaction.gas?.toString(),
         chainId: transaction.chainId
       });
 
@@ -226,7 +239,7 @@ export const createNFCAccount = (address: `0x${string}`) => {
     signTypedData: async () => {
       throw new Error('Typed data signing not yet implemented');
     },
-    signAuthorization: async (authorization: any) => {
+    signAuthorization: async (authorization: Authorization) => {
       console.log('📱 NFC: signAuthorization called with:', authorization);
 
       // Use viem's hashAuthorization to get the proper hash

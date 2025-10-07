@@ -63,9 +63,8 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
 
       // Sign EIP-7702 authorization
       console.log('⚔️ DemonSlayer: Requesting authorization signature...');
-      // @ts-ignore - TypeScript doesn't know about signAuthorization yet
       const authorization = await account.signAuthorization({
-        contractAddress: CONTRACTS.stakerWallet,
+        address: CONTRACTS.stakerWallet,
         chainId: optimismSepolia.id,
         nonce: txNonce,
       });
@@ -75,7 +74,7 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
       console.log('⚔️ DemonSlayer: Sending to relayer...');
       const relayPayload = {
         authorization: {
-          contractAddress: authorization.contractAddress,
+          contractAddress: authorization.address,
           chainId: authorization.chainId,
           nonce: authorization.nonce.toString(),
           r: authorization.r,
@@ -131,9 +130,10 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
           setShowVictory(true);
         }, 1000);
       }, 300);
-    } catch (err: any) {
+    } catch (err) {
       console.error('⚔️ DemonSlayer: Stake failed:', err);
-      setError(err.message || 'Failed to stake');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to stake';
+      setError(errorMessage);
       setStakeResult(null);
     } finally {
       setIsLoading(false);
