@@ -32,51 +32,18 @@ export class NFCErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
-  private parseErrorMessage(errorMessage: string): { title: string; message: string; category: string } {
-    // Parse error codes from nfc.ts error messages
-    if (errorMessage.includes('NFC_DESKTOP_UNSUPPORTED')) {
+  private parseErrorMessage(errorMessage: string): { title: string; message: string } {
+    // Extract the user-friendly message after the error code
+    const colonIndex = errorMessage.indexOf(':');
+    if (colonIndex !== -1) {
       return {
-        category: 'desktop',
-        title: 'DESKTOP DETECTED',
-        message: 'Desktop browsers require HaLo Bridge with a USB NFC reader. Visit halo.arx.org/bridge for installation instructions.'
-      };
-    }
-
-    if (errorMessage.includes('NFC_BROWSER_UNSUPPORTED')) {
-      return {
-        category: 'browser',
-        title: 'INCOMPATIBLE BROWSER',
-        message: 'Use Chrome or Safari on mobile for NFC support. If you\'re already using a compatible browser, try refreshing the page.'
-      };
-    }
-
-    if (errorMessage.includes('NFC_IOS_LIMITED')) {
-      return {
-        category: 'ios',
-        title: 'iOS LIMITATIONS',
-        message: 'iOS has limited Web NFC support. Ensure NFC is enabled in Settings and try using Safari.'
-      };
-    }
-
-    if (errorMessage.includes('NFC_DISABLED')) {
-      return {
-        category: 'disabled',
-        title: 'NFC DISABLED',
-        message: 'NFC may be disabled on your device. Enable NFC in your device settings and try again.'
-      };
-    }
-
-    if (errorMessage.includes('NFC_CARD_READ_FAILED')) {
-      return {
-        category: 'card',
-        title: 'CARD READ FAILED',
-        message: 'Failed to read NFC card. Please ensure your card is properly positioned and try again.'
+        title: 'CONNECTION FAILED',
+        message: errorMessage.substring(colonIndex + 1).trim()
       };
     }
 
     // Fallback for other errors
     return {
-      category: 'unknown',
       title: 'CONNECTION FAILED',
       message: 'An unexpected error occurred. Please try again or check the technical details below.'
     };

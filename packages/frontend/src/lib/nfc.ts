@@ -26,26 +26,8 @@ interface HaloSignCommand {
   format?: 'text' | 'hex';
 }
 
-// Browser detection utilities
-export const detectBrowser = () => {
-  const ua = navigator.userAgent;
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
-  const isChrome = /Chrome/i.test(ua) && !/Edg/i.test(ua);
-  const isSafari = /Safari/i.test(ua) && !/Chrome/i.test(ua);
-  const isAndroid = /Android/i.test(ua);
-  const isIOS = /iPhone|iPad|iPod/i.test(ua);
-
-  return {
-    isMobile,
-    isChrome,
-    isSafari,
-    isAndroid,
-    isIOS,
-    isMobileChrome: isMobile && isChrome,
-    isMobileSafari: isMobile && isSafari,
-    isCompatible: (isMobile && isChrome) || (isMobile && isSafari)
-  };
-};
+// Simple mobile detection
+const isMobile = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 // Helper function to get valid RP ID for WebAuthn
 const getRpId = () => {
@@ -114,21 +96,19 @@ export const getCardData = async (): Promise<NFCCardData> => {
       stack: errorObj.stack?.split('\n').slice(0, 3).join('\n')
     });
 
-    const browser = detectBrowser();
-
-    // Simplified error handling: Mobile users vs Desktop users
+    // Simple error handling: Mobile users vs Desktop users
     if (errorObj.message?.includes('NotAllowedError') ||
         errorObj.message?.includes("device can't be used") ||
         errorObj.message?.includes('not supported')) {
 
-      if (browser.isMobile) {
+      if (isMobile()) {
         // On mobile: recommend Chrome/Safari or refresh
         throw new Error(
           'NFC_BROWSER_UNSUPPORTED: Use Chrome or Safari on mobile for NFC support. ' +
           'If you\'re already using a compatible browser, try refreshing the page.'
         );
       } else {
-        // On desktop: recommend using mobile instead
+        // On desktop: direct to mobile
         throw new Error(
           'NFC_DESKTOP_UNSUPPORTED: Please use Chrome or Safari on your mobile device for NFC support.'
         );
