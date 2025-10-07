@@ -13,6 +13,7 @@ export interface Env {
   PRIVATE_KEY: string;
   RPC_URL: string;
   CHAIN_ID: string;
+  ALLOWED_CONTRACT_ADDRESS: string;
   ENVIRONMENT?: string;
 }
 
@@ -110,6 +111,23 @@ export default {
           }),
           {
             status: 400,
+            headers: corsHeaders
+          }
+        );
+      }
+
+      // Validate authorization contract address matches allowed address
+      const allowedAddress = env.ALLOWED_CONTRACT_ADDRESS.toLowerCase() as Address;
+      const authAddress = body.authorization.address.toLowerCase() as Address;
+      if (authAddress !== allowedAddress) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Contract address not allowed',
+            details: `Authorization contract address ${body.authorization.address} does not match allowed address ${env.ALLOWED_CONTRACT_ADDRESS}`
+          }),
+          {
+            status: 403,
             headers: corsHeaders
           }
         );

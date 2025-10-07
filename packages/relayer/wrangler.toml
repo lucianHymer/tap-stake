@@ -6,6 +6,7 @@ compatibility_date = "2024-12-01"
 # PRIVATE_KEY - The relayer's private key
 # RPC_URL - The RPC endpoint URL
 # CHAIN_ID - The chain ID (e.g. 11155420 for OP Sepolia)
+# ALLOWED_CONTRACT_ADDRESS - The contract address to allow for delegated execution
 
 [vars]
 # Non-sensitive config can go here
