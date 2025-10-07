@@ -26,20 +26,41 @@ interface HaloSignCommand {
   format?: 'text' | 'hex';
 }
 
+// Browser detection utilities
+export const detectBrowser = () => {
+  const ua = navigator.userAgent;
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+  const isChrome = /Chrome/i.test(ua) && !/Edg/i.test(ua);
+  const isSafari = /Safari/i.test(ua) && !/Chrome/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+  return {
+    isMobile,
+    isChrome,
+    isSafari,
+    isAndroid,
+    isIOS,
+    isMobileChrome: isMobile && isChrome,
+    isMobileSafari: isMobile && isSafari,
+    isCompatible: (isMobile && isChrome) || (isMobile && isSafari)
+  };
+};
+
 // Helper function to get valid RP ID for WebAuthn
 const getRpId = () => {
   const hostname = window.location.hostname;
   // WebAuthn doesn't support IP addresses as RP ID
   // Check if hostname is an IP address (IPv4 or IPv6)
   const isIPAddress = /^(\d{1,3}\.){3}\d{1,3}$|^\[?[0-9a-fA-F:]+\]?$/.test(hostname);
-  
+
   if (isIPAddress) {
     throw new Error(
       `Cannot use NFC with IP address (${hostname}). ` +
       `Use ngrok for mobile testing: npx ngrok http 3001`
     );
   }
-  
+
   return hostname;
 };
 
@@ -92,16 +113,54 @@ export const getCardData = async (): Promise<NFCCardData> => {
       name: errorObj.name,
       stack: errorObj.stack?.split('\n').slice(0, 3).join('\n')
     });
-    
-    // Check for common errors
-    if (errorObj.message?.includes('NotAllowedError') || errorObj.message?.includes("device can't be used")) {
+
+    const browser = detectBrowser();
+
+    // Check for common errors and provide browser-specific guidance
+    if (errorObj.message?.includes('NotAllowedError') ||
+        errorObj.message?.includes("device can't be used") ||
+        errorObj.message?.includes('not supported')) {
+
+      // Desktop users need HaLo Bridge
+      if (!browser.isMobile) {
+        throw new Error(
+          'NFC_DESKTOP_UNSUPPORTED: Desktop browsers require HaLo Bridge with USB NFC reader. ' +
+          'Visit https://halo.arx.org/bridge for installation instructions.'
+        );
+      }
+
+      // Mobile users on incompatible browsers
+      if (browser.isMobile && !browser.isCompatible) {
+        throw new Error(
+          'NFC_BROWSER_UNSUPPORTED: Use Chrome or Safari on mobile for NFC support. ' +
+          'If you\'re already using a compatible browser, try refreshing the page.'
+        );
+      }
+
+      // iOS has limited NFC support
+      if (browser.isIOS) {
+        throw new Error(
+          'NFC_IOS_LIMITED: iOS has limited Web NFC support. ' +
+          'Ensure NFC is enabled in Settings and try using Safari.'
+        );
+      }
+
+      // Android Chrome but NFC might be disabled
       throw new Error(
-        'NFC reader not available. Desktop users: Install HaLo Bridge with USB NFC reader. ' +
-        'Mobile users: Use Android Chrome with NFC enabled.'
+        'NFC_DISABLED: NFC may be disabled. ' +
+        'Enable NFC in your device settings and try again.'
       );
     }
 
-    throw new Error('Failed to read NFC card. Please ensure NFC is enabled and try again.');
+    // Generic error with browser context
+    if (!browser.isCompatible) {
+      throw new Error(
+        'NFC_BROWSER_UNSUPPORTED: Use Chrome or Safari on mobile. ' +
+        'Desktop users need HaLo Bridge with USB NFC reader.'
+      );
+    }
+
+    throw new Error('NFC_CARD_READ_FAILED: Failed to read NFC card. Please ensure your card is properly positioned and try again.');
   }
 };
 

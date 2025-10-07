@@ -28,17 +28,18 @@ class NFCResource {
 
   private static async connect(): Promise<NFCConnection> {
     try {
-      // Small delay to ensure WebAuthn context is ready
-      // This prevents the NFC card from being read as a regular tag
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      // Delay to ensure WebAuthn context is ready and prevent premature errors
+      // This gives the NFC SDK time to initialize and prevents showing errors
+      // before the user has had a chance to interact with the page
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Get card data - this will wait for NFC tap
       const cardData = await getCardData();
       const address = cardData.address;
-      
+
       // Create the NFC account
       const account = createNFCAccount(address);
-      
+
       this.result = { address, account };
       return this.result;
     } catch (error) {
