@@ -98,7 +98,7 @@ export function Demo() {
       const authorization = await walletClient.signAuthorization({
         contractAddress: CONTRACTS.stakerWallet,
         chainId: optimismSepolia.id,
-        nonce: BigInt(txNonce),
+        nonce: txNonce,
       });
       console.log('🎮 Demo: Authorization signed:', authorization);
 

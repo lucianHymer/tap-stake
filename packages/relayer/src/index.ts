@@ -137,8 +137,8 @@ export default {
         address: body.authorization.contractAddress, // viem expects 'address' field
         chainId: authChainId,
         nonce: typeof body.authorization.nonce === 'string'
-          ? parseInt(body.authorization.nonce)
-          : Number(body.authorization.nonce), // viem expects number not bigint
+          ? BigInt(body.authorization.nonce)
+          : BigInt(body.authorization.nonce), // Convert to BigInt for viem
         r: body.authorization.r,
         s: body.authorization.s,
         yParity: body.authorization.yParity,
