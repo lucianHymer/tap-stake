@@ -9,7 +9,7 @@ export default defineConfig({
   base: "/tap-stake/",
   plugins: [
     react(),
-    basicSsl(),
+    ...(process.env.DISABLE_SSL !== 'true' ? [basicSsl()] : []),
     serverLogger(), // Add server logging plugin
     nodePolyfills({
       globals: {

@@ -12,7 +12,6 @@ body {
     radial-gradient(circle at 20% 50%, #1a0000 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, #0a0000 0%, transparent 50%),
     radial-gradient(circle at 40% 20%, #200000 0%, transparent 50%);
-  min-height: 100vh;
   color: #fff;
   font-family: 'Courier New', monospace;
   overflow-x: hidden;
@@ -47,17 +46,15 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-shadow: 
-    0 0 10px #ff0000,
-    0 0 20px #ff0000,
-    0 0 30px #ff0000,
-    0 0 40px #990000;
+  text-shadow:
+    0 0 8px rgba(255, 0, 0, 0.6),
+    0 0 15px rgba(255, 0, 0, 0.4);
   animation: bloodPulse 2s ease-in-out infinite;
 }
 
 .title span {
   display: block;
-  background: linear-gradient(180deg, #fff 0%, #ff0000 50%, #660000 100%);
+  background: linear-gradient(180deg, #ffcccc 0%, #ff0000 50%, #660000 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -65,18 +62,14 @@ body {
 
 @keyframes bloodPulse {
   0%, 100% {
-    text-shadow: 
-      0 0 10px #ff0000,
-      0 0 20px #ff0000,
-      0 0 30px #ff0000,
-      0 0 40px #990000;
+    text-shadow:
+      0 0 8px rgba(255, 0, 0, 0.6),
+      0 0 15px rgba(255, 0, 0, 0.4);
   }
   50% {
-    text-shadow: 
-      0 0 20px #ff0000,
-      0 0 30px #ff0000,
-      0 0 40px #ff0000,
-      0 0 50px #cc0000;
+    text-shadow:
+      0 0 12px rgba(255, 0, 0, 0.7),
+      0 0 20px rgba(255, 0, 0, 0.5);
   }
 }
 
@@ -376,16 +369,8 @@ body {
 }
 
 @media (max-width: 768px) {
-  .title {
-    font-size: 4rem;
-  }
-  
   .moloch-image-container {
     width: 300px;
     height: 300px;
-  }
-  
-  .demon-text {
-    font-size: 1rem;
   }
 }

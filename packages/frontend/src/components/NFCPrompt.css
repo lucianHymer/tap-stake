@@ -1,78 +1,33 @@
 .nfc-prompt-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at center, #1a0000 0%, #000000 100%);
-  animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  text-align: center;
+  padding: 8px 2px;
+  box-sizing: border-box;
 }
 
 .nfc-prompt-content {
-  text-align: center;
-  padding: 2rem;
-}
-
-.nfc-prompt-content .title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 6rem;
-  line-height: 0.9;
-  letter-spacing: 0.1em;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  text-shadow: 
-    0 0 10px #ff0000,
-    0 0 20px #ff0000,
-    0 0 30px #ff0000,
-    0 0 40px #990000;
-  animation: bloodPulse 2s ease-in-out infinite;
-  margin-bottom: 3rem;
+  justify-content: space-around;
+  gap: 10px;
+  max-height: 100%;
 }
 
-.nfc-prompt-content .title span {
-  display: block;
-  background: linear-gradient(180deg, #fff 0%, #ff0000 50%, #660000 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-@keyframes bloodPulse {
-  0%, 100% {
-    text-shadow: 
-      0 0 10px #ff0000,
-      0 0 20px #ff0000,
-      0 0 30px #ff0000,
-      0 0 40px #990000;
-  }
-  50% {
-    text-shadow: 
-      0 0 20px #ff0000,
-      0 0 30px #ff0000,
-      0 0 40px #ff0000,
-      0 0 50px #cc0000;
-  }
+.nfc-prompt-title {
+  width: 90%;
+  max-width: 320px;
 }
 
 .nfc-icon-container {
   position: relative;
   width: 200px;
   height: 200px;
-  margin: 0 auto 3rem;
 }
 
 .nfc-icon {
@@ -124,7 +79,6 @@
 .nfc-prompt-text {
   color: #aa0000;
   font-size: 1.2rem;
-  margin-bottom: 2rem;
   font-family: 'Courier New', monospace;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -158,10 +112,4 @@
     transform: scale(1.2);
     opacity: 1;
   }
-}
-
-.future-escape-hatch {
-  margin-top: 4rem;
-  min-height: 2rem;
-  /* Reserved space for future "Connect differently" link */
 }

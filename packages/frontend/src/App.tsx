@@ -1,5 +1,5 @@
 import { Suspense, useState } from 'react';
-import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NFCErrorBoundary } from './components/NFCErrorBoundary';
@@ -50,35 +50,10 @@ function App() {
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <HashRouter>
-          <div>
-            <nav style={{
-              background: 'rgba(0,0,0,0.9)',
-              padding: '10px',
-              borderBottom: '2px solid #ff0000',
-              marginBottom: '20px'
-            }}>
-              <Link to="/" style={{
-                color: '#ff0000',
-                textDecoration: 'none',
-                marginRight: '20px',
-                fontWeight: 'bold'
-              }}>
-                NFC DEMON SLAYER
-              </Link>
-              <Link to="/admin" style={{
-                color: '#888',
-                textDecoration: 'none',
-                fontWeight: 'bold'
-              }}>
-                ADMIN
-              </Link>
-            </nav>
-
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/admin" element={<AdminPage />} />
-            </Routes>
-          </div>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/admin" element={<AdminPage />} />
+          </Routes>
         </HashRouter>
       </QueryClientProvider>
     </WagmiProvider>
