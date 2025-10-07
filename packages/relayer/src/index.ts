@@ -21,7 +21,7 @@ export interface Env {
 
 interface RelayRequest {
   authorization: {
-    contractAddress: Address;
+    address: Address;
     chainId: number;
     nonce: bigint | string;
     r: Hex;
@@ -134,7 +134,7 @@ export default {
 
       // Convert string values to proper types
       const authorization = {
-        address: body.authorization.contractAddress, // viem expects 'address' field
+        address: body.authorization.address,
         chainId: authChainId,
         nonce: typeof body.authorization.nonce === 'string'
           ? BigInt(body.authorization.nonce)

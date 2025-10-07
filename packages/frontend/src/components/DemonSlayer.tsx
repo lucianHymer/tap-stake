@@ -74,7 +74,7 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
       console.log('⚔️ DemonSlayer: Sending to relayer...');
       const relayPayload = {
         authorization: {
-          contractAddress: authorization.address,
+          address: authorization.address,
           chainId: authorization.chainId,
           nonce: authorization.nonce.toString(),
           r: authorization.r,
