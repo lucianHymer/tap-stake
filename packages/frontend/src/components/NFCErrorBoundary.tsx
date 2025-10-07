@@ -66,13 +66,6 @@ export class NFCErrorBoundary extends Component<Props, State> {
               {parsedError.message}
             </p>
 
-            <div className="nfc-error-details">
-              <details>
-                <summary>Technical Details</summary>
-                <pre>{this.state.error?.message}</pre>
-              </details>
-            </div>
-
             <button className="retry-button" onClick={this.handleRetry}>
               TRY AGAIN
             </button>
