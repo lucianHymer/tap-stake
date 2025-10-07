@@ -16,7 +16,7 @@ contract StakerWallet {
     address public immutable TOKEN_ADDRESS;
     address public immutable STAKE_CONTRACT;
     address public immutable RELAYER;
-    uint256 public constant MAX_STAKE_PER_TX = 1000e18; // Reasonable limit
+    uint256 public constant MAX_STAKE_PER_TX = 100e18;
 
     error OnlyRelayer();
     error AmountTooHigh();
@@ -52,9 +52,6 @@ contract StakerWallet {
 
         // Execute stake
         IStake(STAKE_CONTRACT).stake(amount);
-
-        // Clear approval for extra safety
-        IERC20(TOKEN_ADDRESS).approve(STAKE_CONTRACT, 0);
 
         emit StakeExecuted(address(this), amount);
     }
