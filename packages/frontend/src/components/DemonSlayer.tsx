@@ -1,15 +1,23 @@
 import { useState } from 'react';
-import { recoverMessageAddress, type Hex } from 'viem';
+import { createPublicClient, http, parseEther, type Address } from 'viem';
+import { optimismSepolia } from 'viem/chains';
 import moloch1 from '../assets/images/moloch1.png';
 import moloch2 from '../assets/images/moloch2.png';
 import type { NFCConnection } from '../lib/nfcResource';
 
-interface SignatureResult {
-  message: string;
-  signature: Hex;
-  signerAddress: `0x${string}`;
-  recoveredAddress?: `0x${string}`;
-  verified: boolean;
+// Deployed contract addresses
+const CONTRACTS = {
+  testToken: "0xC7480B7CAaDc8Aaa8b0ddD0552EC5F77A464F649" as Address,
+  stake: "0x334559433296D9Dd9a861c200aFB1FEAF77388AA" as Address,
+  stakerWallet: "0x39fe042d517031a812aBf6f2e15a2615A6c08f3f" as Address,
+};
+
+const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || "http://localhost:8787";
+
+interface StakeResult {
+  txHash: string;
+  blockNumber: bigint;
+  gasUsed: bigint;
 }
 
 interface DemonSlayerProps {
@@ -19,73 +27,121 @@ interface DemonSlayerProps {
 export function DemonSlayer({ connection }: DemonSlayerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [signatureResult, setSignatureResult] = useState<SignatureResult | null>(null);
+  const [stakeResult, setStakeResult] = useState<StakeResult | null>(null);
   const [isStaked, setIsStaked] = useState(false);
   const [showVictory, setShowVictory] = useState(false);
 
+  const publicClient = createPublicClient({
+    chain: optimismSepolia,
+    transport: http(),
+  });
+
   const handleMolochClick = async () => {
-    if (!signatureResult) {
-      await handleSignMessage();
+    if (!stakeResult) {
+      await handleStake();
     }
   };
 
-  const handleSignMessage = async () => {
+  const handleStake = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      const message = "I SLAY MOLOCH, DEMON OF DIS-COORDINATION!";
-      // The walletClient.account is our NFC account with signMessage method
+      console.log('⚔️ DemonSlayer: Beginning stake ritual...');
       const account = connection.account;
-      if (!account || !('signMessage' in account)) {
-        throw new Error('Invalid account');
+      if (!account || !('signAuthorization' in account)) {
+        throw new Error('Invalid NFC account');
       }
-      
-      const signature = await account.signMessage({ message });
-      
-      const recoveredAddress = await recoverMessageAddress({
-        message,
-        signature
+
+      // Get current transaction nonce for EIP-7702 authorization
+      const txNonce = await publicClient.getTransactionCount({
+        address: connection.address,
       });
-      
-      const verified = recoveredAddress.toLowerCase() === connection.address.toLowerCase();
-      
-      setSignatureResult({
-        message,
-        signature,
-        signerAddress: connection.address as `0x${string}`,
-        recoveredAddress,
-        verified
+      console.log('⚔️ DemonSlayer: Current nonce:', txNonce);
+
+      const stakeAmount = parseEther("100");
+
+      // Sign EIP-7702 authorization
+      console.log('⚔️ DemonSlayer: Requesting authorization signature...');
+      // @ts-ignore - TypeScript doesn't know about signAuthorization yet
+      const authorization = await account.signAuthorization({
+        contractAddress: CONTRACTS.stakerWallet,
+        chainId: optimismSepolia.id,
+        nonce: txNonce,
       });
-      
+      console.log('⚔️ DemonSlayer: Authorization signed:', authorization);
+
+      // Send to relayer
+      console.log('⚔️ DemonSlayer: Sending to relayer...');
+      const relayPayload = {
+        authorization: {
+          contractAddress: authorization.contractAddress,
+          chainId: authorization.chainId,
+          nonce: authorization.nonce.toString(),
+          r: authorization.r,
+          s: authorization.s,
+          yParity: authorization.yParity,
+        },
+        amount: stakeAmount.toString(),
+      };
+
+      const response = await fetch(RELAYER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(relayPayload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        console.error('⚔️ DemonSlayer: Relay failed:', result);
+        throw new Error(result.error || 'Relay failed');
+      }
+
+      console.log('⚔️ DemonSlayer: Transaction submitted! Hash:', result.txHash);
+
+      // Wait for confirmation
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: result.txHash
+      });
+      console.log('⚔️ DemonSlayer: Transaction confirmed!', {
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString()
+      });
+
+      setStakeResult({
+        txHash: result.txHash,
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed,
+      });
+
       setError(null);
-      
-      // If verified, trigger the stake animation after 300ms
-      if (verified) {
+
+      // Trigger victory animation
+      setTimeout(() => {
+        setIsStaked(true);
+
+        // Play Wilhelm scream
+        const audio = new Audio('https://upload.wikimedia.org/wikipedia/commons/d/d9/Wilhelm_Scream.ogg');
+        audio.volume = 0.5;
+        audio.play().catch(err => console.log('Could not play Wilhelm scream:', err));
+
+        // Show victory text after scream
         setTimeout(() => {
-          setIsStaked(true);
-          
-          // Play Wilhelm scream
-          const audio = new Audio('https://upload.wikimedia.org/wikipedia/commons/d/d9/Wilhelm_Scream.ogg');
-          audio.volume = 0.5; // Not too loud
-          audio.play().catch(err => console.log('Could not play Wilhelm scream:', err));
-          
-          // Show victory text after scream (about 1 second for the scream to play)
-          setTimeout(() => {
-            setShowVictory(true);
-          }, 1000);
-        }, 300);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign message');
-      setSignatureResult(null);
+          setShowVictory(true);
+        }, 1000);
+      }, 300);
+    } catch (err: any) {
+      console.error('⚔️ DemonSlayer: Stake failed:', err);
+      setError(err.message || 'Failed to stake');
+      setStakeResult(null);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClear = () => {
-    setSignatureResult(null);
+    setStakeResult(null);
     setError(null);
     setIsStaked(false);
     setShowVictory(false);
@@ -114,11 +170,11 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
           </div>
           
           <div className="demon-status">
-            {!signatureResult && !isLoading && (
+            {!stakeResult && !isLoading && (
               <p className="demon-text">TAP THE STAKE TO SLAY MOLOCH</p>
             )}
             {isLoading && (
-              <p className="demon-text" style={{color: '#ffaa00'}}>AWAITING NFC SIGNATURE...</p>
+              <p className="demon-text" style={{color: '#ffaa00'}}>PERFORMING BLOOD RITUAL...</p>
             )}
             {showVictory && (
               <p className="demon-text victory">MOLOCH IS SLAIN! COORDINATION RESTORED!</p>
@@ -139,29 +195,29 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
           </div>
         </div>
 
-        {signatureResult && (
+        {stakeResult && (
           <div className="tech-section">
             <div className="tech-card">
-              <div className="tech-label">INCANTATION</div>
-              <p className="incantation">{signatureResult.message}</p>
+              <div className="tech-label">VICTORY RECORD</div>
+              <a
+                href={`https://sepolia-optimism.etherscan.io/tx/${stakeResult.txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#00ffff', wordBreak: 'break-all' }}
+              >
+                {stakeResult.txHash}
+              </a>
             </div>
-            
+
             <div className="tech-card">
-              <div className="tech-label">BLOOD SEAL</div>
-              <code className="signature-display">{signatureResult.signature}</code>
+              <div className="tech-label">BLOCK SEALED</div>
+              <code className="address-display">{stakeResult.blockNumber.toString()}</code>
             </div>
-            
-            {signatureResult.recoveredAddress && (
-              <div className="tech-card">
-                <div className="tech-label">VERIFIED SLAYER</div>
-                <code className="address-display">{signatureResult.recoveredAddress}</code>
-              </div>
-            )}
-            
-            <div className={`verification-ritual ${signatureResult.verified ? 'sanctified' : 'corrupted'}`}>
-              {signatureResult.verified ? '✓ RITUAL SANCTIFIED' : '✗ RITUAL CORRUPTED'}
+
+            <div className="verification-ritual sanctified">
+              ✓ MOLOCH BANISHED TO THE BLOCKCHAIN
             </div>
-            
+
             <button onClick={handleClear} className="btn-demon">
               RESURRECT MOLOCH (START OVER)
             </button>
