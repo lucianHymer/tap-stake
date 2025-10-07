@@ -23,6 +23,9 @@ wrangler secret put RPC_URL
 
 # Chain ID (e.g., 11155420 for OP Sepolia)
 wrangler secret put CHAIN_ID
+
+# Allowed contract address for delegated execution (e.g., 0x...)
+wrangler secret put ALLOWED_CONTRACT_ADDRESS
 ```
 
 ### 3. Local development
@@ -89,8 +92,12 @@ Submit a transaction with an EIP-7702 authorization.
 
 ## Security Notes
 
-This is a minimal implementation. Production deployments should add:
-- Access control (allowlist of addresses)
+Security features:
+- **Contract address restriction**: Only proxies approvals for a single allowed contract address
+- **Chain ID validation**: Ensures authorization matches the relayer's configured chain
+
+Production deployments should also add:
+- Access control (allowlist of user addresses)
 - Rate limiting
 - Gas price management
 - Nonce management for concurrent requests
