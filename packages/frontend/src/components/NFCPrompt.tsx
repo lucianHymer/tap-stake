@@ -1,7 +1,12 @@
 import './NFCPrompt.css';
 import baphometImage from '../assets/images/baphomet.jpg';
 
-export function NFCPrompt() {
+interface NFCPromptProps {
+  onConnect: () => void;
+  connecting?: boolean;
+}
+
+export function NFCPrompt({ onConnect, connecting = false }: NFCPromptProps) {
   return (
     <div className="nfc-prompt-container">
       <div className="nfc-prompt-content">
@@ -9,36 +14,49 @@ export function NFCPrompt() {
           <span>TAP</span>
           <span>STAKE</span>
         </h1>
-        
+
         <div className="nfc-icon-container">
           <div className="nfc-icon">
-            <div className="nfc-pulse"></div>
-            <div className="nfc-pulse-delayed"></div>
-            <img 
-              src={baphometImage} 
-              alt="Baphomet" 
+            {connecting && (
+              <>
+                <div className="nfc-pulse"></div>
+                <div className="nfc-pulse-delayed"></div>
+              </>
+            )}
+            <img
+              src={baphometImage}
+              alt="Baphomet"
               className="nfc-symbol"
               style={{width: '120px', height: '120px', objectFit: 'contain', filter: 'invert(1)'}}
             />
           </div>
         </div>
-        
+
         <p className="nfc-prompt-text">
-          Hold your NFC card against your device to enter the demon-slaying realm
+          {connecting
+            ? 'Hold your NFC card against your device to enter the demon-slaying realm'
+            : 'Prepare to enter the demon-slaying realm'
+          }
         </p>
-        
-        <div className="nfc-prompt-waiting">
-          <span className="dot-1">.</span>
-          <span className="dot-2">.</span>
-          <span className="dot-3">.</span>
-        </div>
+
+        {connecting ? (
+          <div className="nfc-prompt-waiting">
+            <span className="dot-1">.</span>
+            <span className="dot-2">.</span>
+            <span className="dot-3">.</span>
+          </div>
+        ) : (
+          <button
+            onClick={onConnect}
+            className="retry-button"
+            style={{ marginTop: '2rem' }}
+          >
+            CONNECT NFC
+          </button>
+        )}
 
         <div className="future-escape-hatch">
           {/* Space reserved for future "Connect differently →" link */}
-          {/* Uncomment for testing without NFC: */}
-          {/* <button onClick={() => window.location.reload()} style={{marginTop: '2rem', opacity: 0.5}}>
-            Skip NFC (Dev Only)
-          </button> */}
         </div>
       </div>
     </div>

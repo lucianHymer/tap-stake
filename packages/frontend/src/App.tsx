@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -17,9 +17,15 @@ function AppWithNFC() {
 }
 
 function HomePage() {
+  const [startConnection, setStartConnection] = useState(false);
+
+  if (!startConnection) {
+    return <NFCPrompt onConnect={() => setStartConnection(true)} />;
+  }
+
   return (
     <NFCErrorBoundary>
-      <Suspense fallback={<NFCPrompt />}>
+      <Suspense fallback={<NFCPrompt onConnect={() => {}} connecting={true} />}>
         <AppWithNFC />
       </Suspense>
     </NFCErrorBoundary>
