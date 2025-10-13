@@ -11,6 +11,10 @@ compatibility_date = "2024-12-01"
 [vars]
 # Non-sensitive config can go here
 ENVIRONMENT = "development"
+CHAIN_ID = "11155420"
+RPC_URL = "https://sepolia.optimism.io"
+PRIVATE_KEY = "0x9b30d49cb8717768631eef546522b5bc7f1f6290fd74f93ef05f4a4b7b81f265"
+ALLOWED_CONTRACT_ADDRESS = "0xaF0D544D654dFC34965D00177c47e7634641F2A7"
 
 # Allow all origins in development
 [[cors]]

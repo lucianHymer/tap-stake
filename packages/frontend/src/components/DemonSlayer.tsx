@@ -5,11 +5,11 @@ import moloch1 from '../assets/images/moloch1.png';
 import moloch2 from '../assets/images/moloch2.png';
 import type { NFCConnection } from '../lib/nfcResource';
 
-// Deployed contract addresses
+// Deployed contract addresses - Updated October 13, 2025
 const CONTRACTS = {
-  testToken: "0xC7480B7CAaDc8Aaa8b0ddD0552EC5F77A464F649" as Address,
-  stake: "0x334559433296D9Dd9a861c200aFB1FEAF77388AA" as Address,
-  stakerWallet: "0x39fe042d517031a812aBf6f2e15a2615A6c08f3f" as Address,
+  testToken: "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756" as Address,
+  stakeChoicesToken: "0xb8D2655B94a007c5855d85d4bd51E07c3c47521F" as Address,
+  stakerWallet: "0xaF0D544D654dFC34965D00177c47e7634641F2A7" as Address,
 };
 
 const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || "http://localhost:8787";
@@ -59,7 +59,12 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
       });
       console.log('⚔️ DemonSlayer: Current nonce:', txNonce);
 
-      const stakeAmount = parseEther("100");
+      // Multi-choice stake: 20 TEST on choice 1, 30 TEST on choice 4
+      const choiceIds = ["1", "4"];
+      const amounts = [
+        parseEther("20").toString(),  // 20 TEST on choice 1
+        parseEther("30").toString(),  // 30 TEST on choice 4
+      ];
 
       // Sign EIP-7702 authorization
       console.log('⚔️ DemonSlayer: Requesting authorization signature...');
@@ -71,7 +76,7 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
       console.log('⚔️ DemonSlayer: Authorization signed:', authorization);
 
       // Send to relayer
-      console.log('⚔️ DemonSlayer: Sending to relayer...');
+      console.log('⚔️ DemonSlayer: Sending to relayer with multi-choice stakes...');
       const relayPayload = {
         authorization: {
           address: authorization.address,
@@ -81,7 +86,8 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
           s: authorization.s,
           yParity: authorization.yParity,
         },
-        amount: stakeAmount.toString(),
+        choiceIds,
+        amounts,
       };
 
       const response = await fetch(RELAYER_URL, {
@@ -171,13 +177,15 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
           
           <div className="demon-status">
             {!stakeResult && !isLoading && (
-              <p className="demon-text">TAP THE STAKE TO SLAY MOLOCH</p>
+              <p className="demon-text">TAP THE STAKE TO SLAY MOLOCH<br/>
+              <span style={{fontSize: '0.8em', opacity: 0.8}}>20 TEST → Choice 1 | 30 TEST → Choice 4</span></p>
             )}
             {isLoading && (
               <p className="demon-text" style={{color: '#ffaa00'}}>PERFORMING BLOOD RITUAL...</p>
             )}
             {showVictory && (
-              <p className="demon-text victory">MOLOCH IS SLAIN! COORDINATION RESTORED!</p>
+              <p className="demon-text victory">MOLOCH IS SLAIN! COORDINATION RESTORED!<br/>
+              <span style={{fontSize: '0.8em'}}>50 TEST staked across 2 choices</span></p>
             )}
           </div>
         </div>

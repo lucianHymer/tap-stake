@@ -26,7 +26,8 @@ interface RelayRequest {
     s: Hex;
     yParity: number;
   };
-  amount: string; // Amount to stake in wei - no signatures needed!
+  choiceIds: string[]; // Array of choice IDs (0-5)
+  amounts: string[]; // Array of amounts to stake in wei
 }
 
 interface RelayResponse {
@@ -35,6 +36,9 @@ interface RelayResponse {
   error?: string;
   details?: Record<string, unknown>;
 }
+
+// Constants for validation
+const MAX_CHOICES = 6; // Maximum number of choices per transaction
 
 // Helper to get chain config from chain ID
 function getChainConfig(chainId: number): typeof optimismSepolia {
@@ -80,12 +84,57 @@ export default {
       const body = await request.json() as RelayRequest;
 
       // Validate required fields
-      if (!body.authorization || !body.amount) {
+      if (!body.authorization || !body.choiceIds || !body.amounts) {
         return new Response(
           JSON.stringify({
             success: false,
             error: 'Missing required fields',
-            details: 'Request must include authorization and amount fields'
+            details: 'Request must include authorization, choiceIds, and amounts fields'
+          }),
+          {
+            status: 400,
+            headers: corsHeaders
+          }
+        );
+      }
+
+      // Validate arrays are same length
+      if (body.choiceIds.length !== body.amounts.length) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Array length mismatch',
+            details: `choiceIds length (${body.choiceIds.length}) must match amounts length (${body.amounts.length})`
+          }),
+          {
+            status: 400,
+            headers: corsHeaders
+          }
+        );
+      }
+
+      // Validate arrays are not empty
+      if (body.choiceIds.length === 0) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Empty arrays',
+            details: 'Must provide at least one choice to stake'
+          }),
+          {
+            status: 400,
+            headers: corsHeaders
+          }
+        );
+      }
+
+      // Validate max choices
+      if (body.choiceIds.length > MAX_CHOICES) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Too many choices',
+            details: `Maximum ${MAX_CHOICES} choices allowed, got ${body.choiceIds.length}`
           }),
           {
             status: 400,
@@ -142,23 +191,23 @@ export default {
       });
 
       // Convert string values to proper types
+      const nonceValue = typeof body.authorization.nonce === 'string'
+        ? parseInt(body.authorization.nonce)
+        : Number(body.authorization.nonce);
+
       const authorization = {
         address: body.authorization.address,
         chainId: authChainId,
-        nonce: typeof body.authorization.nonce === 'string'
-          ? BigInt(body.authorization.nonce)
-          : BigInt(body.authorization.nonce), // Convert to BigInt for viem
+        nonce: nonceValue,
         r: body.authorization.r,
         s: body.authorization.s,
         yParity: body.authorization.yParity,
       };
 
-
       // Verify the authorization was signed by the expected address
       // We recover the address from the authorization to ensure it matches what we expect
       let signerAddress: Address;
       try {
-        // @ts-expect-error - TypeScript doesn't know about EIP-7702 types yet
         signerAddress = await recoverAuthorizationAddress({
           authorization,
         });
@@ -187,16 +236,57 @@ export default {
         );
       }
 
-      // Parse and validate amount
-      const amount = BigInt(body.amount);
+      // Parse and validate choice IDs and amounts
+      const choiceIds: bigint[] = [];
+      const amounts: bigint[] = [];
       const MAX_STAKE_PER_TX = BigInt("1000000000000000000000"); // 1000 tokens
 
-      if (amount > MAX_STAKE_PER_TX) {
+      for (let i = 0; i < body.choiceIds.length; i++) {
+        const choiceId = BigInt(body.choiceIds[i]);
+        const amount = BigInt(body.amounts[i]);
+
+        // Validate choice ID is in range (0 to MAX_CHOICES-1)
+        if (choiceId >= MAX_CHOICES) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: 'Invalid choice ID',
+              details: `Choice ID ${choiceId} must be less than ${MAX_CHOICES} (valid range: 0-${MAX_CHOICES - 1})`
+            }),
+            {
+              status: 400,
+              headers: corsHeaders
+            }
+          );
+        }
+
+        // Validate amount is non-zero
+        if (amount === 0n) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: 'Invalid amount',
+              details: `Amount for choice ${choiceId} must be greater than 0`
+            }),
+            {
+              status: 400,
+              headers: corsHeaders
+            }
+          );
+        }
+
+        choiceIds.push(choiceId);
+        amounts.push(amount);
+      }
+
+      // Validate total amount
+      const totalAmount = amounts.reduce((sum, amt) => sum + amt, 0n);
+      if (totalAmount > MAX_STAKE_PER_TX) {
         return new Response(
           JSON.stringify({
             success: false,
-            error: 'Amount too high',
-            details: `Amount ${amount.toString()} exceeds maximum ${MAX_STAKE_PER_TX.toString()}`
+            error: 'Total amount too high',
+            details: `Total amount ${totalAmount.toString()} exceeds maximum ${MAX_STAKE_PER_TX.toString()}`
           }),
           {
             status: 400,
@@ -205,13 +295,14 @@ export default {
         );
       }
 
-      // Build the stake call data - simple!
+      // Build the addStakes call data
       const STAKER_WALLET_ABI = [
         {
-          name: "stake",
+          name: "addStakes",
           type: "function",
           inputs: [
-            { name: "amount", type: "uint256" }
+            { name: "choiceIds", type: "uint256[]" },
+            { name: "amounts", type: "uint256[]" }
           ],
           outputs: [],
         },
@@ -219,8 +310,8 @@ export default {
 
       const callData = encodeFunctionData({
         abi: STAKER_WALLET_ABI,
-        functionName: "stake",
-        args: [amount],
+        functionName: "addStakes",
+        args: [choiceIds, amounts],
       });
 
       if (env.ENVIRONMENT !== 'production') {
@@ -234,7 +325,6 @@ export default {
       }
 
       // Send the transaction with the authorization
-      // @ts-expect-error - TypeScript doesn't know about authorizationList yet
       const txHash = await walletClient.sendTransaction({
         account,
         to: signerAddress, // The EOA that will be delegated
@@ -259,7 +349,9 @@ export default {
             chainId,
             eoa: signerAddress,
             delegatedTo: authorization.address,
-            amount: amount.toString(),
+            choiceIds: choiceIds.map(id => id.toString()),
+            amounts: amounts.map(amt => amt.toString()),
+            totalAmount: totalAmount.toString(),
           }
         } as RelayResponse),
         {
