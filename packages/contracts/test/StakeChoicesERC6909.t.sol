@@ -285,4 +285,34 @@ contract StakeChoicesERC6909Test is Test {
         assertEq(stakeChoices.balanceOf(user1, 1), 50 ether);
         assertEq(stakeChoices.balanceOf(user2, 1), 50 ether);
     }
+
+    function testAddStakesSameChoiceMultipleTimes() public {
+        // Use the same choice ID multiple times in the same call
+        uint256[] memory choiceIds = new uint256[](4);
+        uint256[] memory amounts = new uint256[](4);
+        choiceIds[0] = 1;
+        choiceIds[1] = 2;
+        choiceIds[2] = 1; // Duplicate choice ID
+        choiceIds[3] = 1; // Another duplicate
+        amounts[0] = 100 ether;
+        amounts[1] = 200 ether;
+        amounts[2] = 50 ether;
+        amounts[3] = 75 ether;
+
+        vm.startPrank(user1);
+        token.approve(address(stakeChoices), 425 ether);
+        stakeChoices.addStakes(choiceIds, amounts);
+        vm.stopPrank();
+
+        // Check balances - choice 1 should have accumulated amounts
+        assertEq(stakeChoices.balanceOf(user1, 1), 225 ether); // 100 + 50 + 75
+        assertEq(stakeChoices.balanceOf(user1, 2), 200 ether);
+
+        // Check total supplies
+        assertEq(stakeChoices.totalSupply(1), 225 ether);
+        assertEq(stakeChoices.totalSupply(2), 200 ether);
+
+        // Contract should hold total staking tokens
+        assertEq(token.balanceOf(address(stakeChoices)), 425 ether);
+    }
 }
