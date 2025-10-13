@@ -44,7 +44,7 @@ contract StakeChoicesFactoryTest is Test {
         StakeChoicesERC6909 deployed = StakeChoicesERC6909(tokenAddress);
         assertEq(address(deployed.stakingToken()), address(token));
         assertEq(deployed.sessionName(), "My Staking Session");
-        assertEq(deployed.factory(), address(this));
+        assertEq(deployed.factory(), address(factory));
     }
 
     function testDeployTokenEmitsEvent() public {
