@@ -16,7 +16,7 @@ contract StakeChoicesERC6909 is ERC6909Metadata, ERC6909TokenSupply, Initializab
     // ============ State Variables ============
 
     IERC20 public stakingToken;
-    string public sessionName;
+    string public name;
     address public factory;
 
     // ============ Errors ============
@@ -37,16 +37,16 @@ contract StakeChoicesERC6909 is ERC6909Metadata, ERC6909TokenSupply, Initializab
     // ============ Initialization ============
 
     /**
-     * @notice Initialize a cloned session instance
+     * @notice Initialize a cloned token instance
      * @param _stakingToken The ERC20 token used for staking
-     * @param _sessionName Human-readable name for the session
+     * @param _name Human-readable name for the token
      */
     function initialize(
         address _stakingToken,
-        string memory _sessionName
+        string memory _name
     ) external initializer {
         stakingToken = IERC20(_stakingToken);
-        sessionName = _sessionName;
+        name = _name;
         factory = msg.sender;
     }
 
