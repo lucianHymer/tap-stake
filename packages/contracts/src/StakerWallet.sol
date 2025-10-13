@@ -3,56 +3,91 @@ pragma solidity ^0.8.30;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-interface IStake {
-    function stake(uint256 amount) external;
+interface IStakeChoicesERC6909 {
+    function addStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external;
+    function removeStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external;
 }
 
 /**
  * @title StakerWallet
- * @notice EIP-7702 delegation contract for gasless staking
- * @dev Simple whitelisted relayer approach - ONE SIGNATURE ONLY!
+ * @notice EIP-7702 delegation contract for gasless staking with ERC6909 sessions
+ * @dev Minimal implementation - relies on ERC6909 events, no duplication
  */
 contract StakerWallet {
+    // ============ Immutable Config ============
+
     address public immutable TOKEN_ADDRESS;
-    address public immutable STAKE_CONTRACT;
     address public immutable RELAYER;
-    uint256 public constant MAX_STAKE_PER_TX = 100e18;
+    uint256 public immutable MAX_STAKE_PER_TX;
+
+    // ============ Errors ============
 
     error OnlyRelayer();
     error AmountTooHigh();
-    error StakeFailed();
 
-    event StakeExecuted(address indexed account, uint256 amount);
+    // ============ Modifiers ============
 
     modifier onlyRelayer() {
         if (msg.sender != RELAYER) revert OnlyRelayer();
         _;
     }
 
-    constructor(address token, address stakeContract, address relayer) {
+    // ============ Constructor ============
+
+    constructor(
+        address token,
+        address relayer,
+        uint256 maxStakePerTx
+    ) {
         TOKEN_ADDRESS = token;
-        STAKE_CONTRACT = stakeContract;
         RELAYER = relayer;
+        MAX_STAKE_PER_TX = maxStakePerTx;
+    }
+
+    // ============ Staking Functions ============
+
+    /**
+     * @notice Add stakes to multiple choices in a session - gasless via relayer
+     * @param sessionAddress Address of the StakeChoicesERC6909 session
+     * @param choiceIds Array of choice IDs to stake to
+     * @param amounts Array of amounts to stake to each choice
+     */
+    function addStakes(
+        address sessionAddress,
+        uint256[] calldata choiceIds,
+        uint256[] calldata amounts
+    ) external onlyRelayer {
+        uint256 total = _sum(amounts);
+        if (total > MAX_STAKE_PER_TX) revert AmountTooHigh();
+
+        // Approve session contract for exact amount needed
+        IERC20(TOKEN_ADDRESS).approve(sessionAddress, total);
+
+        IStakeChoicesERC6909(sessionAddress).addStakes(choiceIds, amounts);
     }
 
     /**
-     * @notice Execute approve + stake - can only be called by whitelisted relayer
-     * @dev The security comes from:
-     *      1. EIP-7702: only the EOA owner can sign the authorization
-     *      2. Relayer whitelist: only trusted relayer can execute
-     *      3. Amount limit: bounded maximum damage
-     * @param amount Amount of tokens to stake
+     * @notice Remove stakes from multiple choices - gasless via relayer
+     * @param sessionAddress Address of the StakeChoicesERC6909 session
+     * @param choiceIds Array of choice IDs to remove stake from
+     * @param amounts Array of amounts to remove from each choice
      */
-    function stake(uint256 amount) external onlyRelayer {
-        // Validate amount
-        if (amount > MAX_STAKE_PER_TX) revert AmountTooHigh();
+    function removeStakes(
+        address sessionAddress,
+        uint256[] calldata choiceIds,
+        uint256[] calldata amounts
+    ) external onlyRelayer {
+        IStakeChoicesERC6909(sessionAddress).removeStakes(choiceIds, amounts);
+    }
 
-        // Approve only the needed amount
-        IERC20(TOKEN_ADDRESS).approve(STAKE_CONTRACT, amount);
+    // ============ Helper Functions ============
 
-        // Execute stake
-        IStake(STAKE_CONTRACT).stake(amount);
-
-        emit StakeExecuted(address(this), amount);
+    /**
+     * @dev Calculate sum of array
+     */
+    function _sum(uint256[] calldata amounts) private pure returns (uint256 total) {
+        for (uint256 i = 0; i < amounts.length; i++) {
+            total += amounts[i];
+        }
     }
 }

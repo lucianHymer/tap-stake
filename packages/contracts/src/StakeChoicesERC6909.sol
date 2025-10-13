@@ -16,7 +16,7 @@ contract StakeChoicesERC6909 is ERC6909Metadata, ERC6909TokenSupply, Initializab
     // ============ State Variables ============
 
     IERC20 public stakingToken;
-    string public name;
+    string public sessionName;
     address public factory;
 
     // ============ Errors ============
@@ -39,14 +39,14 @@ contract StakeChoicesERC6909 is ERC6909Metadata, ERC6909TokenSupply, Initializab
     /**
      * @notice Initialize a cloned token instance
      * @param _stakingToken The ERC20 token used for staking
-     * @param _name Human-readable name for the token
+     * @param _sessionName Human-readable name for the session
      */
     function initialize(
         address _stakingToken,
-        string memory _name
+        string memory _sessionName
     ) external initializer {
         stakingToken = IERC20(_stakingToken);
-        name = _name;
+        sessionName = _sessionName;
         factory = msg.sender;
     }
 
@@ -110,7 +110,8 @@ contract StakeChoicesERC6909 is ERC6909Metadata, ERC6909TokenSupply, Initializab
      * @param choiceName The name for this choice
      */
     function setChoiceName(uint256 id, string calldata choiceName) external {
-        if (bytes(name(id)).length != 0) revert AlreadyNamed();
+        string memory currentName = name(id);
+        if (bytes(currentName).length != 0) revert AlreadyNamed();
         _setName(id, choiceName);
     }
 
@@ -120,7 +121,8 @@ contract StakeChoicesERC6909 is ERC6909Metadata, ERC6909TokenSupply, Initializab
      * @param choiceSymbol The symbol for this choice
      */
     function setChoiceSymbol(uint256 id, string calldata choiceSymbol) external {
-        if (bytes(symbol(id)).length != 0) revert AlreadySymboled();
+        string memory currentSymbol = symbol(id);
+        if (bytes(currentSymbol).length != 0) revert AlreadySymboled();
         _setSymbol(id, choiceSymbol);
     }
 

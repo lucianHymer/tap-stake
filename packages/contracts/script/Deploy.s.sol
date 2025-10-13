@@ -2,28 +2,30 @@
 pragma solidity ^0.8.30;
 
 import {Script, console} from "forge-std/Script.sol";
-import {SelfBatchExecutor} from "../src/SelfBatchExecutor.sol";
 import {StakerWallet} from "../src/StakerWallet.sol";
+import {StakeChoicesFactory} from "../src/StakeChoicesFactory.sol";
+import {StakeChoicesERC6909} from "../src/StakeChoicesERC6909.sol";
 import {TestERC20} from "../src/TestERC20.sol";
-import {Stake} from "../src/Stake.sol";
 
 contract DeployScript is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        // Deploy existing contracts
-        SelfBatchExecutor executor = new SelfBatchExecutor();
-        console.log("SelfBatchExecutor deployed at:", address(executor));
-
+        // Deploy test token
         TestERC20 token = new TestERC20();
         console.log("TestERC20 deployed at:", address(token));
 
-        // Deploy Stake contract with TestERC20 as staking token
-        Stake stakeContract = new Stake(address(token));
-        console.log("Stake deployed at:", address(stakeContract));
+        // Deploy StakeChoicesFactory
+        StakeChoicesFactory factory = new StakeChoicesFactory();
+        console.log("StakeChoicesFactory deployed at:", address(factory));
+        console.log("  Implementation at:", factory.implementation());
 
-        // Deploy new StakerWallet with relayer address
+        // Deploy a sample session for testing
+        address session = factory.deployToken(address(token), "Test Session");
+        console.log("Sample StakeChoicesERC6909 session deployed at:", session);
+
+        // Deploy StakerWallet with relayer address
         // Check if RELAYER_ADDRESS is set, otherwise use deployer as relayer
         address relayerAddress;
         try vm.envAddress("RELAYER_ADDRESS") returns (address addr) {
@@ -36,11 +38,13 @@ contract DeployScript is Script {
 
         StakerWallet stakerWallet = new StakerWallet(
             address(token),
-            address(stakeContract),
-            relayerAddress
+            relayerAddress,
+            100 ether // MAX_STAKE_PER_TX
         );
         console.log("StakerWallet deployed at:", address(stakerWallet));
-        console.log("  Whitelisted relayer:", relayerAddress);
+        console.log("  Token:", address(token));
+        console.log("  Relayer:", relayerAddress);
+        console.log("  Max stake per tx:", stakerWallet.MAX_STAKE_PER_TX());
 
         vm.stopBroadcast();
     }
