@@ -17,6 +17,7 @@ contract StakerWallet {
     // ============ Immutable Config ============
 
     address public immutable TOKEN_ADDRESS;
+    address public immutable STAKE_CHOICES_ADDRESS;
     address public immutable RELAYER;
     uint256 public immutable MAX_STAKE_PER_TX;
 
@@ -36,10 +37,12 @@ contract StakerWallet {
 
     constructor(
         address token,
+        address stakeChoicesAddress,
         address relayer,
         uint256 maxStakePerTx
     ) {
         TOKEN_ADDRESS = token;
+        STAKE_CHOICES_ADDRESS = stakeChoicesAddress;
         RELAYER = relayer;
         MAX_STAKE_PER_TX = maxStakePerTx;
     }
@@ -48,12 +51,10 @@ contract StakerWallet {
 
     /**
      * @notice Add stakes to multiple choices in a session - gasless via relayer
-     * @param sessionAddress Address of the StakeChoicesERC6909 session
      * @param choiceIds Array of choice IDs to stake to
      * @param amounts Array of amounts to stake to each choice
      */
     function addStakes(
-        address sessionAddress,
         uint256[] calldata choiceIds,
         uint256[] calldata amounts
     ) external onlyRelayer {
@@ -61,23 +62,21 @@ contract StakerWallet {
         if (total > MAX_STAKE_PER_TX) revert AmountTooHigh();
 
         // Approve session contract for exact amount needed
-        IERC20(TOKEN_ADDRESS).approve(sessionAddress, total);
+        IERC20(TOKEN_ADDRESS).approve(STAKE_CHOICES_ADDRESS, total);
 
-        IStakeChoicesERC6909(sessionAddress).addStakes(choiceIds, amounts);
+        IStakeChoicesERC6909(STAKE_CHOICES_ADDRESS).addStakes(choiceIds, amounts);
     }
 
     /**
      * @notice Remove stakes from multiple choices - gasless via relayer
-     * @param sessionAddress Address of the StakeChoicesERC6909 session
      * @param choiceIds Array of choice IDs to remove stake from
      * @param amounts Array of amounts to remove from each choice
      */
     function removeStakes(
-        address sessionAddress,
         uint256[] calldata choiceIds,
         uint256[] calldata amounts
     ) external onlyRelayer {
-        IStakeChoicesERC6909(sessionAddress).removeStakes(choiceIds, amounts);
+        IStakeChoicesERC6909(STAKE_CHOICES_ADDRESS).removeStakes(choiceIds, amounts);
     }
 
     // ============ Helper Functions ============

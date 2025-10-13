@@ -38,11 +38,13 @@ contract DeployScript is Script {
 
         StakerWallet stakerWallet = new StakerWallet(
             address(token),
+            session,
             relayerAddress,
             100 ether // MAX_STAKE_PER_TX
         );
         console.log("StakerWallet deployed at:", address(stakerWallet));
         console.log("  Token:", address(token));
+        console.log("  StakeChoices:", session);
         console.log("  Relayer:", relayerAddress);
         console.log("  Max stake per tx:", stakerWallet.MAX_STAKE_PER_TX());
 

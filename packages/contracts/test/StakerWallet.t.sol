@@ -28,6 +28,7 @@ contract StakerWalletTest is Test {
         // Deploy wallet with reasonable limits
         wallet = new StakerWallet(
             address(token),
+            address(session),
             relayer,
             100 ether // MAX_STAKE_PER_TX
         );
@@ -38,6 +39,7 @@ contract StakerWalletTest is Test {
 
     function testImmutableConfig() public view {
         assertEq(wallet.TOKEN_ADDRESS(), address(token));
+        assertEq(wallet.STAKE_CHOICES_ADDRESS(), address(session));
         assertEq(wallet.RELAYER(), relayer);
         assertEq(wallet.MAX_STAKE_PER_TX(), 100 ether);
     }
@@ -54,7 +56,7 @@ contract StakerWalletTest is Test {
 
         // Only relayer can call
         vm.prank(relayer);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
 
         // Verify stakes were added
         assertEq(session.balanceOf(address(wallet), 1), 50 ether);
@@ -77,7 +79,7 @@ contract StakerWalletTest is Test {
 
         // Relayer executes
         vm.prank(relayer);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
 
         // Verify all stakes were added
         assertEq(session.balanceOf(address(wallet), 1), 20 ether);
@@ -97,12 +99,12 @@ contract StakerWalletTest is Test {
         // Non-relayer cannot call
         vm.prank(attacker);
         vm.expectRevert(StakerWallet.OnlyRelayer.selector);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
 
         // User cannot call
         vm.prank(user);
         vm.expectRevert(StakerWallet.OnlyRelayer.selector);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
     }
 
     function testAddStakesAmountTooHigh() public {
@@ -116,7 +118,7 @@ contract StakerWalletTest is Test {
 
         vm.prank(relayer);
         vm.expectRevert(StakerWallet.AmountTooHigh.selector);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
     }
 
     function testAddStakesMultipleChoicesAmountTooHigh() public {
@@ -134,7 +136,7 @@ contract StakerWalletTest is Test {
 
         vm.prank(relayer);
         vm.expectRevert(StakerWallet.AmountTooHigh.selector);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
     }
 
     function testRemoveStakes() public {
@@ -148,13 +150,13 @@ contract StakerWalletTest is Test {
         amounts[0] = 50 ether;
 
         vm.prank(relayer);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
 
         // Now remove stakes
         uint256 walletBalanceBefore = token.balanceOf(address(wallet));
 
         vm.prank(relayer);
-        wallet.removeStakes(address(session), choiceIds, amounts);
+        wallet.removeStakes(choiceIds, amounts);
 
         // Verify stakes were removed
         assertEq(session.balanceOf(address(wallet), 1), 0);
@@ -176,7 +178,7 @@ contract StakerWalletTest is Test {
         amounts[2] = 40 ether;
 
         vm.prank(relayer);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
 
         // Remove partial stakes
         uint256[] memory removeIds = new uint256[](2);
@@ -187,7 +189,7 @@ contract StakerWalletTest is Test {
         removeAmounts[1] = 15 ether;
 
         vm.prank(relayer);
-        wallet.removeStakes(address(session), removeIds, removeAmounts);
+        wallet.removeStakes(removeIds, removeAmounts);
 
         // Verify partial removal
         assertEq(session.balanceOf(address(wallet), 1), 10 ether);
@@ -206,12 +208,12 @@ contract StakerWalletTest is Test {
         amounts[0] = 50 ether;
 
         vm.prank(relayer);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
 
         // Non-relayer cannot remove
         vm.prank(attacker);
         vm.expectRevert(StakerWallet.OnlyRelayer.selector);
-        wallet.removeStakes(address(session), choiceIds, amounts);
+        wallet.removeStakes(choiceIds, amounts);
     }
 
     function testAddStakesExactLimit() public {
@@ -225,7 +227,7 @@ contract StakerWalletTest is Test {
 
         // Should succeed
         vm.prank(relayer);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
 
         assertEq(session.balanceOf(address(wallet), 1), 100 ether);
     }
@@ -241,7 +243,7 @@ contract StakerWalletTest is Test {
 
         // Should succeed (total is 0, under limit)
         vm.prank(relayer);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
     }
 
     function testMultipleSessionsSupport() public {
@@ -249,8 +251,19 @@ contract StakerWalletTest is Test {
         address session2Addr = factory.deployToken(address(token), "Second Session");
         StakeChoicesERC6909 session2 = StakeChoicesERC6909(session2Addr);
 
-        vm.prank(user);
+        // Deploy second wallet for second session
+        StakerWallet wallet2 = new StakerWallet(
+            address(token),
+            address(session2),
+            relayer,
+            100 ether
+        );
+
+        // Transfer tokens to both wallets
+        vm.startPrank(user);
         token.transfer(address(wallet), 100 ether);
+        token.transfer(address(wallet2), 100 ether);
+        vm.stopPrank();
 
         uint256[] memory choiceIds = new uint256[](1);
         uint256[] memory amounts = new uint256[](1);
@@ -259,16 +272,16 @@ contract StakerWalletTest is Test {
 
         // Add stakes to first session
         vm.prank(relayer);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
 
         amounts[0] = 40 ether;
-        // Add stakes to second session
+        // Add stakes to second session using second wallet
         vm.prank(relayer);
-        wallet.addStakes(address(session2), choiceIds, amounts);
+        wallet2.addStakes(choiceIds, amounts);
 
         // Verify stakes in both sessions
         assertEq(session.balanceOf(address(wallet), 1), 30 ether);
-        assertEq(session2.balanceOf(address(wallet), 1), 40 ether);
+        assertEq(session2.balanceOf(address(wallet2), 1), 40 ether);
     }
 
     function testApprovalIsExactAmount() public {
@@ -283,7 +296,7 @@ contract StakerWalletTest is Test {
         amounts[1] = 20 ether;
 
         vm.prank(relayer);
-        wallet.addStakes(address(session), choiceIds, amounts);
+        wallet.addStakes(choiceIds, amounts);
 
         // Verify no leftover approval (should be 0 after addStakes completes)
         assertEq(token.allowance(address(wallet), address(session)), 0);
