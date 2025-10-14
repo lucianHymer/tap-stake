@@ -14,6 +14,7 @@ export interface Env {
   RPC_URL: string;
   CHAIN_ID: string;
   ALLOWED_CONTRACT_ADDRESS: string;
+  APPROVED_CHOICE_IDS: string; // Comma-separated list of approved choice IDs
   ENVIRONMENT?: string;
 }
 
@@ -37,8 +38,14 @@ interface RelayResponse {
   details?: Record<string, unknown>;
 }
 
-// Constants for validation
-const MAX_CHOICES = 6; // Maximum number of choices per transaction
+// Helper to parse approved choice IDs from environment
+function parseApprovedChoiceIds(env: Env): bigint[] {
+  try {
+    return env.APPROVED_CHOICE_IDS.split(',').map(id => BigInt(id.trim()));
+  } catch (error) {
+    throw new Error('Invalid APPROVED_CHOICE_IDS configuration');
+  }
+}
 
 // Helper to get chain config from chain ID
 function getChainConfig(chainId: number): typeof optimismSepolia {
@@ -128,13 +135,16 @@ export default {
         );
       }
 
-      // Validate max choices
-      if (body.choiceIds.length > MAX_CHOICES) {
+      // Parse approved choice IDs from environment
+      const approvedChoiceIds = parseApprovedChoiceIds(env);
+
+      // Validate max choices doesn't exceed approved list
+      if (body.choiceIds.length > approvedChoiceIds.length) {
         return new Response(
           JSON.stringify({
             success: false,
             error: 'Too many choices',
-            details: `Maximum ${MAX_CHOICES} choices allowed, got ${body.choiceIds.length}`
+            details: `Maximum ${approvedChoiceIds.length} choices allowed, got ${body.choiceIds.length}`
           }),
           {
             status: 400,
@@ -241,17 +251,20 @@ export default {
       const amounts: bigint[] = [];
       const MAX_STAKE_PER_TX = BigInt("1000000000000000000000"); // 1000 tokens
 
+      // Create a Set for efficient lookup
+      const approvedChoiceIdsSet = new Set(approvedChoiceIds.map(id => id.toString()));
+
       for (let i = 0; i < body.choiceIds.length; i++) {
         const choiceId = BigInt(body.choiceIds[i]);
         const amount = BigInt(body.amounts[i]);
 
-        // Validate choice ID is in range (0 to MAX_CHOICES-1)
-        if (choiceId >= MAX_CHOICES) {
+        // Validate choice ID is in the approved list
+        if (!approvedChoiceIdsSet.has(choiceId.toString())) {
           return new Response(
             JSON.stringify({
               success: false,
               error: 'Invalid choice ID',
-              details: `Choice ID ${choiceId} must be less than ${MAX_CHOICES} (valid range: 0-${MAX_CHOICES - 1})`
+              details: `Choice ID ${choiceId} is not in the approved list of choices`
             }),
             {
               status: 400,
