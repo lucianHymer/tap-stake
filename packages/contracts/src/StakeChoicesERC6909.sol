@@ -47,10 +47,7 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
      * @param _stakingToken The ERC20 token used for staking
      * @param _name Human-readable name for the session
      */
-    function initialize(
-        address _stakingToken,
-        string memory _name
-    ) external initializer {
+    function initialize(address _stakingToken, string memory _name) external initializer {
         stakingToken = IERC20(_stakingToken);
         name_ = _name;
         factory = msg.sender;
@@ -63,10 +60,7 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
      * @param choiceIds Array of choice IDs to stake to
      * @param amounts Array of amounts to stake to each choice
      */
-    function addStakes(
-        uint256[] calldata choiceIds,
-        uint256[] calldata amounts
-    ) external {
+    function addStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external {
         if (choiceIds.length != amounts.length) revert LengthMismatch();
 
         uint256 totalToAdd;
@@ -88,10 +82,7 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
      * @param choiceIds Array of choice IDs to remove stake from
      * @param amounts Array of amounts to remove from each choice
      */
-    function removeStakes(
-        uint256[] calldata choiceIds,
-        uint256[] calldata amounts
-    ) external {
+    function removeStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external {
         if (choiceIds.length != amounts.length) revert LengthMismatch();
 
         uint256 totalToRemove;
@@ -136,12 +127,9 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
      * @param choiceSymbol The symbol for this choice (optional)
      * @param uri The URI for this choice (optional)
      */
-    function registerChoice(
-        bytes32 salt,
-        string calldata choiceName,
-        string calldata choiceSymbol,
-        string calldata uri
-    ) external {
+    function registerChoice(bytes32 salt, string calldata choiceName, string calldata choiceSymbol, string calldata uri)
+        external
+    {
         uint256 id = computeId(msg.sender, salt);
 
         // Validate name is non-empty
@@ -169,12 +157,11 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
     /**
      * @dev Override _update to call all parent implementations
      */
-    function _update(
-        address from,
-        address to,
-        uint256 id,
-        uint256 value
-    ) internal virtual override(ERC6909, ERC6909TokenSupply) {
+    function _update(address from, address to, uint256 id, uint256 value)
+        internal
+        virtual
+        override(ERC6909, ERC6909TokenSupply)
+    {
         super._update(from, to, id, value);
     }
 }

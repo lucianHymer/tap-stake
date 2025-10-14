@@ -47,13 +47,11 @@ contract DeployScript is Script {
 
         for (uint256 i = 0; i < 6; i++) {
             bytes32 salt = bytes32(i + 1);
-            string memory uri = string(abi.encodePacked(
-                "data:application/json,{\"name\":\"",
-                choiceNames[i],
-                "\",\"symbol\":\"",
-                choiceSymbols[i],
-                "\"}"
-            ));
+            string memory uri = string(
+                abi.encodePacked(
+                    "data:application/json,{\"name\":\"", choiceNames[i], "\",\"symbol\":\"", choiceSymbols[i], "\"}"
+                )
+            );
             stakeChoices.registerChoice(salt, choiceNames[i], choiceSymbols[i], uri);
             console.log("Registered choice", i + 1, "with salt:", uint256(salt));
         }

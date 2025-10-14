@@ -16,11 +16,7 @@ contract StakeChoicesFactory {
 
     // ============ Events ============
 
-    event TokenDeployed(
-        address indexed tokenAddress,
-        address stakingToken,
-        string tokenName
-    );
+    event TokenDeployed(address indexed tokenAddress, address stakingToken, string tokenName);
 
     // ============ Constructor ============
 
@@ -39,18 +35,12 @@ contract StakeChoicesFactory {
      * @param tokenName Human-readable name for the token
      * @return tokenAddress The address of the deployed token
      */
-    function deployToken(
-        address stakingToken,
-        string memory tokenName
-    ) external returns (address tokenAddress) {
+    function deployToken(address stakingToken, string memory tokenName) external returns (address tokenAddress) {
         // Deploy minimal proxy clone (only ~41k gas!)
         tokenAddress = Clones.clone(implementation);
 
         // Initialize the clone
-        StakeChoicesERC6909(tokenAddress).initialize(
-            stakingToken,
-            tokenName
-        );
+        StakeChoicesERC6909(tokenAddress).initialize(stakingToken, tokenName);
 
         emit TokenDeployed(tokenAddress, stakingToken, tokenName);
     }
@@ -59,19 +49,15 @@ contract StakeChoicesFactory {
      * @notice Deploy with predicted address (CREATE2)
      * @dev Useful for counterfactual deployments or when address needs to be known in advance
      */
-    function deployTokenDeterministic(
-        address stakingToken,
-        string memory tokenName,
-        bytes32 salt
-    ) external returns (address tokenAddress) {
+    function deployTokenDeterministic(address stakingToken, string memory tokenName, bytes32 salt)
+        external
+        returns (address tokenAddress)
+    {
         // Deploy with CREATE2 for deterministic address
         tokenAddress = Clones.cloneDeterministic(implementation, salt);
 
         // Initialize the clone
-        StakeChoicesERC6909(tokenAddress).initialize(
-            stakingToken,
-            tokenName
-        );
+        StakeChoicesERC6909(tokenAddress).initialize(stakingToken, tokenName);
 
         emit TokenDeployed(tokenAddress, stakingToken, tokenName);
     }

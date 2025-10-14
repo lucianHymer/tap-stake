@@ -252,12 +252,7 @@ contract StakerWalletTest is Test {
         StakeChoicesERC6909 session2 = StakeChoicesERC6909(session2Addr);
 
         // Deploy second wallet for second session
-        StakerWallet wallet2 = new StakerWallet(
-            address(token),
-            address(session2),
-            relayer,
-            100 ether
-        );
+        StakerWallet wallet2 = new StakerWallet(address(token), address(session2), relayer, 100 ether);
 
         // Transfer tokens to both wallets
         vm.startPrank(user);

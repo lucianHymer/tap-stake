@@ -35,12 +35,7 @@ contract StakerWallet {
 
     // ============ Constructor ============
 
-    constructor(
-        address token,
-        address stakeChoicesAddress,
-        address relayer,
-        uint256 maxStakePerTx
-    ) {
+    constructor(address token, address stakeChoicesAddress, address relayer, uint256 maxStakePerTx) {
         TOKEN_ADDRESS = token;
         STAKE_CHOICES_ADDRESS = stakeChoicesAddress;
         RELAYER = relayer;
@@ -54,10 +49,7 @@ contract StakerWallet {
      * @param choiceIds Array of choice IDs to stake to
      * @param amounts Array of amounts to stake to each choice
      */
-    function addStakes(
-        uint256[] calldata choiceIds,
-        uint256[] calldata amounts
-    ) external onlyRelayer {
+    function addStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external onlyRelayer {
         uint256 total = _sum(amounts);
         if (total > MAX_STAKE_PER_TX) revert AmountTooHigh();
 
@@ -72,10 +64,7 @@ contract StakerWallet {
      * @param choiceIds Array of choice IDs to remove stake from
      * @param amounts Array of amounts to remove from each choice
      */
-    function removeStakes(
-        uint256[] calldata choiceIds,
-        uint256[] calldata amounts
-    ) external onlyRelayer {
+    function removeStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external onlyRelayer {
         IStakeChoicesERC6909(STAKE_CHOICES_ADDRESS).removeStakes(choiceIds, amounts);
     }
 

@@ -33,10 +33,7 @@ contract StakeChoicesFactoryTest is Test {
     }
 
     function testDeployToken() public {
-        address tokenAddress = factory.deployToken(
-            address(token),
-            "My Staking Session"
-        );
+        address tokenAddress = factory.deployToken(address(token), "My Staking Session");
 
         assertNotEq(tokenAddress, address(0));
 
@@ -55,7 +52,7 @@ contract StakeChoicesFactoryTest is Test {
         Vm.Log[] memory logs = vm.getRecordedLogs();
         bool foundEvent = false;
 
-        for (uint i = 0; i < logs.length; i++) {
+        for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].topics[0] == keccak256("TokenDeployed(address,address,string)")) {
                 foundEvent = true;
                 break;
@@ -67,10 +64,7 @@ contract StakeChoicesFactoryTest is Test {
     }
 
     function testDeployedTokenIsUsable() public {
-        address sessionAddress = factory.deployToken(
-            address(token),
-            "Usable Session"
-        );
+        address sessionAddress = factory.deployToken(address(token), "Usable Session");
 
         StakeChoicesERC6909 session = StakeChoicesERC6909(sessionAddress);
 
@@ -108,11 +102,7 @@ contract StakeChoicesFactoryTest is Test {
     function testDeployTokenDeterministic() public {
         bytes32 salt = keccak256("my-salt");
 
-        address tokenAddress = factory.deployTokenDeterministic(
-            address(token),
-            "Deterministic Session",
-            salt
-        );
+        address tokenAddress = factory.deployTokenDeterministic(address(token), "Deterministic Session", salt);
 
         assertNotEq(tokenAddress, address(0));
 
@@ -126,17 +116,13 @@ contract StakeChoicesFactoryTest is Test {
         bytes32 salt = keccak256("test-salt");
 
         vm.recordLogs();
-        address deployed = factory.deployTokenDeterministic(
-            address(token),
-            "Test Session",
-            salt
-        );
+        address deployed = factory.deployTokenDeterministic(address(token), "Test Session", salt);
 
         // Verify event was emitted by checking logs
         Vm.Log[] memory logs = vm.getRecordedLogs();
         bool foundEvent = false;
 
-        for (uint i = 0; i < logs.length; i++) {
+        for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].topics[0] == keccak256("TokenDeployed(address,address,string)")) {
                 foundEvent = true;
                 break;
@@ -154,11 +140,7 @@ contract StakeChoicesFactoryTest is Test {
         address predicted = factory.predictTokenAddress(salt);
 
         // Deploy with same salt
-        address actual = factory.deployTokenDeterministic(
-            address(token),
-            "Predicted Session",
-            salt
-        );
+        address actual = factory.deployTokenDeterministic(address(token), "Predicted Session", salt);
 
         // Should match
         assertEq(predicted, actual);
@@ -168,45 +150,26 @@ contract StakeChoicesFactoryTest is Test {
         bytes32 salt = keccak256("duplicate-salt");
 
         // First deployment succeeds
-        factory.deployTokenDeterministic(
-            address(token),
-            "First Session",
-            salt
-        );
+        factory.deployTokenDeterministic(address(token), "First Session", salt);
 
         // Second deployment with same salt should fail
         vm.expectRevert();
-        factory.deployTokenDeterministic(
-            address(token),
-            "Second Session",
-            salt
-        );
+        factory.deployTokenDeterministic(address(token), "Second Session", salt);
     }
 
     function testDifferentSaltsProduceDifferentAddresses() public {
         bytes32 salt1 = keccak256("salt-1");
         bytes32 salt2 = keccak256("salt-2");
 
-        address addr1 = factory.deployTokenDeterministic(
-            address(token),
-            "Session 1",
-            salt1
-        );
+        address addr1 = factory.deployTokenDeterministic(address(token), "Session 1", salt1);
 
-        address addr2 = factory.deployTokenDeterministic(
-            address(token),
-            "Session 2",
-            salt2
-        );
+        address addr2 = factory.deployTokenDeterministic(address(token), "Session 2", salt2);
 
         assertTrue(addr1 != addr2);
     }
 
     function testDeployedCloneCannotBeReinitialized() public {
-        address tokenAddress = factory.deployToken(
-            address(token),
-            "Locked Session"
-        );
+        address tokenAddress = factory.deployToken(address(token), "Locked Session");
 
         StakeChoicesERC6909 deployed = StakeChoicesERC6909(tokenAddress);
 
@@ -249,11 +212,7 @@ contract StakeChoicesFactoryTest is Test {
         address predicted = factory.predictTokenAddress(salt);
 
         // Deploy later
-        address deployed = factory.deployTokenDeterministic(
-            address(token),
-            "Predictable",
-            salt
-        );
+        address deployed = factory.deployTokenDeterministic(address(token), "Predictable", salt);
 
         assertEq(predicted, deployed);
     }
@@ -264,14 +223,8 @@ contract StakeChoicesFactoryTest is Test {
         address session1 = factory.deployToken(address(token), "Token 1 Session");
         address session2 = factory.deployToken(address(token2), "Token 2 Session");
 
-        assertEq(
-            address(StakeChoicesERC6909(session1).stakingToken()),
-            address(token)
-        );
-        assertEq(
-            address(StakeChoicesERC6909(session2).stakingToken()),
-            address(token2)
-        );
+        assertEq(address(StakeChoicesERC6909(session1).stakingToken()), address(token));
+        assertEq(address(StakeChoicesERC6909(session2).stakingToken()), address(token2));
     }
 
     function testGasSavingsFromClones() public {
