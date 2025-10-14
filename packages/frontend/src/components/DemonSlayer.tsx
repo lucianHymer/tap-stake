@@ -62,8 +62,8 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
       // Multi-choice stake: 20 TEST on choice 1, 30 TEST on choice 4
       // Using actual choice IDs from deployment (1st and 4th registered choices)
       const choiceIds = [
-        "35944569015047981758235818500518690797898803954137960285681681313226267984075", // Choice 1
-        "97940999879862486104046856375658994738036738590581900819813490438205806384215", // Choice 4
+        "99921030434853126453340568019546123113290951926625281747676119336391366179676", // Choice 1
+        "102590855234691522285546861392190170000582855349844279089213381909182907084793", // Choice 4
       ];
       const amounts = [
         parseEther("20").toString(), // 20 TEST on choice 1
