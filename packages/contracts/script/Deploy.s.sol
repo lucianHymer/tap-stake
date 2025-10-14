@@ -12,9 +12,10 @@ contract DeployScript is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        // Deploy test token
-        TestERC20 token = new TestERC20();
-        console.log("TestERC20 deployed at:", address(token));
+        // Use existing TestERC20 or deploy new one
+        address tokenAddress = 0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756;
+        TestERC20 token = TestERC20(tokenAddress);
+        console.log("Using existing TestERC20 at:", address(token));
 
         // Deploy StakeChoicesFactory
         StakeChoicesFactory factory = new StakeChoicesFactory();
@@ -24,6 +25,38 @@ contract DeployScript is Script {
         // Deploy a sample session for testing
         address session = factory.deployToken(address(token), "Test Session");
         console.log("Sample StakeChoicesERC6909 session deployed at:", session);
+
+        // Register 6 choices
+        StakeChoicesERC6909 stakeChoices = StakeChoicesERC6909(session);
+        string[6] memory choiceNames = [
+            "Staked GTC - Choice 1",
+            "Staked GTC - Choice 2",
+            "Staked GTC - Choice 3",
+            "Staked GTC - Choice 4",
+            "Staked GTC - Choice 5",
+            "Staked GTC - Choice 6"
+        ];
+        string[6] memory choiceSymbols = [
+            unicode"🥩GTC-C1",
+            unicode"🥩GTC-C2",
+            unicode"🥩GTC-C3",
+            unicode"🥩GTC-C4",
+            unicode"🥩GTC-C5",
+            unicode"🥩GTC-C6"
+        ];
+
+        for (uint256 i = 0; i < 6; i++) {
+            bytes32 salt = bytes32(i + 1);
+            string memory uri = string(abi.encodePacked(
+                "data:application/json,{\"name\":\"",
+                choiceNames[i],
+                "\",\"symbol\":\"",
+                choiceSymbols[i],
+                "\"}"
+            ));
+            stakeChoices.registerChoice(salt, choiceNames[i], choiceSymbols[i], uri);
+            console.log("Registered choice", i + 1, "with salt:", uint256(salt));
+        }
 
         // Deploy StakerWallet with relayer address
         // Check if RELAYER_ADDRESS is set, otherwise use deployer as relayer

@@ -43,7 +43,7 @@ contract StakeChoicesFactoryTest is Test {
         // Verify initialization
         StakeChoicesERC6909 deployed = StakeChoicesERC6909(tokenAddress);
         assertEq(address(deployed.stakingToken()), address(token));
-        assertEq(deployed.sessionName(), "My Staking Session");
+        assertEq(deployed.name(), "My Staking Session");
         assertEq(deployed.factory(), address(factory));
     }
 
@@ -100,9 +100,9 @@ contract StakeChoicesFactoryTest is Test {
         assertTrue(token2 != token3);
 
         // All should be initialized properly
-        assertEq(StakeChoicesERC6909(token1).sessionName(), "Session 1");
-        assertEq(StakeChoicesERC6909(token2).sessionName(), "Session 2");
-        assertEq(StakeChoicesERC6909(token3).sessionName(), "Session 3");
+        assertEq(StakeChoicesERC6909(token1).name(), "Session 1");
+        assertEq(StakeChoicesERC6909(token2).name(), "Session 2");
+        assertEq(StakeChoicesERC6909(token3).name(), "Session 3");
     }
 
     function testDeployTokenDeterministic() public {
@@ -119,7 +119,7 @@ contract StakeChoicesFactoryTest is Test {
         // Verify initialization
         StakeChoicesERC6909 deployed = StakeChoicesERC6909(tokenAddress);
         assertEq(address(deployed.stakingToken()), address(token));
-        assertEq(deployed.sessionName(), "Deterministic Session");
+        assertEq(deployed.name(), "Deterministic Session");
     }
 
     function testDeployTokenDeterministicEmitsEvent() public {

@@ -31,7 +31,7 @@ contract StakeChoicesERC6909Test is Test {
 
     function testInitialization() public view {
         assertEq(address(stakeChoices.stakingToken()), address(token));
-        assertEq(stakeChoices.sessionName(), "Test Staking Session");
+        assertEq(stakeChoices.name(), "Test Staking Session");
         assertEq(stakeChoices.factory(), address(factory));
     }
 

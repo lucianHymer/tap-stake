@@ -22,7 +22,7 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
     // ============ State Variables ============
 
     IERC20 public stakingToken;
-    string public sessionName;
+    string private name_;
     address public factory;
 
     // ============ Errors ============
@@ -45,14 +45,14 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
     /**
      * @notice Initialize a cloned token instance
      * @param _stakingToken The ERC20 token used for staking
-     * @param _sessionName Human-readable name for the session
+     * @param _name Human-readable name for the session
      */
     function initialize(
         address _stakingToken,
-        string memory _sessionName
+        string memory _name
     ) external initializer {
         stakingToken = IERC20(_stakingToken);
-        sessionName = _sessionName;
+        name_ = _name;
         factory = msg.sender;
     }
 
@@ -109,6 +109,14 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
     }
 
     // ============ Metadata Functions ============
+
+    /**
+     * @notice Get the session/contract name
+     * @return The human-readable name for this staking session
+     */
+    function name() public view returns (string memory) {
+        return name_;
+    }
 
     /**
      * @notice Compute deterministic token ID from creator address and salt
