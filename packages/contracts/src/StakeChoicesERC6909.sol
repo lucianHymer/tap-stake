@@ -4,7 +4,9 @@ pragma solidity ^0.8.30;
 import {ERC6909} from "@openzeppelin/contracts/token/ERC6909/ERC6909.sol";
 import {ERC6909Metadata} from "@openzeppelin/contracts/token/ERC6909/extensions/ERC6909Metadata.sol";
 import {ERC6909TokenSupply} from "@openzeppelin/contracts/token/ERC6909/extensions/ERC6909TokenSupply.sol";
+import {ERC6909ContentURI} from "@openzeppelin/contracts/token/ERC6909/extensions/ERC6909ContentURI.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 /**
@@ -12,7 +14,11 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
  * @notice ERC6909-based multi-choice staking with tradeable positions
  * @dev Minimal implementation using OpenZeppelin's ERC6909 with TokenSupply tracking
  */
-contract StakeChoicesERC6909 is ERC6909Metadata, ERC6909TokenSupply, Initializable {
+contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909TokenSupply, Initializable {
+    // ============ Constants ============
+
+    string private constant ID_NAMESPACE = "v1.stakechoices";
+
     // ============ State Variables ============
 
     IERC20 public stakingToken;
@@ -22,8 +28,8 @@ contract StakeChoicesERC6909 is ERC6909Metadata, ERC6909TokenSupply, Initializab
     // ============ Errors ============
 
     error LengthMismatch();
-    error AlreadyNamed();
-    error AlreadySymboled();
+    error MetadataAlreadySet();
+    error NameCannotBeEmpty();
 
     // ============ Constructor ============
 
@@ -105,38 +111,55 @@ contract StakeChoicesERC6909 is ERC6909Metadata, ERC6909TokenSupply, Initializab
     // ============ Metadata Functions ============
 
     /**
-     * @notice Set the name for a choice token (once only, anyone can set)
-     * @param id The token ID (choice ID)
-     * @param choiceName The name for this choice
+     * @notice Compute deterministic token ID from creator address and salt
+     * @param creator The address creating the token ID
+     * @param salt Arbitrary bytes32 salt for namespacing
+     * @return The deterministic token ID
      */
-    function setChoiceName(uint256 id, string calldata choiceName) external {
-        string memory currentName = name(id);
-        if (bytes(currentName).length != 0) revert AlreadyNamed();
-        _setName(id, choiceName);
+    function computeId(address creator, bytes32 salt) public pure returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(ID_NAMESPACE, creator, salt)));
     }
 
     /**
-     * @notice Set the symbol for a choice token (once only, anyone can set)
-     * @param id The token ID (choice ID)
-     * @param choiceSymbol The symbol for this choice
+     * @notice Register metadata for a choice token (once only, anyone can register)
+     * @dev Token ID is derived from msg.sender and salt for deterministic cross-chain IDs
+     * @param salt Arbitrary bytes32 salt for namespacing, allows user to define their own scheme
+     * @param choiceName The name for this choice (required, non-empty)
+     * @param choiceSymbol The symbol for this choice (optional)
+     * @param uri The URI for this choice (optional)
      */
-    function setChoiceSymbol(uint256 id, string calldata choiceSymbol) external {
-        string memory currentSymbol = symbol(id);
-        if (bytes(currentSymbol).length != 0) revert AlreadySymboled();
+    function registerChoice(
+        bytes32 salt,
+        string calldata choiceName,
+        string calldata choiceSymbol,
+        string calldata uri
+    ) external {
+        uint256 id = computeId(msg.sender, salt);
+
+        // Validate name is non-empty
+        if (bytes(choiceName).length == 0) revert NameCannotBeEmpty();
+
+        // Check metadata not already set
+        string memory currentName = name(id);
+        if (bytes(currentName).length != 0) revert MetadataAlreadySet();
+
+        // Set all metadata
+        _setName(id, choiceName);
         _setSymbol(id, choiceSymbol);
+        _setTokenURI(id, uri);
     }
 
     // ============ Internal Functions ============
 
     /**
-     * @dev Override to set 18 decimals for all tokens
+     * @dev Override to match staking token decimals for all choice tokens
      */
-    function decimals(uint256) public pure override returns (uint8) {
-        return 18;
+    function decimals(uint256) public view override returns (uint8) {
+        return IERC20Metadata(address(stakingToken)).decimals();
     }
 
     /**
-     * @dev Override _update to call both parent implementations
+     * @dev Override _update to call all parent implementations
      */
     function _update(
         address from,
