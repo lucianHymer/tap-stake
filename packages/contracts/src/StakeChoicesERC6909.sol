@@ -6,15 +6,23 @@ import {ERC6909Metadata} from "@openzeppelin/contracts/token/ERC6909/extensions/
 import {ERC6909TokenSupply} from "@openzeppelin/contracts/token/ERC6909/extensions/ERC6909TokenSupply.sol";
 import {ERC6909ContentURI} from "@openzeppelin/contracts/token/ERC6909/extensions/ERC6909ContentURI.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+
+interface IStakeChoicesERC6909 {
+    function addStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external;
+    function removeStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external;
+}
 
 /**
  * @title StakeChoicesERC6909
  * @notice ERC6909-based multi-choice staking with tradeable positions
  * @dev Minimal implementation using OpenZeppelin's ERC6909 with TokenSupply tracking
  */
-contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909TokenSupply, Initializable {
+contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909TokenSupply, Initializable, IStakeChoicesERC6909 {
+    using SafeERC20 for IERC20;
+
     // ============ Constants ============
 
     string private constant ID_NAMESPACE = "v1.stakechoices";
@@ -63,13 +71,13 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
     function addStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external {
         if (choiceIds.length != amounts.length) revert LengthMismatch();
 
-        uint256 totalToAdd;
+        uint256 totalToAdd = 0;
         for (uint256 i = 0; i < choiceIds.length; i++) {
             totalToAdd += amounts[i];
         }
 
         // Transfer staking tokens from user
-        stakingToken.transferFrom(msg.sender, address(this), totalToAdd);
+        stakingToken.safeTransferFrom(msg.sender, address(this), totalToAdd);
 
         // Mint ERC6909 receipt tokens - choiceId IS the tokenId
         for (uint256 i = 0; i < choiceIds.length; i++) {
@@ -85,7 +93,7 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
     function removeStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external {
         if (choiceIds.length != amounts.length) revert LengthMismatch();
 
-        uint256 totalToRemove;
+        uint256 totalToRemove = 0;
         for (uint256 i = 0; i < choiceIds.length; i++) {
             totalToRemove += amounts[i];
         }
@@ -96,7 +104,7 @@ contract StakeChoicesERC6909 is ERC6909ContentURI, ERC6909Metadata, ERC6909Token
         }
 
         // Return staking tokens to user
-        stakingToken.transfer(msg.sender, totalToRemove);
+        stakingToken.safeTransfer(msg.sender, totalToRemove);
     }
 
     // ============ Metadata Functions ============

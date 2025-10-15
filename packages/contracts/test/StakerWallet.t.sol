@@ -38,10 +38,10 @@ contract StakerWalletTest is Test {
     }
 
     function testImmutableConfig() public view {
-        assertEq(wallet.TOKEN_ADDRESS(), address(token));
-        assertEq(wallet.STAKE_CHOICES_ADDRESS(), address(session));
-        assertEq(wallet.RELAYER(), relayer);
-        assertEq(wallet.MAX_STAKE_PER_TX(), 100 ether);
+        assertEq(wallet.tokenAddress(), address(token));
+        assertEq(wallet.stakeChoicesAddress(), address(session));
+        assertEq(wallet.relayer(), relayer);
+        assertEq(wallet.maxStakePerTx(), 100 ether);
     }
 
     function testAddStakesSingleChoice() public {

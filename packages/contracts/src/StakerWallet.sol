@@ -2,6 +2,7 @@
 pragma solidity ^0.8.30;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 interface IStakeChoicesERC6909 {
     function addStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external;
@@ -13,33 +14,40 @@ interface IStakeChoicesERC6909 {
  * @notice EIP-7702 delegation contract for gasless staking with ERC6909 sessions
  * @dev Minimal implementation - relies on ERC6909 events, no duplication
  */
-contract StakerWallet {
+contract StakerWallet is IStakeChoicesERC6909 {
+    using SafeERC20 for IERC20;
+
     // ============ Immutable Config ============
 
-    address public immutable TOKEN_ADDRESS;
-    address public immutable STAKE_CHOICES_ADDRESS;
-    address public immutable RELAYER;
-    uint256 public immutable MAX_STAKE_PER_TX;
+    address public immutable tokenAddress;
+    address public immutable stakeChoicesAddress;
+    address public immutable relayer;
+    uint256 public immutable maxStakePerTx;
 
     // ============ Errors ============
 
     error OnlyRelayer();
     error AmountTooHigh();
+    error ZeroAddress();
 
     // ============ Modifiers ============
 
     modifier onlyRelayer() {
-        if (msg.sender != RELAYER) revert OnlyRelayer();
+        if (msg.sender != relayer) revert OnlyRelayer();
         _;
     }
 
     // ============ Constructor ============
 
-    constructor(address token, address stakeChoicesAddress, address relayer, uint256 maxStakePerTx) {
-        TOKEN_ADDRESS = token;
-        STAKE_CHOICES_ADDRESS = stakeChoicesAddress;
-        RELAYER = relayer;
-        MAX_STAKE_PER_TX = maxStakePerTx;
+    constructor(address _token, address _stakeChoicesAddress, address _relayer, uint256 _maxStakePerTx) {
+        if (_token == address(0)) revert ZeroAddress();
+        if (_stakeChoicesAddress == address(0)) revert ZeroAddress();
+        if (_relayer == address(0)) revert ZeroAddress();
+
+        tokenAddress = _token;
+        stakeChoicesAddress = _stakeChoicesAddress;
+        relayer = _relayer;
+        maxStakePerTx = _maxStakePerTx;
     }
 
     // ============ Staking Functions ============
@@ -51,12 +59,12 @@ contract StakerWallet {
      */
     function addStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external onlyRelayer {
         uint256 total = _sum(amounts);
-        if (total > MAX_STAKE_PER_TX) revert AmountTooHigh();
+        if (total > maxStakePerTx) revert AmountTooHigh();
 
         // Approve session contract for exact amount needed
-        IERC20(TOKEN_ADDRESS).approve(STAKE_CHOICES_ADDRESS, total);
+        IERC20(tokenAddress).safeIncreaseAllowance(stakeChoicesAddress, total);
 
-        IStakeChoicesERC6909(STAKE_CHOICES_ADDRESS).addStakes(choiceIds, amounts);
+        IStakeChoicesERC6909(stakeChoicesAddress).addStakes(choiceIds, amounts);
     }
 
     /**
@@ -65,7 +73,7 @@ contract StakerWallet {
      * @param amounts Array of amounts to remove from each choice
      */
     function removeStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external onlyRelayer {
-        IStakeChoicesERC6909(STAKE_CHOICES_ADDRESS).removeStakes(choiceIds, amounts);
+        IStakeChoicesERC6909(stakeChoicesAddress).removeStakes(choiceIds, amounts);
     }
 
     // ============ Helper Functions ============
