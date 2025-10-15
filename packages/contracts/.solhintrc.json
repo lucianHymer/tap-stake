@@ -1,0 +1,11 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "import-path-check": "off",
+    "immutable-vars-naming": "off",
+    "no-console": "off",
+    "max-line-length": ["error", 120],
+    "compiler-version": ["error", "^0.8.0"],
+    "func-visibility": ["warn", {"ignoreConstructors": true}]
+  }
+}

@@ -2,7 +2,7 @@
 
 # Run solhint linter (uses npx to run from project root)
 lint:
-	npx solhint 'src/**/*.sol' 'script/**/*.sol' 'test/**/*.sol'
+	npx solhint --config .solhintrc.json 'src/**/*.sol'
 
 # Run slither (requires slither-analyzer to be installed)
 slither:
