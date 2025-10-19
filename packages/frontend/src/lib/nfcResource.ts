@@ -1,5 +1,5 @@
-import { getCardData, createNFCAccount } from './nfc';
 import { privateKeyToAccount } from 'viem/accounts';
+import { createNFCAccount, getCardData } from './nfc';
 
 // DEV MODE: Set to true to use a hardcoded test wallet instead of NFC
 const USE_DEV_WALLET = import.meta.env.VITE_USE_DEV_WALLET === 'true';
@@ -16,19 +16,19 @@ class NFCResource {
   private static error: Error | null = null;
 
   static read(): NFCConnection {
-    if (this.error) {
-      throw this.error;
+    if (NFCResource.error) {
+      throw NFCResource.error;
     }
 
-    if (this.result) {
-      return this.result;
+    if (NFCResource.result) {
+      return NFCResource.result;
     }
 
-    if (!this.promise) {
-      this.promise = this.connect();
+    if (!NFCResource.promise) {
+      NFCResource.promise = NFCResource.connect();
     }
 
-    throw this.promise;
+    throw NFCResource.promise;
   }
 
   private static async connect(): Promise<NFCConnection> {
@@ -37,8 +37,8 @@ class NFCResource {
       if (USE_DEV_WALLET) {
         console.log('🔧 DEV MODE: Using hardcoded test wallet');
         const account = privateKeyToAccount(DEV_PRIVATE_KEY as `0x${string}`);
-        this.result = { address: account.address, account };
-        return this.result;
+        NFCResource.result = { address: account.address, account };
+        return NFCResource.result;
       }
 
       // Get card data - this will wait for NFC tap
@@ -50,18 +50,18 @@ class NFCResource {
       // Create the NFC account
       const account = createNFCAccount(address);
 
-      this.result = { address, account };
-      return this.result;
+      NFCResource.result = { address, account };
+      return NFCResource.result;
     } catch (error) {
-      this.error = error instanceof Error ? error : new Error('Failed to connect NFC');
-      throw this.error;
+      NFCResource.error = error instanceof Error ? error : new Error('Failed to connect NFC');
+      throw NFCResource.error;
     }
   }
 
   static reset() {
-    this.promise = null;
-    this.result = null;
-    this.error = null;
+    NFCResource.promise = null;
+    NFCResource.result = null;
+    NFCResource.error = null;
   }
 }
 

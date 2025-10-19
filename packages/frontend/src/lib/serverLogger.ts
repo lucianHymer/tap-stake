@@ -19,7 +19,7 @@ function formatArgs(args: any[]): string {
       if (typeof arg === 'object') {
         try {
           // Handle BigInt serialization
-          return JSON.stringify(arg, (_, v) => (typeof v === 'bigint' ? v.toString() + 'n' : v), 2);
+          return JSON.stringify(arg, (_, v) => (typeof v === 'bigint' ? `${v.toString()}n` : v), 2);
         } catch {
           return String(arg);
         }
@@ -69,7 +69,7 @@ export function initializeServerLogging() {
     originalConsole[level] = console[level];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (console as any)[level] = function (...args: any[]) {
+    (console as any)[level] = (...args: any[]) => {
       // Call original console method
       originalConsole[level]?.apply(console, args);
 

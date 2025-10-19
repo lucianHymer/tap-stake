@@ -1,4 +1,4 @@
-import { createWalletClient, http, type Hex, type Address, encodeFunctionData } from 'viem';
+import { http, type Address, type Hex, createWalletClient, encodeFunctionData } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { optimismSepolia } from 'viem/chains';
 import { recoverAuthorizationAddress } from 'viem/experimental';
@@ -148,13 +148,13 @@ export default {
       }
 
       // Get chain configuration
-      const chainId = parseInt(env.CHAIN_ID);
+      const chainId = Number.parseInt(env.CHAIN_ID);
       const chain = getChainConfig(chainId);
 
       // Validate authorization chain ID matches
       const authChainId =
         typeof body.authorization.chainId === 'string'
-          ? parseInt(body.authorization.chainId)
+          ? Number.parseInt(body.authorization.chainId)
           : body.authorization.chainId;
       if (authChainId !== chainId) {
         return new Response(
@@ -198,7 +198,7 @@ export default {
       // Convert string values to proper types
       const nonceValue =
         typeof body.authorization.nonce === 'string'
-          ? parseInt(body.authorization.nonce)
+          ? Number.parseInt(body.authorization.nonce)
           : Number(body.authorization.nonce);
 
       const authorization = {

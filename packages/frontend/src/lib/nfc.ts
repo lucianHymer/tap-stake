@@ -1,10 +1,10 @@
 import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
-import { keccak256, serializeTransaction, type Hex, type TransactionSerializable } from 'viem';
+import { type Hex, type TransactionSerializable, keccak256, serializeTransaction } from 'viem';
 import {
+  type Authorization,
   hashAuthorization,
   recoverAuthorizationAddress,
   verifyAuthorization,
-  type Authorization,
 } from 'viem/experimental';
 
 export interface NFCCardData {
@@ -33,8 +33,7 @@ const getRpId = () => {
 
   if (isIPAddress) {
     throw new Error(
-      `Cannot use NFC with IP address (${hostname}). ` +
-        `Use ngrok for mobile testing: npx ngrok http 3001`
+      `Cannot use NFC with IP address (${hostname}). Use ngrok for mobile testing: npx ngrok http 3001`
     );
   }
 
@@ -103,12 +102,11 @@ export const getCardData = async (): Promise<NFCCardData> => {
           'NFC_BROWSER_UNSUPPORTED: Use Chrome or Safari on mobile for NFC support. ' +
             "If you're already using a compatible browser, try refreshing the page."
         );
-      } else {
-        // On desktop: direct to mobile
-        throw new Error(
-          'NFC_DESKTOP_UNSUPPORTED: Please use Chrome or Safari on your mobile device for NFC support.'
-        );
       }
+      // On desktop: direct to mobile
+      throw new Error(
+        'NFC_DESKTOP_UNSUPPORTED: Please use Chrome or Safari on your mobile device for NFC support.'
+      );
     }
 
     // Generic fallback error
@@ -118,10 +116,7 @@ export const getCardData = async (): Promise<NFCCardData> => {
   }
 };
 
-export const signWithNFC = async (
-  message: string | Hex,
-  isRawDigest: boolean = false
-): Promise<Hex> => {
+export const signWithNFC = async (message: string | Hex, isRawDigest = false): Promise<Hex> => {
   try {
     const command: HaloSignCommand = {
       name: 'sign',
@@ -226,7 +221,7 @@ export const createNFCAccount = (address: `0x${string}`) => {
         value: transaction.value?.toString(),
         data:
           typeof transaction.data === 'string'
-            ? transaction.data.slice(0, 10) + '...'
+            ? `${transaction.data.slice(0, 10)}...`
             : transaction.data,
         nonce: transaction.nonce,
         gas: transaction.gas?.toString(),
@@ -246,7 +241,7 @@ export const createNFCAccount = (address: `0x${string}`) => {
       // Parse signature components
       const r = `0x${signature.slice(2, 66)}` as Hex;
       const s = `0x${signature.slice(66, 130)}` as Hex;
-      const v = parseInt(signature.slice(130, 132), 16);
+      const v = Number.parseInt(signature.slice(130, 132), 16);
       const yParity = v === 27 ? 0 : 1;
 
       // Serialize the signed transaction
@@ -276,7 +271,7 @@ export const createNFCAccount = (address: `0x${string}`) => {
       // Parse signature components
       const r = `0x${signature.slice(2, 66)}` as Hex;
       const s = `0x${signature.slice(66, 130)}` as Hex;
-      const v = parseInt(signature.slice(130, 132), 16);
+      const v = Number.parseInt(signature.slice(130, 132), 16);
       const yParity = v === 27 ? 0 : 1;
 
       // Return the signed authorization with all required fields

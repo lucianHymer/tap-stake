@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createPublicClient, http, parseEther, type Address } from 'viem';
+import { http, type Address, createPublicClient, parseEther } from 'viem';
 import { optimismSepolia } from 'viem/chains';
 import moloch1 from '../assets/images/moloch1.png';
 import moloch2 from '../assets/images/moloch2.png';

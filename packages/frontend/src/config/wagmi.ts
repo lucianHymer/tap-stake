@@ -1,5 +1,5 @@
-import { createConfig, http } from 'wagmi';
 import { optimismSepolia } from 'viem/chains';
+import { http, createConfig } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 
 export const wagmiConfig = createConfig({

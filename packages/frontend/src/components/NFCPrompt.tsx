@@ -19,8 +19,8 @@ export function NFCPrompt({ onConnect, connecting = false }: NFCPromptProps) {
           <div className="nfc-icon">
             {connecting && (
               <>
-                <div className="nfc-pulse"></div>
-                <div className="nfc-pulse-delayed"></div>
+                <div className="nfc-pulse" />
+                <div className="nfc-pulse-delayed" />
               </>
             )}
             <img

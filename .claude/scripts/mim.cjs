@@ -1,37 +1,37 @@
 #!/usr/bin/env node
-"use strict";
+'use strict';
 
 // src/claude.ts
-var import_child_process = require("child_process");
-var import_fs = require("fs");
-var import_os = require("os");
-var import_path = require("path");
+const import_child_process = require('node:child_process');
+const import_fs = require('node:fs');
+const import_os = require('node:os');
+const import_path = require('node:path');
 
 // src/types.ts
-var Colors = {
-  RED: "\x1B[0;31m",
-  GREEN: "\x1B[0;32m",
-  YELLOW: "\x1B[1;33m",
-  BLUE: "\x1B[0;34m",
-  NC: "\x1B[0m"
+const Colors = {
+  RED: '\x1B[0;31m',
+  GREEN: '\x1B[0;32m',
+  YELLOW: '\x1B[1;33m',
+  BLUE: '\x1B[0;34m',
+  NC: '\x1B[0m',
   // No Color
 };
 
 // src/claude.ts
-var import_readline = require("readline");
-var ALLOWED_TOOLS = "Read,Write,Edit,MultiEdit,Glob,Grep,LS,Bash,Git";
+const import_readline = require('node:readline');
+const ALLOWED_TOOLS = 'Read,Write,Edit,MultiEdit,Glob,Grep,LS,Bash,Git';
 function streamClaudeOutput(line) {
   try {
     const data = JSON.parse(line);
-    if (data.type === "system" && data.subtype === "init" && data.session_id) {
+    if (data.type === 'system' && data.subtype === 'init' && data.session_id) {
       return data.session_id;
     }
-    if (data.message?.content?.[0]?.type === "text") {
+    if (data.message?.content?.[0]?.type === 'text') {
       const text = data.message.content[0].text;
       if (text) {
         console.log(text);
       }
-    } else if (data.message?.content?.[0]?.type === "tool_use") {
+    } else if (data.message?.content?.[0]?.type === 'tool_use') {
       const toolName = data.message.content[0].name;
       if (toolName) {
         console.log(`[Using tool: ${toolName}]`);
@@ -50,42 +50,44 @@ async function runClaude(options) {
     tools = ALLOWED_TOOLS,
     resumeSessionId,
     systemPrompt,
-    captureOutput = false
+    captureOutput = false,
   } = options;
   const args = [];
   if (resumeSessionId) {
-    args.push("--resume", resumeSessionId);
+    args.push('--resume', resumeSessionId);
   }
-  args.push("--verbose");
-  args.push("--allowedTools", tools);
+  args.push('--verbose');
+  args.push('--allowedTools', tools);
   if (systemPrompt) {
-    args.push("--append-system-prompt", systemPrompt);
+    args.push('--append-system-prompt', systemPrompt);
   }
-  args.push("--print");
-  args.push("--output-format", "stream-json");
+  args.push('--print');
+  args.push('--output-format', 'stream-json');
   args.push(prompt);
   return new Promise((resolve) => {
     let tempFile;
     let sessionId;
-    let fullOutput = "";
+    let fullOutput = '';
     if (captureOutput) {
-      const tempDir = (0, import_fs.mkdtempSync)((0, import_path.join)((0, import_os.tmpdir)(), "mim-"));
-      tempFile = (0, import_path.join)(tempDir, "output.txt");
+      const tempDir = (0, import_fs.mkdtempSync)(
+        (0, import_path.join)((0, import_os.tmpdir)(), 'mim-')
+      );
+      tempFile = (0, import_path.join)(tempDir, 'output.txt');
     }
     const writeStream = tempFile ? (0, import_fs.createWriteStream)(tempFile) : null;
-    const child = (0, import_child_process.spawn)("claude", args, {
+    const child = (0, import_child_process.spawn)('claude', args, {
       shell: false,
-      stdio: ["inherit", "pipe", "pipe"]
+      stdio: ['inherit', 'pipe', 'pipe'],
     });
     const rl = (0, import_readline.createInterface)({
       input: child.stdout,
-      crlfDelay: Infinity
+      crlfDelay: Number.POSITIVE_INFINITY,
     });
-    rl.on("line", (line) => {
+    rl.on('line', (line) => {
       if (captureOutput) {
-        fullOutput += line + "\n";
+        fullOutput += `${line}\n`;
         if (writeStream) {
-          writeStream.write(line + "\n");
+          writeStream.write(`${line}\n`);
         }
       }
       const extractedSessionId = streamClaudeOutput(line);
@@ -93,7 +95,7 @@ async function runClaude(options) {
         sessionId = extractedSessionId;
       }
     });
-    child.stderr.on("data", (data) => {
+    child.stderr.on('data', (data) => {
       const text = data.toString();
       if (captureOutput) {
         fullOutput += text;
@@ -103,28 +105,24 @@ async function runClaude(options) {
       }
       process.stderr.write(data);
     });
-    child.on("close", (code) => {
+    child.on('close', (code) => {
       if (writeStream) {
         writeStream.end();
       }
       resolve({
         success: code === 0,
         sessionId,
-        tempFile
+        tempFile,
       });
     });
-    child.on("error", (err) => {
+    child.on('error', (err) => {
       console.error(`${Colors.RED}Failed to start claude: ${err.message}${Colors.NC}`);
       resolve({ success: false });
     });
   });
 }
 async function runSession(session, options = {}) {
-  const {
-    tools = ALLOWED_TOOLS,
-    systemPrompts = [],
-    captureFirstOutput = true
-  } = options;
+  const { tools = ALLOWED_TOOLS, systemPrompts = [], captureFirstOutput = true } = options;
   let sessionId;
   for (let i = 0; i < session.prompts.length; i++) {
     const prompt = session.prompts[i];
@@ -136,7 +134,7 @@ async function runSession(session, options = {}) {
       tools,
       systemPrompt,
       resumeSessionId: i > 0 ? sessionId : void 0,
-      captureOutput: i === 0 && captureFirstOutput
+      captureOutput: i === 0 && captureFirstOutput,
     });
     if (!result.success) {
       console.error(`${Colors.RED}\u274C Prompt ${i + 1} failed${Colors.NC}`);
@@ -149,27 +147,28 @@ async function runSession(session, options = {}) {
     if (result.tempFile) {
       try {
         (0, import_fs.unlinkSync)(result.tempFile);
-      } catch (e) {
-      }
+      } catch (e) {}
     }
   }
   return { success: true, sessionId };
 }
 function ensureInquisitorAgent() {
-  const fs = require("fs");
-  const path = require("path");
-  const agentPath = path.join(process.cwd(), ".claude", "agents", "inquisitor.md");
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const agentPath = path.join(process.cwd(), '.claude', 'agents', 'inquisitor.md');
   if (!fs.existsSync(agentPath)) {
-    console.warn(`${Colors.YELLOW}\u26A0\uFE0F  Inquisitor agent not found at ${agentPath}${Colors.NC}`);
-    console.warn("   Please ensure Mim is properly installed");
+    console.warn(
+      `${Colors.YELLOW}\u26A0\uFE0F  Inquisitor agent not found at ${agentPath}${Colors.NC}`
+    );
+    console.warn('   Please ensure Mim is properly installed');
     return false;
   }
   return true;
 }
 
 // src/prompts.ts
-var COALESCE_COMMAND = {
-  name: "coalesce",
+const COALESCE_COMMAND = {
+  name: 'coalesce',
   sessions: [
     {
       prompts: [
@@ -211,13 +210,13 @@ Documentation structure to create and maintain:
 |-- KNOWLEDGE_MAP.md        # User-facing index with markdown links
 |-- KNOWLEDGE_MAP_CLAUDE.md # Claude-facing index with RELATIVE @ references
 
-After completing all updates, inform the user that documentation has been updated.`
-      ]
-    }
-  ]
+After completing all updates, inform the user that documentation has been updated.`,
+      ],
+    },
+  ],
 };
-var DISTILL_COMMAND = {
-  name: "distill",
+const DISTILL_COMMAND = {
+  name: 'distill',
   sessions: [
     // Generate session (3 prompts)
     {
@@ -351,8 +350,8 @@ Review your synthesis and distill-report.md:
    - Improve clarity of suggestions
    - Update distill-report.md with any changes
 
-Take your time to think through edge cases and ensure the report is thorough and accurate.`
-      ]
+Take your time to think through edge cases and ensure the report is thorough and accurate.`,
+      ],
     },
     // Refine session (1 prompt)
     {
@@ -409,36 +408,41 @@ Take your time to think through edge cases and ensure the report is thorough and
    - Verify consistency between local and global knowledge maps
    - Report completion status and list all files created/modified
 
-IMPORTANT: The report is at ./distill-report.md (repository root). Process Knowledge Relocation section first, then other changes.`
-      ]
-    }
-  ]
+IMPORTANT: The report is at ./distill-report.md (repository root). Process Knowledge Relocation section first, then other changes.`,
+      ],
+    },
+  ],
 };
-var SYSTEM_PROMPTS = {
-  coalesce: "You are M\xEDm's knowledge processor. Your role is to organize raw captured knowledge into structured documentation. You must process every entry, categorize it appropriately, update knowledge maps, and ensure no knowledge is lost.",
-  distillPhase1: "You are M\xEDm's distillation orchestrator, Phase 1: Knowledge Verification. You coordinate multiple inquisitor agents to research and verify each knowledge entry against the current codebase. Launch agents systematically to ensure comprehensive coverage and location context for each entry.",
-  distillPhase2: "You are M\xEDm's distillation synthesizer, Phase 2: Finding Analysis. You process all inquisitor research to identify duplicates, conflicts, and outdated information. You also categorize knowledge by appropriate location (global, local directory, or code comment). Create a clear distill-report.md with proper USER INPUT delimiters for each review item and relocation suggestion.",
-  distillPhase3: "You are M\xEDm's distillation validator, Phase 3: Quality Assurance. You perform edge case analysis and validation of the distill report, including knowledge relocation suggestions. Ensure all USER INPUT delimiters are present, relocation paths are valid, and no valuable knowledge is lost.",
-  refine: "You are M\xEDm's refinement executor. Your role is to apply user decisions from the distill report, including knowledge relocations to subdirectory .knowledge files or code comment suggestions. Parse user input sections carefully, create local knowledge files as needed, and clean up the report when complete."
+const SYSTEM_PROMPTS = {
+  coalesce:
+    "You are M\xEDm's knowledge processor. Your role is to organize raw captured knowledge into structured documentation. You must process every entry, categorize it appropriately, update knowledge maps, and ensure no knowledge is lost.",
+  distillPhase1:
+    "You are M\xEDm's distillation orchestrator, Phase 1: Knowledge Verification. You coordinate multiple inquisitor agents to research and verify each knowledge entry against the current codebase. Launch agents systematically to ensure comprehensive coverage and location context for each entry.",
+  distillPhase2:
+    "You are M\xEDm's distillation synthesizer, Phase 2: Finding Analysis. You process all inquisitor research to identify duplicates, conflicts, and outdated information. You also categorize knowledge by appropriate location (global, local directory, or code comment). Create a clear distill-report.md with proper USER INPUT delimiters for each review item and relocation suggestion.",
+  distillPhase3:
+    "You are M\xEDm's distillation validator, Phase 3: Quality Assurance. You perform edge case analysis and validation of the distill report, including knowledge relocation suggestions. Ensure all USER INPUT delimiters are present, relocation paths are valid, and no valuable knowledge is lost.",
+  refine:
+    "You are M\xEDm's refinement executor. Your role is to apply user decisions from the distill report, including knowledge relocations to subdirectory .knowledge files or code comment suggestions. Parse user input sections carefully, create local knowledge files as needed, and clean up the report when complete.",
 };
 
 // src/commands/coalesce.ts
 async function coalesce() {
-  console.log("\u{1F504} Running mim coalesce...");
-  console.log("Processing remembered knowledge from session.md...");
-  console.log("");
+  console.log('\u{1F504} Running mim coalesce...');
+  console.log('Processing remembered knowledge from session.md...');
+  console.log('');
   const session = COALESCE_COMMAND.sessions[0];
   const prompt = session.prompts[0];
   const result = await runClaude({
     prompt,
-    systemPrompt: SYSTEM_PROMPTS.coalesce
+    systemPrompt: SYSTEM_PROMPTS.coalesce,
   });
   if (result.success) {
-    console.log("");
-    console.log("\u2728 Coalesce complete!");
-    console.log("");
-    console.log("\u{1F4DA} Knowledge processed and organized");
-    console.log("\u{1F4CD} Check .claude/knowledge/ for updated documentation");
+    console.log('');
+    console.log('\u2728 Coalesce complete!');
+    console.log('');
+    console.log('\u{1F4DA} Knowledge processed and organized');
+    console.log('\u{1F4CD} Check .claude/knowledge/ for updated documentation');
   } else {
     console.error(`${Colors.RED}\u274C Coalesce failed${Colors.NC}`);
     process.exit(1);
@@ -446,19 +450,19 @@ async function coalesce() {
 }
 
 // src/commands/distill.ts
-var import_fs2 = require("fs");
-var import_child_process2 = require("child_process");
-var ALLOWED_TOOLS2 = "Read,Write,Edit,MultiEdit,Glob,Grep,LS,Bash,Git";
-var ALLOWED_TOOLS_WITH_TASK = `${ALLOWED_TOOLS2},Task`;
+const import_fs2 = require('node:fs');
+const import_child_process2 = require('node:child_process');
+const ALLOWED_TOOLS2 = 'Read,Write,Edit,MultiEdit,Glob,Grep,LS,Bash,Git';
+const ALLOWED_TOOLS_WITH_TASK = `${ALLOWED_TOOLS2},Task`;
 async function distillGenerate() {
   if (!ensureInquisitorAgent()) {
     return false;
   }
   const generateSession = DISTILL_COMMAND.sessions[0];
-  console.log("\u{1F50D} Starting distill generation...");
-  console.log("Phase 1: Launching inquisitor agents...");
-  console.log("Phase 2: Processing findings...");
-  console.log("Phase 3: Edge case review...");
+  console.log('\u{1F50D} Starting distill generation...');
+  console.log('Phase 1: Launching inquisitor agents...');
+  console.log('Phase 2: Processing findings...');
+  console.log('Phase 3: Edge case review...');
   const result = await runSession(generateSession, {
     // First prompt uses Task tool for agents, others use regular tools
     // TODO: Consider allowing per-prompt tools configuration in runSession
@@ -466,9 +470,9 @@ async function distillGenerate() {
     systemPrompts: [
       SYSTEM_PROMPTS.distillPhase1,
       SYSTEM_PROMPTS.distillPhase2,
-      SYSTEM_PROMPTS.distillPhase3
+      SYSTEM_PROMPTS.distillPhase3,
     ],
-    captureFirstOutput: true
+    captureFirstOutput: true,
   });
   if (!result.success) {
     console.error(`${Colors.RED}\u274C Distill generation failed${Colors.NC}`);
@@ -478,67 +482,74 @@ async function distillGenerate() {
     console.error(`${Colors.RED}\u274C Failed to extract session ID${Colors.NC}`);
     return false;
   }
-  console.log("");
-  console.log("\u2728 Distillation complete!");
-  if ((0, import_fs2.existsSync)("./distill-report.md")) {
-    console.log("");
-    console.log("\u{1F4CB} Distill report generated at ./distill-report.md");
-    const report = (0, import_fs2.readFileSync)("./distill-report.md", "utf-8");
-    if (report.includes("## Requires Review")) {
-      return true;
-    } else {
-      console.log("   \u2713 Only automatic fixes found, no manual review needed");
+  console.log('');
+  console.log('\u2728 Distillation complete!');
+  if ((0, import_fs2.existsSync)('./distill-report.md')) {
+    console.log('');
+    console.log('\u{1F4CB} Distill report generated at ./distill-report.md');
+    const report = (0, import_fs2.readFileSync)('./distill-report.md', 'utf-8');
+    if (report.includes('## Requires Review')) {
       return true;
     }
+    console.log('   \u2713 Only automatic fixes found, no manual review needed');
+    return true;
   }
   return true;
 }
 async function distillRefine() {
-  if (!(0, import_fs2.existsSync)("./distill-report.md")) {
-    console.warn(`${Colors.YELLOW}\u26A0\uFE0F  No distill report found at ./distill-report.md${Colors.NC}`);
+  if (!(0, import_fs2.existsSync)('./distill-report.md')) {
+    console.warn(
+      `${Colors.YELLOW}\u26A0\uFE0F  No distill report found at ./distill-report.md${Colors.NC}`
+    );
     console.warn("   Run 'mim distill' first to generate a report");
     return;
   }
-  console.log("\u{1F4CB} Applying refinements from distill-report.md...");
-  console.log("");
+  console.log('\u{1F4CB} Applying refinements from distill-report.md...');
+  console.log('');
   const refineSession = DISTILL_COMMAND.sessions[1];
   const prompt = refineSession.prompts[0];
   const result = await runClaude({
     prompt,
-    systemPrompt: SYSTEM_PROMPTS.refine
+    systemPrompt: SYSTEM_PROMPTS.refine,
   });
   if (result.success) {
-    console.log("");
-    console.log("\u2728 Refinement complete!");
-    console.log("");
-    if ((0, import_fs2.existsSync)("./distill-report.md")) {
-      console.warn(`${Colors.YELLOW}\u26A0\uFE0F  Note: distill-report.md still exists${Colors.NC}`);
-      console.warn("   This might indicate the refinement was incomplete");
+    console.log('');
+    console.log('\u2728 Refinement complete!');
+    console.log('');
+    if ((0, import_fs2.existsSync)('./distill-report.md')) {
+      console.warn(
+        `${Colors.YELLOW}\u26A0\uFE0F  Note: distill-report.md still exists${Colors.NC}`
+      );
+      console.warn('   This might indicate the refinement was incomplete');
     } else {
-      console.log("\u2713 All refinements applied successfully");
-      console.log("\u2713 Distill report cleaned up");
+      console.log('\u2713 All refinements applied successfully');
+      console.log('\u2713 Distill report cleaned up');
     }
   } else {
     console.error(`${Colors.RED}\u274C Refinement failed${Colors.NC}`);
-    console.error("   Check distill-report.md and try again");
+    console.error('   Check distill-report.md and try again');
     process.exit(1);
   }
 }
 async function distill(options) {
-  console.log("\u{1F9F9} Running mim distill...");
-  console.log("\u{1F50D} Scanning documentation for duplicates, conflicts, junk, and outdated information...");
-  console.log("");
-  console.log("   [This may take several minutes to analyze all documentation]");
-  console.log("");
+  console.log('\u{1F9F9} Running mim distill...');
+  console.log(
+    '\u{1F50D} Scanning documentation for duplicates, conflicts, junk, and outdated information...'
+  );
+  console.log('');
+  console.log('   [This may take several minutes to analyze all documentation]');
+  console.log('');
   const { noInteractive, customEditor, refineOnly } = options;
-  const editorCmd = customEditor || process.env.EDITOR || "nano";
+  const editorCmd = customEditor || process.env.EDITOR || 'nano';
   if (refineOnly) {
-    if (!(0, import_fs2.existsSync)("./distill-report.md")) {
-      console.warn(`${Colors.YELLOW}\u26A0\uFE0F  No distill-report.md found. Run 'mim distill' first.${Colors.NC}`);
+    if (!(0, import_fs2.existsSync)('./distill-report.md')) {
+      console.warn(
+        `${Colors.YELLOW}\u26A0\uFE0F  No distill-report.md found. Run 'mim distill' first.${Colors.NC}`
+      );
       process.exit(1);
     }
-    console.log("\u{1F4CB} Found existing distill-report.md");
-    console.log("\u{1F504} Applying refinements...");
+    console.log('\u{1F4CB} Found existing distill-report.md');
+    console.log('\u{1F504} Applying refinements...');
     await distillRefine();
     return;
   }
@@ -547,48 +558,50 @@ async function distill(options) {
     process.exit(1);
   }
   if (noInteractive) {
-    console.log("");
+    console.log('');
     console.log(`${Colors.YELLOW}\u{1F4CB} Review required before applying changes${Colors.NC}`);
-    console.log("");
-    console.log("Next steps:");
+    console.log('');
+    console.log('Next steps:');
     console.log(`  1. Review and edit: ${Colors.BLUE}${editorCmd} ./distill-report.md${Colors.NC}`);
-    console.log("  2. Add your decisions in the <!-- USER INPUT --> sections");
+    console.log('  2. Add your decisions in the <!-- USER INPUT --> sections');
     console.log(`  3. Apply changes: ${Colors.BLUE}mim distill --refine-only${Colors.NC}`);
-    console.log("");
-    console.log(`Or use interactive mode: ${Colors.BLUE}mim distill${Colors.NC} (opens editor automatically)`);
+    console.log('');
+    console.log(
+      `Or use interactive mode: ${Colors.BLUE}mim distill${Colors.NC} (opens editor automatically)`
+    );
   } else {
-    if ((0, import_fs2.existsSync)("./distill-report.md")) {
-      const report = (0, import_fs2.readFileSync)("./distill-report.md", "utf-8");
-      if (report.includes("## Requires Review")) {
+    if ((0, import_fs2.existsSync)('./distill-report.md')) {
+      const report = (0, import_fs2.readFileSync)('./distill-report.md', 'utf-8');
+      if (report.includes('## Requires Review')) {
         await new Promise((resolve) => {
-          console.log("");
-          console.log("\u{1F4DD} Opening distill-report.md for your review...");
-          console.log("   Please add your decisions in the <!-- USER INPUT --> sections");
-          console.log("");
-          const child = (0, import_child_process2.spawn)(editorCmd, ["./distill-report.md"], {
-            stdio: "inherit",
-            shell: true
+          console.log('');
+          console.log('\u{1F4DD} Opening distill-report.md for your review...');
+          console.log('   Please add your decisions in the <!-- USER INPUT --> sections');
+          console.log('');
+          const child = (0, import_child_process2.spawn)(editorCmd, ['./distill-report.md'], {
+            stdio: 'inherit',
+            shell: true,
           });
-          child.on("close", () => {
+          child.on('close', () => {
             resolve();
           });
-          child.on("error", (err) => {
+          child.on('error', (err) => {
             console.error(`${Colors.RED}Failed to open editor: ${err.message}${Colors.NC}`);
             resolve();
           });
         });
-        console.log("");
-        console.log("\u{1F504} Applying your refinements...");
+        console.log('');
+        console.log('\u{1F504} Applying your refinements...');
         await distillRefine();
       } else {
-        console.log("");
-        console.log("\u2728 No manual review needed - only automatic fixes were found");
-        console.log("\u{1F504} Applying automatic fixes...");
+        console.log('');
+        console.log('\u2728 No manual review needed - only automatic fixes were found');
+        console.log('\u{1F504} Applying automatic fixes...');
         await distillRefine();
       }
     } else {
-      console.log("");
-      console.log("\u2728 Distillation complete! No issues found.");
+      console.log('');
+      console.log('\u2728 Distillation complete! No issues found.');
     }
   }
 }
@@ -621,33 +634,37 @@ Learn more: https://github.com/lucianHymer/mim`);
 function parseDistillOptions(args) {
   const options = {
     noInteractive: false,
-    refineOnly: false
+    refineOnly: false,
   };
   let i = 0;
   while (i < args.length) {
     const arg = args[i];
     switch (arg) {
-      case "--no-interactive":
-      case "-n":
+      case '--no-interactive':
+      case '-n':
         options.noInteractive = true;
         i++;
         break;
-      case "--editor":
+      case '--editor':
         options.customEditor = args[i + 1];
         if (!options.customEditor) {
           console.error(`${Colors.RED}--editor requires a value${Colors.NC}`);
-          console.error("Usage: mim distill [--no-interactive|-n] [--editor <command>] [--refine-only]");
+          console.error(
+            'Usage: mim distill [--no-interactive|-n] [--editor <command>] [--refine-only]'
+          );
           process.exit(1);
         }
         i += 2;
         break;
-      case "--refine-only":
+      case '--refine-only':
         options.refineOnly = true;
         i++;
         break;
       default:
         console.error(`${Colors.RED}Unknown option: ${arg}${Colors.NC}`);
-        console.error("Usage: mim distill [--no-interactive|-n] [--editor <command>] [--refine-only]");
+        console.error(
+          'Usage: mim distill [--no-interactive|-n] [--editor <command>] [--refine-only]'
+        );
         process.exit(1);
     }
   }
@@ -657,31 +674,32 @@ async function main() {
   const args = process.argv.slice(2);
   const command = args[0];
   switch (command) {
-    case "coalesce":
+    case 'coalesce':
       await coalesce();
       break;
-    case "distill":
+    case 'distill': {
       const distillOptions = parseDistillOptions(args.slice(1));
       await distill(distillOptions);
       break;
-    case "help":
-    case "--help":
-    case "-h":
+    }
+    case 'help':
+    case '--help':
+    case '-h':
     case void 0:
       showHelp();
       break;
     default:
       console.error(`${Colors.RED}Unknown command: ${command}${Colors.NC}`);
-      console.error("");
+      console.error('');
       showHelp();
       process.exit(1);
   }
 }
-process.on("uncaughtException", (err) => {
+process.on('uncaughtException', (err) => {
   console.error(`${Colors.RED}Uncaught error: ${err.message}${Colors.NC}`);
   process.exit(1);
 });
-process.on("unhandledRejection", (err) => {
+process.on('unhandledRejection', (err) => {
   console.error(`${Colors.RED}Unhandled rejection: ${err}${Colors.NC}`);
   process.exit(1);
 });
