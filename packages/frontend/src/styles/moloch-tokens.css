@@ -46,7 +46,7 @@
   --core-radius-sm: 6px;
   --core-radius-md: 12px;
   --core-radius-lg: 20px;
-  --core-radius-pill: 999px;
+  --core-radius-pill: 50px;
   --core-shadow-elev-0: none;
   --core-shadow-elev-1: 0 4px 12px rgba(0,0,0,0.25);
   --core-shadow-elev-2: 0 8px 24px rgba(0,0,0,0.35);

@@ -6,6 +6,7 @@ import { DemonSlayer } from './components/DemonSlayer';
 import { NFCErrorBoundary } from './components/NFCErrorBoundary';
 import { NFCPrompt } from './components/NFCPrompt';
 import { ButtonDemo } from './pages/ButtonDemo';
+import { ToggleButtonDemo } from './pages/ToggleButtonDemo';
 import { wagmiConfig } from './config/wagmi';
 import { readNFCConnection } from './lib/nfcResource';
 import './App.css';
@@ -57,6 +58,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/button-demo" element={<ButtonDemo />} />
+            <Route path="/toggle-demo" element={<ToggleButtonDemo />} />
           </Routes>
         </HashRouter>
       </QueryClientProvider>
