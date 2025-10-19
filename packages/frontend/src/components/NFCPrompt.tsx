@@ -19,24 +19,20 @@ export function NFCPrompt({ onConnect, connecting = false }: NFCPromptProps) {
           <div className="nfc-icon">
             {connecting && (
               <>
-                <div className="nfc-pulse"></div>
-                <div className="nfc-pulse-delayed"></div>
+                <div className="nfc-pulse" />
+                <div className="nfc-pulse-delayed" />
               </>
             )}
             <img
               src={baphometImage}
               alt="Baphomet"
               className="nfc-symbol"
-              style={{width: '120px', height: '120px', objectFit: 'contain', filter: 'invert(1)'}}
+              style={{ width: '120px', height: '120px', objectFit: 'contain', filter: 'invert(1)' }}
             />
           </div>
         </div>
 
-        <button
-          onClick={onConnect}
-          className="retry-button"
-          disabled={connecting}
-        >
+        <button onClick={onConnect} className="retry-button" disabled={connecting}>
           {connecting ? 'CONNECTING...' : 'CONNECT NFC'}
         </button>
       </div>

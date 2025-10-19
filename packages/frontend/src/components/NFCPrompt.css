@@ -79,7 +79,7 @@
 .nfc-prompt-text {
   color: #aa0000;
   font-size: 1.2rem;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -87,7 +87,7 @@
 .nfc-prompt-waiting {
   font-size: 3rem;
   color: #ff0000;
-  font-family: 'Bebas Neue', cursive;
+  font-family: "Bebas Neue", cursive;
 }
 
 .nfc-prompt-waiting span {
@@ -104,7 +104,9 @@
 }
 
 @keyframes bounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0.8);
     opacity: 0.5;
   }

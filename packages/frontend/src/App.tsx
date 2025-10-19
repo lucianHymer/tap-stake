@@ -1,12 +1,12 @@
-import { Suspense, useState } from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
-import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Suspense, useState } from 'react';
+import { HashRouter, Route, Routes } from 'react-router-dom';
+import { WagmiProvider } from 'wagmi';
+import { DemonSlayer } from './components/DemonSlayer';
 import { NFCErrorBoundary } from './components/NFCErrorBoundary';
 import { NFCPrompt } from './components/NFCPrompt';
-import { DemonSlayer } from './components/DemonSlayer';
-import { readNFCConnection } from './lib/nfcResource';
 import { wagmiConfig } from './config/wagmi';
+import { readNFCConnection } from './lib/nfcResource';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -34,12 +34,14 @@ function HomePage() {
 
 function AdminPage() {
   return (
-    <div style={{
-      color: '#ff0000',
-      textAlign: 'center',
-      marginTop: '100px',
-      fontSize: '2rem'
-    }}>
+    <div
+      style={{
+        color: '#ff0000',
+        textAlign: 'center',
+        marginTop: '100px',
+        fontSize: '2rem',
+      }}
+    >
       TODO: Admin panel
     </div>
   );
@@ -60,4 +62,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

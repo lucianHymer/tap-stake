@@ -15,7 +15,7 @@ interface State {
 export class NFCErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    error: null
+    error: null,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -38,14 +38,15 @@ export class NFCErrorBoundary extends Component<Props, State> {
     if (colonIndex !== -1) {
       return {
         title: 'CONNECTION FAILED',
-        message: errorMessage.substring(colonIndex + 1).trim()
+        message: errorMessage.substring(colonIndex + 1).trim(),
       };
     }
 
     // Fallback for other errors
     return {
       title: 'CONNECTION FAILED',
-      message: 'An unexpected error occurred. Please try again or check the technical details below.'
+      message:
+        'An unexpected error occurred. Please try again or check the technical details below.',
     };
   }
 
@@ -56,15 +57,11 @@ export class NFCErrorBoundary extends Component<Props, State> {
       return (
         <div className="nfc-error-container">
           <div className="nfc-error-content">
-            <h1 className="nfc-error-title">
-              {parsedError.title}
-            </h1>
+            <h1 className="nfc-error-title">{parsedError.title}</h1>
 
             <div className="error-icon">⚠️</div>
 
-            <p className="nfc-error-message">
-              {parsedError.message}
-            </p>
+            <p className="nfc-error-message">{parsedError.message}</p>
 
             <button className="retry-button" onClick={this.handleRetry}>
               TRY AGAIN

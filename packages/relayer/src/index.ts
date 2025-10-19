@@ -1,10 +1,4 @@
-import {
-  createWalletClient,
-  http,
-  type Hex,
-  type Address,
-  encodeFunctionData
-} from 'viem';
+import { http, type Address, type Hex, createWalletClient, encodeFunctionData } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { optimismSepolia } from 'viem/chains';
 import { recoverAuthorizationAddress } from 'viem/experimental';
@@ -41,7 +35,7 @@ interface RelayResponse {
 // Helper to parse approved choice IDs from environment
 function parseApprovedChoiceIds(env: Env): bigint[] {
   try {
-    return env.APPROVED_CHOICE_IDS.split(',').map(id => BigInt(id.trim()));
+    return env.APPROVED_CHOICE_IDS.split(',').map((id) => BigInt(id.trim()));
   } catch (error) {
     throw new Error('Invalid APPROVED_CHOICE_IDS configuration');
   }
@@ -77,18 +71,18 @@ export default {
         JSON.stringify({
           success: false,
           error: 'Method not allowed',
-          details: 'Only POST requests are accepted'
+          details: 'Only POST requests are accepted',
         }),
         {
           status: 405,
-          headers: corsHeaders
+          headers: corsHeaders,
         }
       );
     }
 
     try {
       // Parse request body
-      const body = await request.json() as RelayRequest;
+      const body = (await request.json()) as RelayRequest;
 
       // Validate required fields
       if (!body.authorization || !body.choiceIds || !body.amounts) {
@@ -96,11 +90,11 @@ export default {
           JSON.stringify({
             success: false,
             error: 'Missing required fields',
-            details: 'Request must include authorization, choiceIds, and amounts fields'
+            details: 'Request must include authorization, choiceIds, and amounts fields',
           }),
           {
             status: 400,
-            headers: corsHeaders
+            headers: corsHeaders,
           }
         );
       }
@@ -111,11 +105,11 @@ export default {
           JSON.stringify({
             success: false,
             error: 'Array length mismatch',
-            details: `choiceIds length (${body.choiceIds.length}) must match amounts length (${body.amounts.length})`
+            details: `choiceIds length (${body.choiceIds.length}) must match amounts length (${body.amounts.length})`,
           }),
           {
             status: 400,
-            headers: corsHeaders
+            headers: corsHeaders,
           }
         );
       }
@@ -126,11 +120,11 @@ export default {
           JSON.stringify({
             success: false,
             error: 'Empty arrays',
-            details: 'Must provide at least one choice to stake'
+            details: 'Must provide at least one choice to stake',
           }),
           {
             status: 400,
-            headers: corsHeaders
+            headers: corsHeaders,
           }
         );
       }
@@ -144,33 +138,34 @@ export default {
           JSON.stringify({
             success: false,
             error: 'Too many choices',
-            details: `Maximum ${approvedChoiceIds.length} choices allowed, got ${body.choiceIds.length}`
+            details: `Maximum ${approvedChoiceIds.length} choices allowed, got ${body.choiceIds.length}`,
           }),
           {
             status: 400,
-            headers: corsHeaders
+            headers: corsHeaders,
           }
         );
       }
 
       // Get chain configuration
-      const chainId = parseInt(env.CHAIN_ID);
+      const chainId = Number.parseInt(env.CHAIN_ID);
       const chain = getChainConfig(chainId);
 
       // Validate authorization chain ID matches
-      const authChainId = typeof body.authorization.chainId === 'string'
-        ? parseInt(body.authorization.chainId)
-        : body.authorization.chainId;
+      const authChainId =
+        typeof body.authorization.chainId === 'string'
+          ? Number.parseInt(body.authorization.chainId)
+          : body.authorization.chainId;
       if (authChainId !== chainId) {
         return new Response(
           JSON.stringify({
             success: false,
             error: 'Chain ID mismatch',
-            details: `Authorization chain ID ${authChainId} does not match relayer chain ID ${chainId}`
+            details: `Authorization chain ID ${authChainId} does not match relayer chain ID ${chainId}`,
           }),
           {
             status: 400,
-            headers: corsHeaders
+            headers: corsHeaders,
           }
         );
       }
@@ -183,11 +178,11 @@ export default {
           JSON.stringify({
             success: false,
             error: 'Contract address not allowed',
-            details: `Authorization contract address ${body.authorization.address} does not match allowed address ${env.ALLOWED_CONTRACT_ADDRESS}`
+            details: `Authorization contract address ${body.authorization.address} does not match allowed address ${env.ALLOWED_CONTRACT_ADDRESS}`,
           }),
           {
             status: 403,
-            headers: corsHeaders
+            headers: corsHeaders,
           }
         );
       }
@@ -201,9 +196,10 @@ export default {
       });
 
       // Convert string values to proper types
-      const nonceValue = typeof body.authorization.nonce === 'string'
-        ? parseInt(body.authorization.nonce)
-        : Number(body.authorization.nonce);
+      const nonceValue =
+        typeof body.authorization.nonce === 'string'
+          ? Number.parseInt(body.authorization.nonce)
+          : Number(body.authorization.nonce);
 
       const authorization = {
         address: body.authorization.address,
@@ -237,11 +233,11 @@ export default {
           JSON.stringify({
             success: false,
             error: 'Invalid authorization signature',
-            details: 'Could not recover signer from authorization'
+            details: 'Could not recover signer from authorization',
           }),
           {
             status: 400,
-            headers: corsHeaders
+            headers: corsHeaders,
           }
         );
       }
@@ -249,10 +245,10 @@ export default {
       // Parse and validate choice IDs and amounts
       const choiceIds: bigint[] = [];
       const amounts: bigint[] = [];
-      const MAX_STAKE_PER_TX = BigInt("1000000000000000000000"); // 1000 tokens
+      const MAX_STAKE_PER_TX = BigInt('1000000000000000000000'); // 1000 tokens
 
       // Create a Set for efficient lookup
-      const approvedChoiceIdsSet = new Set(approvedChoiceIds.map(id => id.toString()));
+      const approvedChoiceIdsSet = new Set(approvedChoiceIds.map((id) => id.toString()));
 
       for (let i = 0; i < body.choiceIds.length; i++) {
         const choiceId = BigInt(body.choiceIds[i]);
@@ -264,11 +260,11 @@ export default {
             JSON.stringify({
               success: false,
               error: 'Invalid choice ID',
-              details: `Choice ID ${choiceId} is not in the approved list of choices`
+              details: `Choice ID ${choiceId} is not in the approved list of choices`,
             }),
             {
               status: 400,
-              headers: corsHeaders
+              headers: corsHeaders,
             }
           );
         }
@@ -279,11 +275,11 @@ export default {
             JSON.stringify({
               success: false,
               error: 'Invalid amount',
-              details: `Amount for choice ${choiceId} must be greater than 0`
+              details: `Amount for choice ${choiceId} must be greater than 0`,
             }),
             {
               status: 400,
-              headers: corsHeaders
+              headers: corsHeaders,
             }
           );
         }
@@ -299,11 +295,11 @@ export default {
           JSON.stringify({
             success: false,
             error: 'Total amount too high',
-            details: `Total amount ${totalAmount.toString()} exceeds maximum ${MAX_STAKE_PER_TX.toString()}`
+            details: `Total amount ${totalAmount.toString()} exceeds maximum ${MAX_STAKE_PER_TX.toString()}`,
           }),
           {
             status: 400,
-            headers: corsHeaders
+            headers: corsHeaders,
           }
         );
       }
@@ -311,11 +307,11 @@ export default {
       // Build the addStakes call data
       const STAKER_WALLET_ABI = [
         {
-          name: "addStakes",
-          type: "function",
+          name: 'addStakes',
+          type: 'function',
           inputs: [
-            { name: "choiceIds", type: "uint256[]" },
-            { name: "amounts", type: "uint256[]" }
+            { name: 'choiceIds', type: 'uint256[]' },
+            { name: 'amounts', type: 'uint256[]' },
           ],
           outputs: [],
         },
@@ -323,7 +319,7 @@ export default {
 
       const callData = encodeFunctionData({
         abi: STAKER_WALLET_ABI,
-        functionName: "addStakes",
+        functionName: 'addStakes',
         args: [choiceIds, amounts],
       });
 
@@ -362,17 +358,16 @@ export default {
             chainId,
             eoa: signerAddress,
             delegatedTo: authorization.address,
-            choiceIds: choiceIds.map(id => id.toString()),
-            amounts: amounts.map(amt => amt.toString()),
+            choiceIds: choiceIds.map((id) => id.toString()),
+            amounts: amounts.map((amt) => amt.toString()),
             totalAmount: totalAmount.toString(),
-          }
+          },
         } as RelayResponse),
         {
           status: 200,
-          headers: corsHeaders
+          headers: corsHeaders,
         }
       );
-
     } catch (error) {
       if (env.ENVIRONMENT !== 'production') {
         // eslint-disable-next-line no-console
@@ -403,7 +398,7 @@ export default {
         } as RelayResponse),
         {
           status: 500,
-          headers: corsHeaders
+          headers: corsHeaders,
         }
       );
     }

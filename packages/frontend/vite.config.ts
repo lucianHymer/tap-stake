@@ -1,12 +1,12 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import basicSsl from "@vitejs/plugin-basic-ssl";
-import { nodePolyfills } from "vite-plugin-node-polyfills";
-import { serverLogger } from "./vite-plugin-logger";
+import basicSsl from '@vitejs/plugin-basic-ssl';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { serverLogger } from './vite-plugin-logger';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/tap-stake/",
+  base: '/tap-stake/',
   plugins: [
     react(),
     ...(process.env.DISABLE_SSL !== 'true' ? [basicSsl()] : []),
@@ -25,6 +25,6 @@ export default defineConfig({
     host: true,
   },
   define: {
-    global: "globalThis",
+    global: 'globalThis',
   },
 });

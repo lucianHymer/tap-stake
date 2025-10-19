@@ -1,5 +1,5 @@
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
-import type { IncomingMessage, ServerResponse } from 'http';
 
 // ANSI color codes for terminal output
 const colors = {
@@ -52,7 +52,7 @@ export function serverLogger(): Plugin {
 async function handleLogRequest(req: IncomingMessage, res: ServerResponse) {
   let body = '';
 
-  req.on('data', (chunk) => {
+  req.on('data', (chunk: Buffer) => {
     body += chunk.toString();
   });
 
@@ -99,7 +99,7 @@ async function handleLogRequest(req: IncomingMessage, res: ServerResponse) {
     }
   });
 
-  req.on('error', (error) => {
+  req.on('error', (error: Error) => {
     console.error('Error receiving log data:', error);
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Server error' }));

@@ -3,7 +3,7 @@
 
 const LOG_ENDPOINT = '/api/log';
 const LOG_LEVELS = ['log', 'warn', 'error', 'info', 'debug'] as const;
-type LogLevel = typeof LOG_LEVELS[number];
+type LogLevel = (typeof LOG_LEVELS)[number];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ConsoleMethod = (...args: any[]) => void;
@@ -14,17 +14,19 @@ const originalConsole: Partial<Record<LogLevel, ConsoleMethod>> = {};
 // Format log arguments for display
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function formatArgs(args: any[]): string {
-  return args.map(arg => {
-    if (typeof arg === 'object') {
-      try {
-        // Handle BigInt serialization
-        return JSON.stringify(arg, (_, v) => typeof v === 'bigint' ? v.toString() + 'n' : v, 2);
-      } catch {
-        return String(arg);
+  return args
+    .map((arg) => {
+      if (typeof arg === 'object') {
+        try {
+          // Handle BigInt serialization
+          return JSON.stringify(arg, (_, v) => (typeof v === 'bigint' ? `${v.toString()}n` : v), 2);
+        } catch {
+          return String(arg);
+        }
       }
-    }
-    return String(arg);
-  }).join(' ');
+      return String(arg);
+    })
+    .join(' ');
 }
 
 // Send log to server
@@ -63,11 +65,11 @@ export function initializeServerLogging() {
   console.log('🔌 Server logging initialized - all console output will be sent to dev server');
 
   // Intercept console methods
-  LOG_LEVELS.forEach(level => {
+  LOG_LEVELS.forEach((level) => {
     originalConsole[level] = console[level];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (console as any)[level] = function(...args: any[]) {
+    (console as any)[level] = (...args: any[]) => {
       // Call original console method
       originalConsole[level]?.apply(console, args);
 
@@ -82,21 +84,18 @@ export function initializeServerLogging() {
       'Uncaught Error:',
       event.message,
       `at ${event.filename}:${event.lineno}:${event.colno}`,
-      event.error?.stack || ''
+      event.error?.stack || '',
     ]);
   });
 
   window.addEventListener('unhandledrejection', (event) => {
-    sendLogToServer('error', [
-      'Unhandled Promise Rejection:',
-      event.reason
-    ]);
+    sendLogToServer('error', ['Unhandled Promise Rejection:', event.reason]);
   });
 }
 
 // Restore original console methods (useful for cleanup)
 export function disableServerLogging() {
-  LOG_LEVELS.forEach(level => {
+  LOG_LEVELS.forEach((level) => {
     if (originalConsole[level]) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (console as any)[level] = originalConsole[level];
