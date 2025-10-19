@@ -116,7 +116,7 @@
   --component-button-primary-radius: var(--core-radius-lg);
   --component-button-primary-shadow: var(--core-shadow-elev-1);
   --component-button-outline-border: var(--semantic-border-default);
-  --component-button-outline-radius: var(--core-radius-lg);
+  --component-button-outline-radius: var(--core-radius-pill);
   --component-button-pill-bg-top: var(--core-color-white);
   --component-button-pill-border: var(--core-color-accent-red);
   --component-button-pill-radius: var(--core-radius-pill);

@@ -1,0 +1,17 @@
+@import "../styles/moloch-tokens.css";
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--semantic-bg-primary);
+  padding: var(--core-spacing-6);
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-spacing-9);
+  align-items: center;
+}

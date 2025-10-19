@@ -7,6 +7,9 @@ import { initializeServerLogging } from './lib/serverLogger';
 // Initialize server logging for development
 initializeServerLogging();
 
+// Set Moloch theme on root element
+document.documentElement.setAttribute('data-theme', 'moloch');
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

@@ -290,7 +290,7 @@
           "value": "{semantic.border.default}"
         },
         "radius": {
-          "value": "{core.radius.lg}"
+          "value": "{core.radius.pill}"
         }
       },
       "pill": {

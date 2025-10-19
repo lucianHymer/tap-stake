@@ -5,6 +5,7 @@ import { WagmiProvider } from 'wagmi';
 import { DemonSlayer } from './components/DemonSlayer';
 import { NFCErrorBoundary } from './components/NFCErrorBoundary';
 import { NFCPrompt } from './components/NFCPrompt';
+import { ButtonDemo } from './pages/ButtonDemo';
 import { wagmiConfig } from './config/wagmi';
 import { readNFCConnection } from './lib/nfcResource';
 import './App.css';
@@ -55,6 +56,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/button-demo" element={<ButtonDemo />} />
           </Routes>
         </HashRouter>
       </QueryClientProvider>
