@@ -55,7 +55,7 @@ contract StakeChoicesERC6909 is
     /// @notice The ERC20 token used for staking
     IERC20 public stakingToken;
 
-    /// @notice Human-readable name for this staking session
+    /// @notice Human-readable name for this staking multi-token
     string private _name;
 
     /// @notice Address of the factory contract that deployed this instance
@@ -82,7 +82,7 @@ contract StakeChoicesERC6909 is
     /**
      * @notice Initialize a cloned token instance
      * @param stakingToken_ The ERC20 token used for staking
-     * @param name_ Human-readable name for the session
+     * @param name_ Human-readable name for the multi-token
      */
     function initialize(address stakingToken_, string calldata name_) external initializer {
         stakingToken = IERC20(stakingToken_);
@@ -139,8 +139,8 @@ contract StakeChoicesERC6909 is
     // ============ Metadata Functions ============
 
     /**
-     * @notice Get the session/contract name
-     * @return The human-readable name for this staking session
+     * @notice Get the multi-token contract name
+     * @return The human-readable name for this staking multi-token
      */
     function name() public view returns (string memory) {
         return _name;

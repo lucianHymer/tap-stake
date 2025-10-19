@@ -22,12 +22,12 @@ contract DeployScript is Script {
         console.log("StakeChoicesFactory deployed at:", address(factory));
         console.log("  Implementation at:", factory.implementation());
 
-        // Deploy a sample session for testing
-        address session = factory.deployToken(address(token), "Test Session");
-        console.log("Sample StakeChoicesERC6909 session deployed at:", session);
+        // Deploy a sample multi-token for testing
+        address multiToken = factory.deployToken(address(token), "Test MultiToken");
+        console.log("Sample StakeChoicesERC6909 multiToken deployed at:", multiToken);
 
         // Register 6 choices
-        StakeChoicesERC6909 stakeChoices = StakeChoicesERC6909(session);
+        StakeChoicesERC6909 stakeChoices = StakeChoicesERC6909(multiToken);
         string[6] memory choiceNames = [
             "Staked GTC - Choice 1",
             "Staked GTC - Choice 2",
@@ -69,13 +69,13 @@ contract DeployScript is Script {
 
         StakerWallet stakerWallet = new StakerWallet(
             address(token),
-            session,
+            multiToken,
             relayerAddress,
             100 ether // MAX_STAKE_PER_TX
         );
         console.log("StakerWallet deployed at:", address(stakerWallet));
         console.log("  Token:", address(token));
-        console.log("  StakeChoices:", session);
+        console.log("  StakeChoices:", multiToken);
         console.log("  Relayer:", relayerAddress);
         console.log("  Max stake per tx:", stakerWallet.maxStakePerTx());
 

@@ -28,7 +28,7 @@ interface IStakeChoicesERC6909 {
 /**
  * @title StakerWallet
  * @author StakeChoices Team
- * @notice EIP-7702 delegation contract for gasless staking with ERC6909 sessions
+ * @notice EIP-7702 delegation contract for gasless staking with ERC6909 multi-tokens
  * @dev Minimal implementation - relies on ERC6909 events, no duplication
  */
 contract StakerWallet is IStakeChoicesERC6909 {
@@ -84,7 +84,7 @@ contract StakerWallet is IStakeChoicesERC6909 {
     // ============ Staking Functions ============
 
     /**
-     * @notice Add stakes to multiple choices in a session - gasless via relayer
+     * @notice Add stakes to multiple choices in a multi-token - gasless via relayer
      * @param choiceIds Array of choice IDs to stake to
      * @param amounts Array of amounts to stake to each choice
      */
@@ -92,7 +92,7 @@ contract StakerWallet is IStakeChoicesERC6909 {
         uint256 total = _sum(amounts);
         if (total > maxStakePerTx) revert AmountTooHigh();
 
-        // Approve session contract for exact amount needed
+        // Approve multi-token contract for exact amount needed
         IERC20(tokenAddress).safeIncreaseAllowance(stakeChoicesAddress, total);
 
         IStakeChoicesERC6909(stakeChoicesAddress).addStakes(choiceIds, amounts);

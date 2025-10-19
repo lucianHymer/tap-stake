@@ -5,11 +5,11 @@ import moloch1 from "../assets/images/moloch1.png";
 import moloch2 from "../assets/images/moloch2.png";
 import type { NFCConnection } from "../lib/nfcResource";
 
-// Deployed contract addresses - Updated October 14, 2025
+// Deployed contract addresses - Updated October 16, 2025
 const CONTRACTS = {
   testToken: "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756" as Address,
-  stakeChoicesToken: "0x79ed6D4B6d582286944aD6cC18cB7A61Ca5c2199" as Address,
-  stakerWallet: "0xeb5ed03c030448270d5671cd4ae79ad124765f26" as Address,
+  stakeChoicesToken: "0xb0a727f57841910752F0f1ef96871Cc28C086012" as Address,
+  stakerWallet: "0x3bcc81ce0b65384f320ef60f281cc946a2f383a3" as Address,
 };
 
 const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || "http://localhost:8787";
