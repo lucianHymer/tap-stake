@@ -2,7 +2,9 @@
   "name": "tap-stake",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend",
@@ -18,6 +20,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "solhint": "^6.0.1"
+    "solhint": "^6.0.1",
+    "style-dictionary": "^5.1.1"
   }
 }
