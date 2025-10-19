@@ -1,0 +1,12 @@
+
+.icon { width: 1em; height: 1em; fill: currentColor; }
+.icon-xs { width: 12px; height: 12px; }
+.icon-sm { width: 16px; height: 16px; }
+.icon-md { width: 20px; height: 20px; }
+.icon-lg { width: 24px; height: 24px; }
+.icon-xl { width: 32px; height: 32px; }
+.icon-neon { color: #39FF14; }
+.icon-red { color: #F50303; }
+.icon-purple { color: #A612F0; }
+.icon-yellow { color: #FFD900; }
+.icon-white { color: #FFFFFF; }
