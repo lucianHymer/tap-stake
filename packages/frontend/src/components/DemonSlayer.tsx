@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { createPublicClient, http, parseEther, type Address } from "viem";
-import { optimismSepolia } from "viem/chains";
-import moloch1 from "../assets/images/moloch1.png";
-import moloch2 from "../assets/images/moloch2.png";
-import type { NFCConnection } from "../lib/nfcResource";
+import { useState } from 'react';
+import { createPublicClient, http, parseEther, type Address } from 'viem';
+import { optimismSepolia } from 'viem/chains';
+import moloch1 from '../assets/images/moloch1.png';
+import moloch2 from '../assets/images/moloch2.png';
+import type { NFCConnection } from '../lib/nfcResource';
 
 // Deployed contract addresses - Updated October 16, 2025
 const CONTRACTS = {
-  testToken: "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756" as Address,
-  stakeChoicesToken: "0xb0a727f57841910752F0f1ef96871Cc28C086012" as Address,
-  stakerWallet: "0x3bcc81ce0b65384f320ef60f281cc946a2f383a3" as Address,
+  testToken: '0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756' as Address,
+  stakeChoicesToken: '0xb0a727f57841910752F0f1ef96871Cc28C086012' as Address,
+  stakerWallet: '0x3bcc81ce0b65384f320ef60f281cc946a2f383a3' as Address,
 };
 
-const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || "http://localhost:8787";
+const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:8787';
 
 interface StakeResult {
   txHash: string;
@@ -47,42 +47,40 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
     setError(null);
 
     try {
-      console.log("⚔️ DemonSlayer: Beginning stake ritual...");
+      console.log('⚔️ DemonSlayer: Beginning stake ritual...');
       const account = connection.account;
-      if (!account || !("signAuthorization" in account)) {
-        throw new Error("Invalid NFC account");
+      if (!account || !('signAuthorization' in account)) {
+        throw new Error('Invalid NFC account');
       }
 
       // Get current transaction nonce for EIP-7702 authorization
       const txNonce = await publicClient.getTransactionCount({
         address: connection.address,
       });
-      console.log("⚔️ DemonSlayer: Current nonce:", txNonce);
+      console.log('⚔️ DemonSlayer: Current nonce:', txNonce);
 
       // Multi-choice stake: 20 TEST on choice 1, 30 TEST on choice 4
       // Using actual choice IDs from deployment (1st and 4th registered choices)
       const choiceIds = [
-        "99921030434853126453340568019546123113290951926625281747676119336391366179676", // Choice 1
-        "102590855234691522285546861392190170000582855349844279089213381909182907084793", // Choice 4
+        '99921030434853126453340568019546123113290951926625281747676119336391366179676', // Choice 1
+        '102590855234691522285546861392190170000582855349844279089213381909182907084793', // Choice 4
       ];
       const amounts = [
-        parseEther("20").toString(), // 20 TEST on choice 1
-        parseEther("30").toString(), // 30 TEST on choice 4
+        parseEther('20').toString(), // 20 TEST on choice 1
+        parseEther('30').toString(), // 30 TEST on choice 4
       ];
 
       // Sign EIP-7702 authorization
-      console.log("⚔️ DemonSlayer: Requesting authorization signature...");
+      console.log('⚔️ DemonSlayer: Requesting authorization signature...');
       const authorization = await account.signAuthorization({
         address: CONTRACTS.stakerWallet,
         chainId: optimismSepolia.id,
         nonce: txNonce,
       });
-      console.log("⚔️ DemonSlayer: Authorization signed:", authorization);
+      console.log('⚔️ DemonSlayer: Authorization signed:', authorization);
 
       // Send to relayer
-      console.log(
-        "⚔️ DemonSlayer: Sending to relayer with multi-choice stakes...",
-      );
+      console.log('⚔️ DemonSlayer: Sending to relayer with multi-choice stakes...');
       const relayPayload = {
         authorization: {
           address: authorization.address,
@@ -97,28 +95,25 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
       };
 
       const response = await fetch(RELAYER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(relayPayload),
       });
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        console.error("⚔️ DemonSlayer: Relay failed:", result);
-        throw new Error(result.error || "Relay failed");
+        console.error('⚔️ DemonSlayer: Relay failed:', result);
+        throw new Error(result.error || 'Relay failed');
       }
 
-      console.log(
-        "⚔️ DemonSlayer: Transaction submitted! Hash:",
-        result.txHash,
-      );
+      console.log('⚔️ DemonSlayer: Transaction submitted! Hash:', result.txHash);
 
       // Wait for confirmation
       const receipt = await publicClient.waitForTransactionReceipt({
         hash: result.txHash,
       });
-      console.log("⚔️ DemonSlayer: Transaction confirmed!", {
+      console.log('⚔️ DemonSlayer: Transaction confirmed!', {
         blockNumber: receipt.blockNumber,
         gasUsed: receipt.gasUsed.toString(),
       });
@@ -137,12 +132,10 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
 
         // Play Wilhelm scream
         const audio = new Audio(
-          "https://upload.wikimedia.org/wikipedia/commons/d/d9/Wilhelm_Scream.ogg",
+          'https://upload.wikimedia.org/wikipedia/commons/d/d9/Wilhelm_Scream.ogg'
         );
         audio.volume = 0.5;
-        audio
-          .play()
-          .catch((err) => console.log("Could not play Wilhelm scream:", err));
+        audio.play().catch((err) => console.log('Could not play Wilhelm scream:', err));
 
         // Show victory text after scream
         setTimeout(() => {
@@ -150,9 +143,8 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
         }, 1000);
       }, 300);
     } catch (err) {
-      console.error("⚔️ DemonSlayer: Stake failed:", err);
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to stake";
+      console.error('⚔️ DemonSlayer: Stake failed:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to stake';
       setError(errorMessage);
       setStakeResult(null);
     } finally {
@@ -179,7 +171,7 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
       <main className="demon-main">
         <div className="moloch-section">
           <div
-            className={`moloch-image-container ${isStaked ? "staked" : ""} ${isLoading ? "loading" : ""}`}
+            className={`moloch-image-container ${isStaked ? 'staked' : ''} ${isLoading ? 'loading' : ''}`}
             onClick={handleMolochClick}
           >
             <img
@@ -194,13 +186,13 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
               <p className="demon-text">
                 TAP THE STAKE TO SLAY MOLOCH
                 <br />
-                <span style={{ fontSize: "0.8em", opacity: 0.8 }}>
+                <span style={{ fontSize: '0.8em', opacity: 0.8 }}>
                   20 TEST → Choice 1 | 30 TEST → Choice 4
                 </span>
               </p>
             )}
             {isLoading && (
-              <p className="demon-text" style={{ color: "#ffaa00" }}>
+              <p className="demon-text" style={{ color: '#ffaa00' }}>
                 PERFORMING BLOOD RITUAL...
               </p>
             )}
@@ -208,9 +200,7 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
               <p className="demon-text victory">
                 MOLOCH IS SLAIN! COORDINATION RESTORED!
                 <br />
-                <span style={{ fontSize: "0.8em" }}>
-                  50 TEST staked across 2 choices
-                </span>
+                <span style={{ fontSize: '0.8em' }}>50 TEST staked across 2 choices</span>
               </p>
             )}
           </div>
@@ -237,7 +227,7 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
                 href={`https://sepolia-optimism.etherscan.io/tx/${stakeResult.txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#00ffff", wordBreak: "break-all" }}
+                style={{ color: '#00ffff', wordBreak: 'break-all' }}
               >
                 {stakeResult.txHash}
               </a>
@@ -245,9 +235,7 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
 
             <div className="tech-card">
               <div className="tech-label">BLOCK SEALED</div>
-              <code className="address-display">
-                {stakeResult.blockNumber.toString()}
-              </code>
+              <code className="address-display">{stakeResult.blockNumber.toString()}</code>
             </div>
 
             <div className="verification-ritual sanctified">
@@ -264,9 +252,7 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
           <details className="tech-details">
             <summary>ARCANE REQUIREMENTS</summary>
             <ul>
-              <li>
-                NFC-enabled device (Android phone or desktop with NFC reader)
-              </li>
+              <li>NFC-enabled device (Android phone or desktop with NFC reader)</li>
               <li>Chrome browser with Web NFC API support</li>
               <li>Initialized HaLo NFC card with ECDSA keys</li>
             </ul>

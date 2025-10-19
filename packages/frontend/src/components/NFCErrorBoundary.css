@@ -17,7 +17,7 @@
 }
 
 .nfc-error-title {
-  font-family: 'Bebas Neue', cursive;
+  font-family: "Bebas Neue", cursive;
   font-size: 3rem;
   color: #ff3333;
   text-shadow: 0 0 10px rgba(255, 51, 51, 0.8);
@@ -35,7 +35,7 @@
   font-size: 1.1rem;
   line-height: 1.6;
   margin-bottom: 2rem;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .nfc-error-details {
@@ -52,7 +52,7 @@
 .nfc-error-details summary {
   color: #888;
   cursor: pointer;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -73,7 +73,7 @@
   color: white;
   border: none;
   padding: 1rem 2rem;
-  font-family: 'Bebas Neue', cursive;
+  font-family: "Bebas Neue", cursive;
   font-size: 1.5rem;
   letter-spacing: 0.1em;
   cursor: pointer;

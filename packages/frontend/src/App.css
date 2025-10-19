@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Creepster&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Creepster&display=swap");
 
 * {
   margin: 0;
@@ -8,12 +8,11 @@
 
 body {
   background: #0a0a0a;
-  background-image: 
-    radial-gradient(circle at 20% 50%, #1a0000 0%, transparent 50%),
+  background-image: radial-gradient(circle at 20% 50%, #1a0000 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, #0a0000 0%, transparent 50%),
     radial-gradient(circle at 40% 20%, #200000 0%, transparent 50%);
   color: #fff;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   overflow-x: hidden;
   display: flex;
   align-items: center;
@@ -38,7 +37,7 @@ body {
 }
 
 .title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: "Bebas Neue", sans-serif;
   font-size: 6rem;
   line-height: 0.9;
   letter-spacing: 0.1em;
@@ -46,9 +45,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-shadow:
-    0 0 8px rgba(255, 0, 0, 0.6),
-    0 0 15px rgba(255, 0, 0, 0.4);
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.6), 0 0 15px rgba(255, 0, 0, 0.4);
   animation: bloodPulse 2s ease-in-out infinite;
 }
 
@@ -61,15 +58,12 @@ body {
 }
 
 @keyframes bloodPulse {
-  0%, 100% {
-    text-shadow:
-      0 0 8px rgba(255, 0, 0, 0.6),
-      0 0 15px rgba(255, 0, 0, 0.4);
+  0%,
+  100% {
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.6), 0 0 15px rgba(255, 0, 0, 0.4);
   }
   50% {
-    text-shadow:
-      0 0 12px rgba(255, 0, 0, 0.7),
-      0 0 20px rgba(255, 0, 0, 0.5);
+    text-shadow: 0 0 12px rgba(255, 0, 0, 0.7), 0 0 20px rgba(255, 0, 0, 0.5);
   }
 }
 
@@ -179,7 +173,8 @@ body {
 }
 
 @keyframes flicker {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -188,7 +183,8 @@ body {
 }
 
 @keyframes victoryPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     text-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
   }
@@ -242,7 +238,7 @@ body {
 }
 
 .tech-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
@@ -270,7 +266,7 @@ body {
 .address-display,
 .signature-display {
   display: block;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 0.9rem;
   color: #00ff00;
   background: #000;

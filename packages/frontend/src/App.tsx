@@ -34,12 +34,14 @@ function HomePage() {
 
 function AdminPage() {
   return (
-    <div style={{
-      color: '#ff0000',
-      textAlign: 'center',
-      marginTop: '100px',
-      fontSize: '2rem'
-    }}>
+    <div
+      style={{
+        color: '#ff0000',
+        textAlign: 'center',
+        marginTop: '100px',
+        fontSize: '2rem',
+      }}
+    >
       TODO: Admin panel
     </div>
   );
@@ -60,4 +62,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

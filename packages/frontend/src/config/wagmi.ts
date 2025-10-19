@@ -4,10 +4,8 @@ import { injected } from 'wagmi/connectors';
 
 export const wagmiConfig = createConfig({
   chains: [optimismSepolia],
-  connectors: [
-    injected()
-  ],
+  connectors: [injected()],
   transports: {
-    [optimismSepolia.id]: http()
-  }
+    [optimismSepolia.id]: http(),
+  },
 });
