@@ -5,6 +5,7 @@ import { WagmiProvider } from 'wagmi';
 import { DemonSlayer } from './components/DemonSlayer';
 import { NFCErrorBoundary } from './components/NFCErrorBoundary';
 import { NFCPrompt } from './components/NFCPrompt';
+import { ConnectCard } from './components/ConnectCard';
 import { ButtonDemo } from './pages/ButtonDemo';
 import { ToggleButtonDemo } from './pages/ToggleButtonDemo';
 import { wagmiConfig } from './config/wagmi';
@@ -49,6 +50,30 @@ function AdminPage() {
   );
 }
 
+function TestPage() {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '20px',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        touchAction: 'none',
+        background: '#12061f',
+      }}
+    >
+      <ConnectCard onConnect={() => console.log('Connect clicked!')} />
+    </div>
+  );
+}
+
 function App() {
   return (
     <WagmiProvider config={wagmiConfig}>
@@ -59,6 +84,7 @@ function App() {
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/button-demo" element={<ButtonDemo />} />
             <Route path="/toggle-demo" element={<ToggleButtonDemo />} />
+            <Route path="/test" element={<TestPage />} />
           </Routes>
         </HashRouter>
       </QueryClientProvider>

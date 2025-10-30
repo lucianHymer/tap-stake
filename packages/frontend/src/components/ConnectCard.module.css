@@ -1,0 +1,37 @@
+/**
+ * ConnectCard Component Styles
+ * Specific styling for the Connect screen details section
+ */
+
+@import "../styles/moloch-tokens.css";
+
+.detailText {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  min-height: 54px;
+  flex-shrink: 0;
+}
+
+.detailText p {
+  font-family: var(--core-type-font-family-serif, 'EB Garamond', serif);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: normal;
+  color: #ffffff;
+  margin: 0;
+}
+
+.centerIllustration {
+  width: 106px;
+  height: 175px;
+  flex-shrink: 0;
+}
+
+.centerIllustration img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}

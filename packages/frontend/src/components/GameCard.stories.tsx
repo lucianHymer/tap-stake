@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { GameCard } from './GameCard';
+import { ConnectCard } from './ConnectCard';
 import { Button } from './Button';
 import { ASSETS } from '../config/assets';
 
@@ -31,33 +32,12 @@ const HelmetIcon = () => (
   <img src={ASSETS.helmetIcon} alt="" style={{ width: '28px', height: '30px', display: 'block' }} />
 );
 
-// ConnectCard - matches Figma design exactly
-export const Connect: Story = {
-  args: {
-    variant: 'connect',
-    heading: 'Slayers of Moloch',
-    headingIcons: [<HeartIcon key="1" />, <HeartIcon key="2" />],
-    subheading: 'Connect',
-    subheadingIcon: <HelmetIcon />,
-    heroImage: ASSETS.heroMoloch,
-    heroImageAlt: 'Hero battling Moloch',
-    detailText: [
-      'You have been given 100 GTC to allocate in the fight against Moloch.',
-      'Tap your Burner card at the top of your phone when prompted.',
-    ],
-    centerIllustration: {
-      src: ASSETS.nfcCard,
-      alt: 'NFC card tap animation',
-    },
-    primaryAction: (
-      <Button variant="primary">
-        Connect
-      </Button>
-    ),
-  },
-};
+// ConnectCard - now using the dedicated component
+// Note: This is technically not a GameCard story since it uses ConnectCard,
+// but kept here for convenience. Consider moving to ConnectCard.stories.tsx
+export const Connect = () => <ConnectCard onConnect={() => console.log('Connect clicked')} />;
 
-// Playground for testing
+// Playground for testing with custom children
 export const Playground: Story = {
   args: {
     variant: 'default',
@@ -67,14 +47,16 @@ export const Playground: Story = {
     subheadingIcon: <HelmetIcon />,
     heroImage: ASSETS.heroMoloch,
     heroImageAlt: 'Test image',
-    detailText: [
-      'First detail text paragraph.',
-      'Second detail text paragraph.',
-    ],
     primaryAction: (
       <Button variant="primary">
         Action
       </Button>
+    ),
+    children: (
+      <div style={{ padding: '20px', textAlign: 'center', color: 'white' }}>
+        <p>Custom content goes here!</p>
+        <p>You can put anything you want in the details section.</p>
+      </div>
     ),
   },
 };

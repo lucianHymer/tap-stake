@@ -16,13 +16,8 @@ export interface GameCardProps {
   heroImage: string;
   /** Alt text for hero image */
   heroImageAlt?: string;
-  /** Detail text paragraphs */
-  detailText?: string[];
-  /** Center illustration (like NFC card graphic) */
-  centerIllustration?: {
-    src: string;
-    alt: string;
-  };
+  /** Details section content */
+  children?: React.ReactNode;
   /** Primary action button */
   primaryAction: React.ReactNode;
   /** Optional className */
@@ -37,8 +32,7 @@ export const GameCard: React.FC<GameCardProps> = ({
   subheadingIcon,
   heroImage,
   heroImageAlt = '',
-  detailText = [],
-  centerIllustration,
+  children,
   primaryAction,
   className = '',
 }) => {
@@ -47,64 +41,54 @@ export const GameCard: React.FC<GameCardProps> = ({
       {/* Border wrapper */}
       <div className={styles.border} />
 
+      {/* This background border prevents scrolled content from peaking from behind the header */}
+      <div className={styles.background } />
+
+          <div className={styles.headingContainer}>
+            {/* Heading pill - extends beyond image */}
+            <div className={styles.heading}>
+              <p>{heading}</p>
+              {headingIcons.map((icon, i) => (
+                <div key={i} className={styles.headingIcon}>
+                  {icon}
+                </div>
+              ))}
+            </div>
+          </div>
+
       {/* Main content */}
       <div className={styles.contents}>
         {/* Top section with image and overlays */}
         <div className={styles.topSection}>
-          {/* Hero image */}
-          <div className={styles.imageSection}>
-            <div className={styles.imageWrapper}>
-              <img
-                src={heroImage}
-                alt={heroImageAlt}
-                className={styles.heroImage}
-              />
-            </div>
-          </div>
-          
-          {/* Heading pill */}
-          <div className={styles.heading}>
-            <p>{heading}</p>
-            {headingIcons.map((icon, i) => (
-              <div key={i} className={styles.headingIcon}>
-                {icon}
-              </div>
-            ))}
-          </div>
+          {/* Hero image - full width with padding */}
+          <img
+            src={heroImage}
+            alt={heroImageAlt}
+            className={styles.heroImage}
+          />
 
-          {/* Subheading pill */}
-          <div className={styles.subheading}>
-            <p>{subheading}</p>
-            {subheadingIcon && (
-              <div className={styles.subheadingIcon}>
-                {subheadingIcon}
-              </div>
-            )}
+          <div className={styles.subheadingContainer}>
+            {/* Subheading pill - contained within image */}
+            <div className={styles.subheading}>
+              <p>{subheading}</p>
+              {subheadingIcon && (
+                <div className={styles.subheadingIcon}>
+                  {subheadingIcon}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Details section */}
         <div className={styles.detailsSection}>
-          {detailText.map((text, i) => (
-            <div key={i} className={styles.detailText}>
-              <p>{text}</p>
-            </div>
-          ))}
-
-          {centerIllustration && (
-            <div className={styles.centerIllustration}>
-              <img
-                src={centerIllustration.src}
-                alt={centerIllustration.alt}
-              />
-            </div>
-          )}
+          {children}
         </div>
 
-        {/* Control panel */}
-        <div className={styles.controlPanel}>
-          {primaryAction}
-        </div>
+      </div>
+      {/* Control panel */}
+      <div className={styles.controlPanel}>
+      {primaryAction}
       </div>
     </div>
   );

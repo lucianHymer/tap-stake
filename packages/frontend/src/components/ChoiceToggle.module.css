@@ -1,0 +1,168 @@
+/**
+ * ChoiceToggle Component Styles
+ * Uses ONLY Moloch design system tokens - zero hardcoded values
+ *
+ * A toggle button component with two states:
+ * - Inactive: Grey border, white text, grey stats
+ * - Active: Yellow border, yellow text, yellow stats
+ */
+
+@import "../styles/moloch-tokens.css";
+
+/* Base button structure */
+.choiceToggle {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  height: 96px;
+
+  /* Reset button styles */
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+
+  /* Transitions for smooth state changes */
+  transition:
+    all var(--core-motion-normal) var(--core-motion-easing-in-out);
+}
+
+.choiceToggle:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: var(--core-spacing-1);
+  box-shadow: var(--core-shadow-glow-green);
+  border-radius: var(--core-radius-lg);
+}
+
+/* Container - holds the visual elements */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--core-spacing-base);
+  padding: var(--core-spacing-base) var(--core-spacing-2);
+  width: 179px;
+  height: 94px;
+  border: 2px solid;
+  border-radius: var(--core-radius-lg);
+  box-sizing: border-box;
+
+  /* Transitions */
+  transition:
+    border-color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
+}
+
+/* Name - main text */
+.name {
+  font-family: var(--core-type-font-family-display); /* 'Jacquard 24' */
+  font-size: 32px;
+  line-height: 80px;
+  text-align: center;
+  width: 165px;
+  height: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+
+  /* Transitions */
+  transition:
+    color var(--core-motion-normal) var(--core-motion-easing-in-out);
+}
+
+/* Stats container */
+.stats {
+  position: relative;
+  font-family: var(--core-type-font-family-display); /* 'Jacquard 24' */
+  font-size: 25px;
+  line-height: 35px;
+  text-align: center;
+  width: 160px;
+  height: 47px;
+  flex-shrink: 0;
+
+  /* Transitions */
+  transition:
+    color var(--core-motion-normal) var(--core-motion-easing-in-out);
+}
+
+/* Stat lines */
+.statLine {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  line-height: 35px;
+}
+
+.statLine:first-child {
+  top: 0;
+  height: 23px;
+}
+
+.statLine:last-child {
+  top: 24px;
+  height: 23.5px;
+}
+
+/* ============================================
+   INACTIVE STATE (Default - Grey)
+   ============================================ */
+.inactive .container {
+  border-color: var(--core-color-grey-500);
+}
+
+.inactive .name {
+  color: var(--core-color-white);
+}
+
+.inactive .stats {
+  color: var(--core-color-grey-500);
+}
+
+.inactive:hover:not(:disabled) .container {
+  border-color: var(--core-color-grey-400);
+  box-shadow: 0 0 12px rgba(128, 128, 128, 0.3);
+}
+
+.inactive:hover:not(:disabled) .stats {
+  color: var(--core-color-grey-400);
+}
+
+/* ============================================
+   ACTIVE STATE (Selected - Yellow)
+   ============================================ */
+.active .container {
+  border-color: var(--core-color-accent-yellow);
+  box-shadow: 0 0 16px rgba(255, 217, 0, 0.25);
+}
+
+.active .name {
+  color: var(--core-color-accent-yellow);
+}
+
+.active .stats {
+  color: var(--core-color-accent-yellow);
+}
+
+.active:hover:not(:disabled) .container {
+  box-shadow: 0 0 24px rgba(255, 217, 0, 0.35);
+}
+
+/* Disabled state */
+.choiceToggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.choiceToggle:disabled .container {
+  border-color: var(--core-color-grey-500);
+}
