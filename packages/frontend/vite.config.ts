@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
@@ -5,26 +6,53 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { serverLogger } from './vite-plugin-logger';
 
 // https://vite.dev/config/
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
+import { playwright } from '@vitest/browser-playwright';
+const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+
+// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   base: '/tap-stake/',
-  plugins: [
-    react(),
-    ...(process.env.DISABLE_SSL !== 'true' ? [basicSsl()] : []),
-    serverLogger(), // Add server logging plugin
-    nodePolyfills({
-      globals: {
-        Buffer: true,
-        global: true,
-        process: true,
-      },
-      protocolImports: true,
-    }),
-  ],
+  plugins: [react(), ...(process.env.DISABLE_SSL !== 'true' ? [basicSsl()] : []), serverLogger(),
+  // Add server logging plugin
+  nodePolyfills({
+    globals: {
+      Buffer: true,
+      global: true,
+      process: true
+    },
+    protocolImports: true
+  })],
   server: {
     port: 3000,
-    host: true,
+    host: true
   },
   define: {
-    global: 'globalThis',
+    global: 'globalThis'
   },
+  test: {
+    projects: [{
+      extends: true,
+      plugins: [
+      // The plugin will run tests for the stories defined in your Storybook config
+      // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
+      storybookTest({
+        configDir: path.join(dirname, '.storybook')
+      })],
+      test: {
+        name: 'storybook',
+        browser: {
+          enabled: true,
+          headless: true,
+          provider: playwright({}),
+          instances: [{
+            browser: 'chromium'
+          }]
+        },
+        setupFiles: ['.storybook/vitest.setup.ts']
+      }
+    }]
+  }
 });

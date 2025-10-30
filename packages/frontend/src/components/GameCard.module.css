@@ -1,0 +1,242 @@
+/**
+ * GameCard Component Styles
+ * Based on Figma "Property 1=connect" design
+ */
+
+@import "../styles/moloch-tokens.css";
+
+/* Register custom property for gradient animation */
+@property --gradient-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* Card container - 396x892px from Figma */
+.card {
+  position: relative;
+  width: 396px;
+  height: 892px;
+  border-radius: 20px;
+  background: transparent;
+}
+
+/* Conic gradient border - 8px wide with animated gradient rotation */
+.border {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 396px;
+  height: 892px;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 10;
+  background: conic-gradient(
+    from var(--gradient-angle, 4deg) at 50% 50%,
+    #7ED1C6 0deg,
+    #49433F 119.42deg,
+    #3BA1FF 223.82deg,
+    #7ED1C6 360deg
+  );
+  /* Create the border effect using a mask */
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 8px;
+  animation: rotateGradient 12s linear infinite;
+}
+
+@keyframes rotateGradient {
+  from {
+    --gradient-angle: 0deg;
+  }
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+/* Main contents wrapper */
+.contents {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  width: 396px;
+  height: 892px;
+}
+
+/* Top section - image area with overlays */
+.topSection {
+  position: relative;
+  width: 100%;
+  height: 456px;
+  flex-shrink: 0;
+}
+
+/* Image section */
+.imageSection {
+  position: absolute;
+  left: 23px;
+  top: 53px;
+  width: 305px;
+  heigwt: 348px;
+  overflow: hidden;
+}
+
+.imageWrapper {
+  position: absolute;
+  left: -84px;
+  top: -38px;
+  width: 549px;
+  height: 413px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroImage {
+  width: 413px;
+  height: 549px;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+/* Heading pill - top overlay */
+.heading {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 351px;
+  display: flex;
+  gap: 7px;
+  align-items: start;
+  padding: 7px 23px;
+  background: var(--core-color-grey-700, #333333);
+  border-radius: 99px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.heading p {
+  font-family: var(--core-type-font-family-display, 'Jacquard 12', sans-serif);
+  font-size: 31.25px;
+  font-weight: 400;
+  line-height: normal;
+  color: #ffffff;
+  width: 235px;
+  margin: 0;
+}
+
+.headingIcon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Subheading pill - middle overlay */
+.subheading {
+  position: absolute;
+  left: 17.5px;
+  top: 409px;
+  width: 316px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 64px;
+  background: var(--core-color-grey-700, #333333);
+  border-radius: 99px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.subheading p {
+  font-family: var(--core-type-font-family-display, 'Jacquard 12', sans-serif);
+  font-size: 31.25px;
+  font-weight: 400;
+  line-height: normal;
+  color: #ffffff;
+  white-space: pre;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.subheadingIcon {
+  width: 28px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.subheadingIcon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Details section */
+.detailsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  width: 100%;
+  height: 329px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.detailText {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 340px;
+  height: 54px;
+  flex-shrink: 0;
+}
+
+.detailText p {
+  font-family: var(--core-type-font-family-serif, 'EB Garamond', serif);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: normal;
+  color: #ffffff;
+  margin: 0;
+}
+
+.detailText:last-of-type {
+  width: 330px;
+  height: 51px;
+}
+
+.centerIllustration {
+  width: 106px;
+  height: 175px;
+  flex-shrink: 0;
+}
+
+.centerIllustration img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+/* Control panel - bottom section */
+.controlPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 191px;
+  padding: 16px 32px;
+  background: var(--core-color-grey-700, #333333);
+  overflow: hidden;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
