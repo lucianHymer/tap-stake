@@ -1,0 +1,89 @@
+
+:root[data-theme="moloch-dark"] {
+  --boon-bg: var(--color-bg-elevated, #1A0C2A);
+  --boon-text: var(--color-text-primary, #FFFFFF);
+  --boon-subtext: var(--color-text-muted, #9E9E9E);
+  --boon-border: rgba(255,255,255,0.18);
+  --boon-radius: 20px;
+  --boon-gap: 8px;
+  --gold: #FFD900;
+  --shadow-elev-1: 0 4px 12px rgba(0,0,0,.25);
+}
+
+.boon {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: var(--boon-gap);
+  padding: 16px 20px;
+  border-radius: var(--boon-radius);
+  border: 2px solid var(--boon-border);
+  background: var(--boon-bg);
+  color: var(--boon-text);
+  box-shadow: var(--shadow-elev-1);
+  transition: box-shadow .25s ease, border-color .25s ease, color .25s ease, background .25s ease, transform .2s ease;
+  overflow: hidden;
+}
+
+.boon__title {
+  font-family: "Jacquard 24","EB Garamond",serif;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.boon__stats {
+  font-family: "EB Garamond",serif;
+  color: var(--boon-subtext);
+  line-height: 1.4;
+  display: grid;
+  gap: 6px;
+  font-size: 18px;
+}
+
+.boon:hover,
+.boon:focus-visible {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(255,217,0,.3), 0 0 24px rgba(255,217,0,.2);
+}
+
+.boon--active {
+  color: var(--gold);
+  border-color: var(--gold);
+  background: radial-gradient(120% 120% at 50% 115%, rgba(255,217,0,0.15) 0%, rgba(18,6,31,1) 60%);
+  box-shadow: 0 0 0 2px rgba(255,217,0,.45), 0 0 36px rgba(255,217,0,.32);
+}
+
+/* Disabled */
+.boon[aria-disabled="true"],
+.boon--disabled {
+  opacity: .85;
+  color: rgba(255,255,255,.4);
+  border-color: rgba(255,255,255,.16);
+  background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(18,6,31,1) 80%);
+  pointer-events: none;
+}
+
+/* Glowing Rune Border */
+.boon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: calc(var(--boon-radius) - 2px);
+  padding: 2px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  background: conic-gradient(from 0deg, rgba(255,217,0,.0), rgba(255,217,0,.35), rgba(255,217,0,.0) 80%);
+  opacity: .25;
+  animation: boon-runes 4s linear infinite;
+}
+
+.boon--active::after { opacity: .45; }
+
+@keyframes boon-runes { to { transform: rotate(360deg); } }
+
+/* Entry animation */
+.boon[data-enter] { opacity: 0; transform: translateY(8px) scale(.98); animation: boon-enter .28s ease forwards; }
+@keyframes boon-enter { to { opacity:1; transform: translateY(0) scale(1); } }
+
+/* Preview grid */
+.boon-grid { display: grid; grid-template-columns: repeat(2, minmax(260px, 1fr)); gap: 16px; }

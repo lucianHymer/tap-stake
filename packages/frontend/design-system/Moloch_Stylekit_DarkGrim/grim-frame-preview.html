@@ -1,0 +1,65 @@
+<!doctype html>
+<html data-theme="moloch-dark">
+<head>
+<meta charset="utf-8"/>
+<title>Grim Frame — Animated Gradient Border</title>
+<link rel="stylesheet" href="moloch-design-tokens.css">
+<link rel="stylesheet" href="grim-frame.css">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&family=Jacquard+24&display=swap" rel="stylesheet">
+<style>
+  body{ background:#12061F; color:#fff; font:16px/1.5 system-ui; margin:0; padding:24px; }
+  h1{ font-family:'Jacquard 24','EB Garamond',serif; margin:0 0 16px; }
+  .stack{ display:flex; flex-wrap:wrap; gap:16px; }
+  .panel{ padding:16px; background:#1A0C2A; border-radius:12px; border:1px solid rgba(255,255,255,.1); max-width:720px; }
+  .btn{ padding:10px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.2); background:#12061F; color:#fff; cursor:pointer;}
+  .btn:active{ transform: translateY(1px); }
+</style>
+</head>
+<body data-theme="moloch-dark">
+  <h1>Grim Frame — Animated Gradient Border</h1>
+  <div class="stack">
+    <div class="grim-frame demo-card" id="frameA">
+      <div class="grim-frame__body">
+        <div style="padding:18px 16px 24px;">
+          <h2 style="font-family:'Jacquard 24','EB Garamond',serif;margin:0 0 8px;">Select Your Boons</h2>
+          <p style="color:#C9C9C9;margin:0;">This container shows the rotating conic-gradient border. Click “Sheen” to trigger the ritual glint.</p>
+          <div style="margin-top:16px; display:flex; gap:10px;">
+            <button class="btn" onclick="sheen('frameA')">Sheen ✨</button>
+            <button class="btn" onclick="toggle('frameA')">Toggle Pause</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grim-frame demo-card" id="frameB" style="width: 420px;">
+      <div class="grim-frame__body">
+        <div style="padding:18px 16px 24px;">
+          <h2 style="font-family:'Jacquard 24','EB Garamond',serif;margin:0 0 8px;">Inventory</h2>
+          <ul style="margin:0; padding-left:16px; color:#C9C9C9;">
+            <li>+ charisma</li>
+            <li>+ intelligence</li>
+            <li>+ wisdom</li>
+          </ul>
+          <div style="margin-top:16px; display:flex; gap:10px;">
+            <button class="btn" onclick="sheen('frameB')">Sheen ✨</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script>
+function sheen(id){
+  const el = document.getElementById(id);
+  el.classList.remove('is-sheen'); // restart
+  void el.offsetWidth;
+  el.classList.add('is-sheen');
+}
+function toggle(id){
+  const el = document.getElementById(id);
+  const before = getComputedStyle(el, '::before');
+  const running = before.animationPlayState || 'running';
+  el.style.setProperty('--frame-rotate-speed', running === 'paused' ? '24s' : '0s');
+}
+</script>
+</body>
+</html>

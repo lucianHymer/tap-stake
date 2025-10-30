@@ -1,0 +1,106 @@
+/* Grim Gradient Frame Component */
+:root[data-theme="moloch-dark"] {
+  --frame-width: 3px;
+  --frame-radius: 20px;
+  --frame-c1: #3ba1ff; /* start: ice blue */
+  --frame-c2: #7ed1c6; /* mid: seafoam */
+  --frame-c3: #49433f; /* end: warm graphite */
+  --frame-rotate-speed: 24s;
+  --frame-sheen-speed: 900ms;
+}
+
+/* Container that receives the animated border */
+.grim-frame {
+  position: relative;
+  border-radius: var(--frame-radius);
+  background: #12061f; /* interior background (match stylekit) */
+  isolation: isolate;
+}
+
+/* The animated gradient ring */
+.grim-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: var(--frame-width);
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    var(--frame-c1),
+    var(--frame-c2),
+    var(--frame-c3),
+    var(--frame-c1)
+  );
+  /* Cut out the center so only the ring shows */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 24px rgba(59, 161, 255, 0.18));
+  animation: grim-rotate var(--frame-rotate-speed) linear infinite;
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+/* The inner content layer */
+.grim-frame__body {
+  position: relative;
+  z-index: 1;
+  border-radius: calc(var(--frame-radius) - 2px);
+  background: #12061f; /* interior */
+  color: #ffffff;
+}
+
+/* A subtle sheen sweep you can trigger by adding .is-sheen */
+.grim-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  transform: translateX(-120%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.grim-frame.is-sheen::after {
+  animation: grim-sheen var(--frame-sheen-speed) ease;
+}
+
+@keyframes grim-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes grim-sheen {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateX(0%);
+    opacity: 0.35;
+  }
+  85% {
+    opacity: 0.12;
+  }
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+/* Utility: size demo card */
+.demo-card {
+  width: 360px;
+  padding: 16px;
+  margin: 18px;
+}
