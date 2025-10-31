@@ -10,7 +10,7 @@ import nfcCardImg from '/assets/nfc-card.png';
 import heroChoicesImg from '/assets/hero-choices.png';
 import swordIconSvg from '/assets/sword-icon.svg';
 import wandIconSvg from '/assets/wand-icon.svg';
-import xIconSvg from '/assets/x-icon.svg';
+import xIconSvg from '/assets/x-icon-figma.svg';
 
 export const ASSETS = {
   // Images - imported directly for better dev experience

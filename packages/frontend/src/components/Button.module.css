@@ -12,7 +12,7 @@
   align-items: center;
   justify-content: center;
 
-  padding: var(--core-spacing-4) var(--core-spacing-9);
+  padding: var(--core-spacing-3) var(--core-spacing-9);
 
   /* Typography */
   font-size: var(--core-type-size-xl);
@@ -53,11 +53,14 @@
    ============================================ */
 .primary {
   background: var(--component-button-primary-bg-default);
-  color: var(--semantic-text-on-accent-dark);
+  color: var(--core-color-grey-900);
   border: 3px solid transparent;
   border-radius: var(--component-button-primary-radius);
   box-shadow: var(--component-button-primary-shadow);
-  font-family: var(--core-type-font-family-display);
+  font-family: 'Jacquard 12', var(--core-type-font-family-display);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .primary:hover:not(:disabled) {
@@ -92,6 +95,49 @@
 
 .outline:active:not(:disabled) {
   outline-color: var(--core-color-white);
+}
+
+/* ============================================
+   CANCEL VARIANT (Transparent, No Border)
+   From Figma: button/primary/cancel
+   ============================================ */
+.cancel {
+  /* Colors - green text only, no border */
+  background: transparent;
+  color: var(--core-color-neon-green);
+  border: none;
+
+  /* Shape */
+  border-radius: 100px;
+
+  /* Spacing - from Figma spec */
+  padding: var(--core-spacing-3) var(--core-spacing-6);
+  gap: 10px;
+
+  /* Typography */
+  font-family: var(--core-type-font-family-serif);
+  font-size: var(--core-type-size-lg); /* 20px - back to original */
+  font-weight: var(--core-type-weight-bold);
+
+  /* Effects */
+  box-shadow: none;
+}
+
+.cancel:hover:not(:disabled) {
+  background: rgba(57, 255, 20, 0.05);
+  box-shadow: var(--core-shadow-glow-green);
+}
+
+.cancel:active:not(:disabled) {
+  background: rgba(57, 255, 20, 0.1);
+}
+
+/* Icon styling for buttons with icons */
+.icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  flex-shrink: 0;
 }
 
 /* ============================================

@@ -26,10 +26,6 @@ const WandIcon = () => (
   <img src={ASSETS.wandIcon} alt="" style={{ width: '28px', height: '28px', display: 'block' }} />
 );
 
-const XIcon = () => (
-  <img src={ASSETS.xIcon} alt="" style={{ width: '28px', height: '28px', display: 'block' }} />
-);
-
 // Choice data
 interface Choice {
   id: string;
@@ -89,11 +85,14 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
           <Button variant="primary" onClick={handleSlayMoloch}>
             Slay Moloch.
           </Button>
-          <button className={styles.textButton} onClick={handleRunAway}>
-            <XIcon />
-            <span>Run Away</span>
-            <XIcon />
-          </button>
+          <Button
+            variant="cancel"
+            leftIcon={ASSETS.xIcon}
+            rightIcon={ASSETS.xIcon}
+            onClick={handleRunAway}
+          >
+            Run Away
+          </Button>
         </div>
       }
     >

@@ -14,7 +14,7 @@
 
 /* Card container - responsive with max constraints */
 .card {
-  --control-panel-height: 191px;
+  --control-panel-height: 124px;
 
   display: grid;
   grid-template: 20px 1fr / 1fr;
@@ -97,7 +97,6 @@
   justify-content: center;
   width: 100%;
   height: var(--control-panel-height);
-  padding: 16px 32px;
   background: var(--core-color-grey-700, #333333);
   overflow: hidden;
   flex-shrink: 0;
