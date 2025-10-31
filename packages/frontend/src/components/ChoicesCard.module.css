@@ -37,8 +37,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px;
   box-sizing: border-box;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
 .backContent h2 {
