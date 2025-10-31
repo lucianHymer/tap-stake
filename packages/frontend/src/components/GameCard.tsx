@@ -16,6 +16,8 @@ export interface GameCardProps {
   heroImage: string;
   /** Alt text for hero image */
   heroImageAlt?: string;
+  /** Optional custom hero image content (overrides default image) */
+  heroImageOverride?: React.ReactNode;
   /** Details section content */
   children?: React.ReactNode;
   /** Primary action button */
@@ -32,6 +34,7 @@ export const GameCard: React.FC<GameCardProps> = ({
   subheadingIcon,
   heroImage,
   heroImageAlt = '',
+  heroImageOverride,
   children,
   primaryAction,
   className = '',
@@ -61,11 +64,15 @@ export const GameCard: React.FC<GameCardProps> = ({
         {/* Top section with image and overlays */}
         <div className={styles.topSection}>
           {/* Hero image - full width with padding */}
-          <img
-            src={heroImage}
-            alt={heroImageAlt}
-            className={styles.heroImage}
-          />
+          {heroImageOverride ? (
+            heroImageOverride
+          ) : (
+            <img
+              src={heroImage}
+              alt={heroImageAlt}
+              className={styles.heroImage}
+            />
+          )}
 
           <div className={styles.subheadingContainer}>
             {/* Subheading pill - contained within image */}
