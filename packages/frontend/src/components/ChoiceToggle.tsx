@@ -30,8 +30,8 @@ export const ChoiceToggle: React.FC<ChoiceToggleProps> = ({
       <div className={styles.container}>
         <div className={styles.name}>{name}</div>
         <div className={styles.stats}>
-          <div className={styles.statLine}>{stats.major}</div>
-          <div className={styles.statLine}>{stats.minor}</div>
+          <span>{stats.major}</span>
+          <span>{stats.minor}</span>
         </div>
       </div>
     </button>

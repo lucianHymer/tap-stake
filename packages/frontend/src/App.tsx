@@ -6,6 +6,7 @@ import { DemonSlayer } from './components/DemonSlayer';
 import { NFCErrorBoundary } from './components/NFCErrorBoundary';
 import { NFCPrompt } from './components/NFCPrompt';
 import { ConnectCard } from './components/ConnectCard';
+import { ChoicesCard } from './components/ChoicesCard';
 import { ButtonDemo } from './pages/ButtonDemo';
 import { ToggleButtonDemo } from './pages/ToggleButtonDemo';
 import { wagmiConfig } from './config/wagmi';
@@ -62,7 +63,7 @@ function TestPage() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: '20px',
+        padding: '8px',
         boxSizing: 'border-box',
         overflow: 'hidden',
         touchAction: 'none',
@@ -70,6 +71,33 @@ function TestPage() {
       }}
     >
       <ConnectCard onConnect={() => console.log('Connect clicked!')} />
+    </div>
+  );
+}
+
+function Test2Page() {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '8px',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        touchAction: 'none',
+        background: '#12061f',
+      }}
+    >
+      <ChoicesCard
+        onSlayMoloch={() => console.log('Slay Moloch!')}
+        onRunAway={() => console.log('Running away!')}
+      />
     </div>
   );
 }
@@ -85,6 +113,7 @@ function App() {
             <Route path="/button-demo" element={<ButtonDemo />} />
             <Route path="/toggle-demo" element={<ToggleButtonDemo />} />
             <Route path="/test" element={<TestPage />} />
+            <Route path="/test2" element={<Test2Page />} />
           </Routes>
         </HashRouter>
       </QueryClientProvider>

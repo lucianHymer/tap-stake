@@ -12,8 +12,7 @@
   align-items: center;
   justify-content: center;
 
-  /* Sizing - calculated to achieve ~248px width with XL font */
-  padding: var(--core-spacing-6) var(--core-spacing-9);
+  padding: var(--core-spacing-4) var(--core-spacing-9);
 
   /* Typography */
   font-size: var(--core-type-size-xl);
