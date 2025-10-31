@@ -27,7 +27,7 @@ contract DeployStakerWalletScript is Script {
         console.log("  Token address:", tokenAddress);
         console.log("  StakeChoices address:", stakeChoicesAddress);
         console.log("  Relayer:", relayerAddress);
-        console.log("  Max stake per tx:", stakerWallet.maxStakePerTx());
+        console.log("  Max amount per tx:", stakerWallet.maxAmountPerTx());
 
         vm.stopBroadcast();
     }

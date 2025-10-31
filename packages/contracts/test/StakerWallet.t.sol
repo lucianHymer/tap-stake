@@ -41,7 +41,7 @@ contract StakerWalletTest is Test {
         assertEq(wallet.tokenAddress(), address(token));
         assertEq(wallet.stakeChoicesAddress(), address(session));
         assertEq(wallet.relayer(), relayer);
-        assertEq(wallet.maxStakePerTx(), 100 ether);
+        assertEq(wallet.maxAmountPerTx(), 100 ether);
     }
 
     function testAddStakesSingleChoice() public {
@@ -295,5 +295,518 @@ contract StakerWalletTest is Test {
 
         // Verify no leftover approval (should be 0 after addStakes completes)
         assertEq(token.allowance(address(wallet), address(session)), 0);
+    }
+
+    // ============ updateStakes() Tests ============
+
+    function testUpdateStakesHappyPath() public {
+        // Setup: give wallet tokens and add initial stakes
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory oldChoiceIds = new uint256[](2);
+        uint256[] memory oldAmounts = new uint256[](2);
+        oldChoiceIds[0] = 1;
+        oldChoiceIds[1] = 2;
+        oldAmounts[0] = 30 ether;
+        oldAmounts[1] = 20 ether;
+
+        vm.prank(relayer);
+        wallet.addStakes(oldChoiceIds, oldAmounts);
+
+        // Update stakes: move from choices 1,2 to choices 3,4,5
+        uint256[] memory newChoiceIds = new uint256[](3);
+        uint256[] memory newAmounts = new uint256[](3);
+        newChoiceIds[0] = 3;
+        newChoiceIds[1] = 4;
+        newChoiceIds[2] = 5;
+        newAmounts[0] = 20 ether;
+        newAmounts[1] = 15 ether;
+        newAmounts[2] = 15 ether;
+
+        vm.prank(relayer);
+        wallet.updateStakes(oldChoiceIds, oldAmounts, newChoiceIds, newAmounts);
+
+        // Verify old stakes removed
+        assertEq(session.balanceOf(address(wallet), 1), 0);
+        assertEq(session.balanceOf(address(wallet), 2), 0);
+
+        // Verify new stakes added
+        assertEq(session.balanceOf(address(wallet), 3), 20 ether);
+        assertEq(session.balanceOf(address(wallet), 4), 15 ether);
+        assertEq(session.balanceOf(address(wallet), 5), 15 ether);
+    }
+
+    function testUpdateStakesEmptyOldStakes() public {
+        // First time staking - empty old stakes
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory oldChoiceIds = new uint256[](0);
+        uint256[] memory oldAmounts = new uint256[](0);
+        uint256[] memory newChoiceIds = new uint256[](2);
+        uint256[] memory newAmounts = new uint256[](2);
+        newChoiceIds[0] = 1;
+        newChoiceIds[1] = 2;
+        newAmounts[0] = 40 ether;
+        newAmounts[1] = 60 ether;
+
+        vm.prank(relayer);
+        wallet.updateStakes(oldChoiceIds, oldAmounts, newChoiceIds, newAmounts);
+
+        // Verify new stakes added
+        assertEq(session.balanceOf(address(wallet), 1), 40 ether);
+        assertEq(session.balanceOf(address(wallet), 2), 60 ether);
+    }
+
+    function testUpdateStakesFullWithdrawal() public {
+        // Setup: add initial stakes
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory oldChoiceIds = new uint256[](2);
+        uint256[] memory oldAmounts = new uint256[](2);
+        oldChoiceIds[0] = 1;
+        oldChoiceIds[1] = 2;
+        oldAmounts[0] = 50 ether;
+        oldAmounts[1] = 50 ether;
+
+        vm.prank(relayer);
+        wallet.addStakes(oldChoiceIds, oldAmounts);
+
+        // Update to empty new stakes (full withdrawal)
+        uint256[] memory newChoiceIds = new uint256[](0);
+        uint256[] memory newAmounts = new uint256[](0);
+
+        uint256 walletBalanceBefore = token.balanceOf(address(wallet));
+
+        vm.prank(relayer);
+        wallet.updateStakes(oldChoiceIds, oldAmounts, newChoiceIds, newAmounts);
+
+        // Verify all stakes removed
+        assertEq(session.balanceOf(address(wallet), 1), 0);
+        assertEq(session.balanceOf(address(wallet), 2), 0);
+
+        // Verify tokens returned to wallet
+        assertEq(token.balanceOf(address(wallet)), walletBalanceBefore + 100 ether);
+    }
+
+    function testUpdateStakesOnlyRelayer() public {
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory oldChoiceIds = new uint256[](0);
+        uint256[] memory oldAmounts = new uint256[](0);
+        uint256[] memory newChoiceIds = new uint256[](1);
+        uint256[] memory newAmounts = new uint256[](1);
+        newChoiceIds[0] = 1;
+        newAmounts[0] = 50 ether;
+
+        // Non-relayer cannot call
+        vm.prank(attacker);
+        vm.expectRevert(StakerWallet.OnlyRelayer.selector);
+        wallet.updateStakes(oldChoiceIds, oldAmounts, newChoiceIds, newAmounts);
+
+        // User cannot call
+        vm.prank(user);
+        vm.expectRevert(StakerWallet.OnlyRelayer.selector);
+        wallet.updateStakes(oldChoiceIds, oldAmounts, newChoiceIds, newAmounts);
+    }
+
+    function testUpdateStakesAmountTooHigh() public {
+        vm.prank(user);
+        token.transfer(address(wallet), 200 ether);
+
+        uint256[] memory oldChoiceIds = new uint256[](0);
+        uint256[] memory oldAmounts = new uint256[](0);
+        uint256[] memory newChoiceIds = new uint256[](1);
+        uint256[] memory newAmounts = new uint256[](1);
+        newChoiceIds[0] = 1;
+        newAmounts[0] = 101 ether; // Over maxAmountPerTx
+
+        vm.prank(relayer);
+        vm.expectRevert(StakerWallet.AmountTooHigh.selector);
+        wallet.updateStakes(oldChoiceIds, oldAmounts, newChoiceIds, newAmounts);
+    }
+
+    function testUpdateStakesExactLimit() public {
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory oldChoiceIds = new uint256[](0);
+        uint256[] memory oldAmounts = new uint256[](0);
+        uint256[] memory newChoiceIds = new uint256[](1);
+        uint256[] memory newAmounts = new uint256[](1);
+        newChoiceIds[0] = 1;
+        newAmounts[0] = 100 ether; // Exactly at limit
+
+        vm.prank(relayer);
+        wallet.updateStakes(oldChoiceIds, oldAmounts, newChoiceIds, newAmounts);
+
+        assertEq(session.balanceOf(address(wallet), 1), 100 ether);
+    }
+
+    function testUpdateStakesPartialUpdate() public {
+        // Setup: add initial stakes to choices 1,2,3
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory initialChoiceIds = new uint256[](3);
+        uint256[] memory initialAmounts = new uint256[](3);
+        initialChoiceIds[0] = 1;
+        initialChoiceIds[1] = 2;
+        initialChoiceIds[2] = 3;
+        initialAmounts[0] = 20 ether;
+        initialAmounts[1] = 30 ether;
+        initialAmounts[2] = 40 ether;
+
+        vm.prank(relayer);
+        wallet.addStakes(initialChoiceIds, initialAmounts);
+
+        // Update: remove from 1,2 only, add to 4,5
+        uint256[] memory oldChoiceIds = new uint256[](2);
+        uint256[] memory oldAmounts = new uint256[](2);
+        oldChoiceIds[0] = 1;
+        oldChoiceIds[1] = 2;
+        oldAmounts[0] = 20 ether;
+        oldAmounts[1] = 30 ether;
+
+        uint256[] memory newChoiceIds = new uint256[](2);
+        uint256[] memory newAmounts = new uint256[](2);
+        newChoiceIds[0] = 4;
+        newChoiceIds[1] = 5;
+        newAmounts[0] = 25 ether;
+        newAmounts[1] = 25 ether;
+
+        vm.prank(relayer);
+        wallet.updateStakes(oldChoiceIds, oldAmounts, newChoiceIds, newAmounts);
+
+        // Verify partial removal
+        assertEq(session.balanceOf(address(wallet), 1), 0);
+        assertEq(session.balanceOf(address(wallet), 2), 0);
+        assertEq(session.balanceOf(address(wallet), 3), 40 ether); // Unchanged
+
+        // Verify new stakes
+        assertEq(session.balanceOf(address(wallet), 4), 25 ether);
+        assertEq(session.balanceOf(address(wallet), 5), 25 ether);
+    }
+
+    // ============ withdraw() Tests ============
+
+    function testWithdrawStandard() public {
+        // Setup: wallet has exactly 100 GTC
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        address recipient = address(0x5555);
+        uint256 recipientBalanceBefore = token.balanceOf(recipient);
+
+        vm.prank(relayer);
+        wallet.withdraw(recipient);
+
+        // Should transfer exactly 100 ether
+        assertEq(token.balanceOf(recipient), recipientBalanceBefore + 100 ether);
+        assertEq(token.balanceOf(address(wallet)), 0);
+    }
+
+    function testWithdrawPartialBalance() public {
+        // Setup: wallet has less than 100 GTC
+        vm.prank(user);
+        token.transfer(address(wallet), 50 ether);
+
+        address recipient = address(0x5555);
+        uint256 recipientBalanceBefore = token.balanceOf(recipient);
+
+        vm.prank(relayer);
+        wallet.withdraw(recipient);
+
+        // Should transfer actual balance (50 ether)
+        assertEq(token.balanceOf(recipient), recipientBalanceBefore + 50 ether);
+        assertEq(token.balanceOf(address(wallet)), 0);
+    }
+
+    function testWithdrawLargeBalance() public {
+        // Setup: wallet has more than 100 GTC
+        vm.prank(user);
+        token.transfer(address(wallet), 150 ether);
+
+        address recipient = address(0x5555);
+        uint256 recipientBalanceBefore = token.balanceOf(recipient);
+
+        vm.prank(relayer);
+        wallet.withdraw(recipient);
+
+        // Should cap at 100 ether
+        assertEq(token.balanceOf(recipient), recipientBalanceBefore + 100 ether);
+        assertEq(token.balanceOf(address(wallet)), 50 ether); // Remainder stays
+    }
+
+    function testWithdrawZeroBalance() public {
+        // Setup: wallet has no tokens
+        address recipient = address(0x5555);
+
+        vm.prank(relayer);
+        vm.expectRevert(StakerWallet.ZeroBalance.selector); // Should revert to save gas
+        wallet.withdraw(recipient);
+    }
+
+    function testWithdrawOnlyRelayer() public {
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        address recipient = address(0x5555);
+
+        // Non-relayer cannot call
+        vm.prank(attacker);
+        vm.expectRevert(StakerWallet.OnlyRelayer.selector);
+        wallet.withdraw(recipient);
+
+        // User cannot call
+        vm.prank(user);
+        vm.expectRevert(StakerWallet.OnlyRelayer.selector);
+        wallet.withdraw(recipient);
+    }
+
+    function testWithdrawExactly100() public {
+        // Setup: wallet has exactly 100 ether
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        address recipient = address(0x5555);
+        uint256 recipientBalanceBefore = token.balanceOf(recipient);
+
+        vm.prank(relayer);
+        wallet.withdraw(recipient);
+
+        assertEq(token.balanceOf(recipient), recipientBalanceBefore + 100 ether);
+        assertEq(token.balanceOf(address(wallet)), 0);
+    }
+
+    function testWithdrawSmallAmount() public {
+        // Setup: wallet has 1 wei
+        vm.prank(user);
+        token.transfer(address(wallet), 1);
+
+        address recipient = address(0x5555);
+        uint256 recipientBalanceBefore = token.balanceOf(recipient);
+
+        vm.prank(relayer);
+        wallet.withdraw(recipient);
+
+        assertEq(token.balanceOf(recipient), recipientBalanceBefore + 1);
+        assertEq(token.balanceOf(address(wallet)), 0);
+    }
+
+    // ============ unstakeAllAndWithdraw() Tests ============
+
+    function testUnstakeAllAndWithdrawFullFlow() public {
+        // Setup: give wallet tokens and add stakes
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory choiceIds = new uint256[](3);
+        uint256[] memory amounts = new uint256[](3);
+        choiceIds[0] = 1;
+        choiceIds[1] = 2;
+        choiceIds[2] = 3;
+        amounts[0] = 30 ether;
+        amounts[1] = 40 ether;
+        amounts[2] = 30 ether;
+
+        vm.prank(relayer);
+        wallet.addStakes(choiceIds, amounts);
+
+        // Unstake all and withdraw to recipient
+        address recipient = address(0x5555);
+        uint256 recipientBalanceBefore = token.balanceOf(recipient);
+
+        vm.prank(relayer);
+        wallet.unstakeAllAndWithdraw(choiceIds, amounts, recipient);
+
+        // Verify all stakes removed
+        assertEq(session.balanceOf(address(wallet), 1), 0);
+        assertEq(session.balanceOf(address(wallet), 2), 0);
+        assertEq(session.balanceOf(address(wallet), 3), 0);
+
+        // Verify tokens sent to recipient
+        assertEq(token.balanceOf(recipient), recipientBalanceBefore + 100 ether);
+        assertEq(token.balanceOf(address(wallet)), 0);
+    }
+
+    function testUnstakeAllAndWithdrawEmptyStakes() public {
+        // Setup: wallet has tokens but no stakes
+        vm.prank(user);
+        token.transfer(address(wallet), 50 ether);
+
+        uint256[] memory choiceIds = new uint256[](0);
+        uint256[] memory amounts = new uint256[](0);
+
+        address recipient = address(0x5555);
+        uint256 recipientBalanceBefore = token.balanceOf(recipient);
+
+        vm.prank(relayer);
+        wallet.unstakeAllAndWithdraw(choiceIds, amounts, recipient);
+
+        // Should still withdraw available balance
+        assertEq(token.balanceOf(recipient), recipientBalanceBefore + 50 ether);
+        assertEq(token.balanceOf(address(wallet)), 0);
+    }
+
+    function testUnstakeAllAndWithdrawSingleChoice() public {
+        // Setup: stake to single choice
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory choiceIds = new uint256[](1);
+        uint256[] memory amounts = new uint256[](1);
+        choiceIds[0] = 1;
+        amounts[0] = 100 ether;
+
+        vm.prank(relayer);
+        wallet.addStakes(choiceIds, amounts);
+
+        // Unstake and withdraw
+        address recipient = address(0x5555);
+        uint256 recipientBalanceBefore = token.balanceOf(recipient);
+
+        vm.prank(relayer);
+        wallet.unstakeAllAndWithdraw(choiceIds, amounts, recipient);
+
+        assertEq(session.balanceOf(address(wallet), 1), 0);
+        assertEq(token.balanceOf(recipient), recipientBalanceBefore + 100 ether);
+    }
+
+    function testUnstakeAllAndWithdrawAll6Choices() public {
+        // Setup: stake to all 6 choices
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory choiceIds = new uint256[](6);
+        uint256[] memory amounts = new uint256[](6);
+        for (uint256 i = 0; i < 6; i++) {
+            choiceIds[i] = i + 1;
+            amounts[i] = 16666666666666666666; // ~16.67 ether each
+        }
+        // Adjust last one to sum to exactly 100 ether
+        amounts[5] = 100 ether - (amounts[0] * 5);
+
+        vm.prank(relayer);
+        wallet.addStakes(choiceIds, amounts);
+
+        // Unstake all 6 and withdraw
+        address recipient = address(0x5555);
+        uint256 recipientBalanceBefore = token.balanceOf(recipient);
+
+        vm.prank(relayer);
+        wallet.unstakeAllAndWithdraw(choiceIds, amounts, recipient);
+
+        // Verify all 6 choices unstaked
+        for (uint256 i = 1; i <= 6; i++) {
+            assertEq(session.balanceOf(address(wallet), i), 0);
+        }
+
+        assertEq(token.balanceOf(recipient), recipientBalanceBefore + 100 ether);
+    }
+
+    function testUnstakeAllAndWithdrawOnlyRelayer() public {
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory choiceIds = new uint256[](1);
+        uint256[] memory amounts = new uint256[](1);
+        choiceIds[0] = 1;
+        amounts[0] = 50 ether;
+
+        vm.prank(relayer);
+        wallet.addStakes(choiceIds, amounts);
+
+        address recipient = address(0x5555);
+
+        // Non-relayer cannot call
+        vm.prank(attacker);
+        vm.expectRevert(StakerWallet.OnlyRelayer.selector);
+        wallet.unstakeAllAndWithdraw(choiceIds, amounts, recipient);
+
+        // User cannot call
+        vm.prank(user);
+        vm.expectRevert(StakerWallet.OnlyRelayer.selector);
+        wallet.unstakeAllAndWithdraw(choiceIds, amounts, recipient);
+    }
+
+    function testUnstakeAllAndWithdrawCap100() public {
+        // Setup: stake 100 ether, then add 50 more tokens directly
+        vm.startPrank(user);
+        token.transfer(address(wallet), 100 ether);
+        vm.stopPrank();
+
+        uint256[] memory choiceIds = new uint256[](1);
+        uint256[] memory amounts = new uint256[](1);
+        choiceIds[0] = 1;
+        amounts[0] = 100 ether;
+
+        vm.prank(relayer);
+        wallet.addStakes(choiceIds, amounts);
+
+        // Add extra tokens to wallet
+        vm.prank(user);
+        token.transfer(address(wallet), 50 ether);
+
+        // Unstake all and withdraw
+        address recipient = address(0x5555);
+        uint256 recipientBalanceBefore = token.balanceOf(recipient);
+
+        vm.prank(relayer);
+        wallet.unstakeAllAndWithdraw(choiceIds, amounts, recipient);
+
+        // Should cap at 100 ether
+        assertEq(token.balanceOf(recipient), recipientBalanceBefore + 100 ether);
+        assertEq(token.balanceOf(address(wallet)), 50 ether); // Remainder stays
+    }
+
+    function testUnstakeAllAndWithdrawZeroBalance() public {
+        // Setup: wallet has stakes but somehow no tokens (edge case)
+        // This shouldn't happen in practice but test the revert
+        uint256[] memory choiceIds = new uint256[](0);
+        uint256[] memory amounts = new uint256[](0);
+        address recipient = address(0x5555);
+
+        vm.prank(relayer);
+        vm.expectRevert(StakerWallet.ZeroBalance.selector);
+        wallet.unstakeAllAndWithdraw(choiceIds, amounts, recipient);
+    }
+
+    function testUnstakeAllAndWithdrawAtomic() public {
+        // Verify it's atomic - both unstake and withdraw happen in same tx
+        vm.prank(user);
+        token.transfer(address(wallet), 100 ether);
+
+        uint256[] memory choiceIds = new uint256[](2);
+        uint256[] memory amounts = new uint256[](2);
+        choiceIds[0] = 1;
+        choiceIds[1] = 2;
+        amounts[0] = 50 ether;
+        amounts[1] = 50 ether;
+
+        vm.prank(relayer);
+        wallet.addStakes(choiceIds, amounts);
+
+        address recipient = address(0x5555);
+
+        // Record state before
+        uint256 stakeBalance1Before = session.balanceOf(address(wallet), 1);
+        uint256 stakeBalance2Before = session.balanceOf(address(wallet), 2);
+
+        // Execute atomic operation
+        vm.prank(relayer);
+        wallet.unstakeAllAndWithdraw(choiceIds, amounts, recipient);
+
+        // Verify stakes were > 0 before
+        assertEq(stakeBalance1Before, 50 ether);
+        assertEq(stakeBalance2Before, 50 ether);
+
+        // Verify both operations completed
+        assertEq(session.balanceOf(address(wallet), 1), 0);
+        assertEq(session.balanceOf(address(wallet), 2), 0);
+        assertEq(token.balanceOf(recipient), 100 ether);
     }
 }
