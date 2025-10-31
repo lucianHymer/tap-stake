@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from './GameCard.module.css';
 
 export interface GameCardProps {
@@ -16,8 +16,8 @@ export interface GameCardProps {
   heroImage: string;
   /** Alt text for hero image */
   heroImageAlt?: string;
-  /** Optional custom hero image content (overrides default image) */
-  heroImageOverride?: React.ReactNode;
+  /** Optional content to show on the back of a flip card */
+  heroImageBackside?: React.ReactNode;
   /** Details section content */
   children?: React.ReactNode;
   /** Primary action button */
@@ -34,11 +34,71 @@ export const GameCard: React.FC<GameCardProps> = ({
   subheadingIcon,
   heroImage,
   heroImageAlt = '',
-  heroImageOverride,
+  heroImageBackside,
   children,
   primaryAction,
   className = '',
 }) => {
+  // Flip card state - only used if heroImageBackside is provided
+  const [isHovering, setIsHovering] = useState(false);
+  const [manualOverride, setManualOverride] = useState<boolean | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Card is flipped based on hover, but manual override takes precedence
+  const isFlipped = manualOverride !== null ? manualOverride : isHovering;
+
+  const handleCardClick = () => {
+    // Don't allow clicks during transition
+    if (isHovering && !isTransitioning) {
+      setManualOverride((prev) => {
+        if (prev === null) {
+          // First click while hovering - flip to front
+          return false;
+        } else {
+          // Toggle between front and back
+          return !prev;
+        }
+      });
+
+      // Set transitioning flag to prevent rapid clicks
+      setIsTransitioning(true);
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+      transitionTimeoutRef.current = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 600); // Match the CSS transition duration
+    }
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+    // Set transitioning flag when hover starts
+    setIsTransitioning(true);
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+    }
+    transitionTimeoutRef.current = setTimeout(() => {
+      setIsTransitioning(false);
+    }, 600); // Match the CSS transition duration
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    // Reset the manual override when mouse leaves
+    setManualOverride(null);
+    setIsTransitioning(false);
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
   return (
     <div className={`${styles.card} ${className}`} data-variant={variant}>
       {/* Border wrapper */}
@@ -63,9 +123,27 @@ export const GameCard: React.FC<GameCardProps> = ({
       <div className={styles.contents}>
         {/* Top section with image and overlays */}
         <div className={styles.topSection}>
-          {/* Hero image - full width with padding */}
-          {heroImageOverride ? (
-            heroImageOverride
+          {/* Hero image - with optional flip card */}
+          {heroImageBackside ? (
+            <div
+              className={styles.flipCardContainer}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={handleCardClick}
+            >
+              <div className={`${styles.flipCard} ${isFlipped ? styles.flipped : ''}`}>
+                <div className={styles.flipCardFront}>
+                  <img
+                    src={heroImage}
+                    alt={heroImageAlt}
+                    className={styles.heroImage}
+                  />
+                </div>
+                <div className={styles.flipCardBack}>
+                  {heroImageBackside}
+                </div>
+              </div>
+            </div>
           ) : (
             <img
               src={heroImage}
