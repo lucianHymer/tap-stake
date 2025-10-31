@@ -77,7 +77,7 @@
    OUTLINE VARIANT (White Border, Transparent)
    ============================================ */
 .outline {
-  background: var(--component-button-outline-bg-default);
+  background: var(--core-color-bg-purple);
   color: var(--component-button-outline-text-default);
   border: 3px solid transparent;
   border-radius: var(--component-button-outline-radius);

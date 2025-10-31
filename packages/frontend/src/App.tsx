@@ -7,6 +7,7 @@ import { NFCErrorBoundary } from './components/NFCErrorBoundary';
 import { NFCPrompt } from './components/NFCPrompt';
 import { ConnectCard } from './components/ConnectCard';
 import { ChoicesCard } from './components/ChoicesCard';
+import { SlainCard } from './components/SlainCard';
 import { ButtonDemo } from './pages/ButtonDemo';
 import { ToggleButtonDemo } from './pages/ToggleButtonDemo';
 import { wagmiConfig } from './config/wagmi';
@@ -102,6 +103,33 @@ function Test2Page() {
   );
 }
 
+function Test3Page() {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '8px',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        touchAction: 'none',
+        background: '#12061f',
+      }}
+    >
+      <SlainCard
+        onShareTwitter={() => console.log('Share to Twitter!')}
+        onStartOver={() => console.log('Starting over!')}
+      />
+    </div>
+  );
+}
+
 function App() {
   return (
     <WagmiProvider config={wagmiConfig}>
@@ -114,6 +142,7 @@ function App() {
             <Route path="/toggle-demo" element={<ToggleButtonDemo />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="/test2" element={<Test2Page />} />
+            <Route path="/test3" element={<Test3Page />} />
           </Routes>
         </HashRouter>
       </QueryClientProvider>

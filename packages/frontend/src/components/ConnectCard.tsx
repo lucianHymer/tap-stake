@@ -29,7 +29,7 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({ onConnect }) => {
       heroImage={ASSETS.heroMoloch}
       heroImageAlt="Hero battling Moloch"
       primaryAction={
-        <Button variant="primary" onClick={onConnect}>
+        <Button variant="outline" onClick={onConnect}>
           Connect
         </Button>
       }
