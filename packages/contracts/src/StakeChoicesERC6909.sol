@@ -164,9 +164,12 @@ contract StakeChoicesERC6909 is
      * @param choiceSymbol The symbol for this choice (optional)
      * @param uri The URI for this choice (optional)
      */
-    function registerChoice(bytes32 salt, string calldata choiceName, string calldata choiceSymbol, string calldata uri)
-        external
-    {
+    function registerChoice(
+        bytes32 salt,
+        string calldata choiceName,
+        string calldata choiceSymbol,
+        string calldata uri
+    ) external {
         uint256 id = computeId(msg.sender, salt);
 
         // Validate name is non-empty
