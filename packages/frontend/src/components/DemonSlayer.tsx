@@ -1,16 +1,10 @@
 import { useState } from 'react';
-import { http, type Address, createPublicClient, parseEther } from 'viem';
+import { http, createPublicClient, parseEther } from 'viem';
 import { optimismSepolia } from 'viem/chains';
 import moloch1 from '../assets/images/moloch1.png';
 import moloch2 from '../assets/images/moloch2.png';
 import type { NFCConnection } from '../lib/nfcResource';
-
-// Deployed contract addresses - Updated October 16, 2025
-const CONTRACTS = {
-  testToken: '0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756' as Address,
-  stakeChoicesToken: '0xb0a727f57841910752F0f1ef96871Cc28C086012' as Address,
-  stakerWallet: '0x3bcc81ce0b65384f320ef60f281cc946a2f383a3' as Address,
-};
+import { CONTRACTS } from '../config/contracts';
 
 const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:8787';
 
