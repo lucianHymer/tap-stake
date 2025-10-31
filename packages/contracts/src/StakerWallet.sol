@@ -154,11 +154,10 @@ contract StakerWallet is IStakeChoicesERC6909 {
      * @param amounts Array of amounts to remove from each choice
      * @param recipient Address to receive the withdrawn tokens
      */
-    function unstakeAllAndWithdraw(
-        uint256[] calldata choiceIds,
-        uint256[] calldata amounts,
-        address recipient
-    ) external onlyRelayer {
+    function unstakeAllAndWithdraw(uint256[] calldata choiceIds, uint256[] calldata amounts, address recipient)
+        external
+        onlyRelayer
+    {
         // Remove all stakes
         if (choiceIds.length > 0) {
             IStakeChoicesERC6909(stakeChoicesAddress).removeStakes(choiceIds, amounts);

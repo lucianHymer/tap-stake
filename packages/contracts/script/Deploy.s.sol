@@ -49,7 +49,11 @@ contract DeployScript is Script {
             bytes32 salt = bytes32(i + 1);
             string memory uri = string(
                 abi.encodePacked(
-                    "data:application/json,{\"name\":\"", choiceNames[i], "\",\"symbol\":\"", choiceSymbols[i], "\",\"decimals\":18}"
+                    "data:application/json,{\"name\":\"",
+                    choiceNames[i],
+                    "\",\"symbol\":\"",
+                    choiceSymbols[i],
+                    "\",\"decimals\":18}"
                 )
             );
             stakeChoices.registerChoice(salt, choiceNames[i], choiceSymbols[i], uri);
