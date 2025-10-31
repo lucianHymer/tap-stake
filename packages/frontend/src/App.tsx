@@ -8,6 +8,7 @@ import { NFCPrompt } from './components/NFCPrompt';
 import { ConnectCard } from './components/ConnectCard';
 import { ChoicesCard } from './components/ChoicesCard';
 import { SlainCard } from './components/SlainCard';
+import { MolochRisesCard } from './components/MolochRisesCard';
 import { ButtonDemo } from './pages/ButtonDemo';
 import { ToggleButtonDemo } from './pages/ToggleButtonDemo';
 import { wagmiConfig } from './config/wagmi';
@@ -130,6 +131,33 @@ function Test3Page() {
   );
 }
 
+function Test4Page() {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '8px',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        touchAction: 'none',
+        background: '#12061f',
+      }}
+    >
+      <MolochRisesCard
+        onRunAway={(address) => console.log('Running away to:', address)}
+        onGoBack={() => console.log('Go back!')}
+      />
+    </div>
+  );
+}
+
 function App() {
   return (
     <WagmiProvider config={wagmiConfig}>
@@ -143,6 +171,7 @@ function App() {
             <Route path="/test" element={<TestPage />} />
             <Route path="/test2" element={<Test2Page />} />
             <Route path="/test3" element={<Test3Page />} />
+            <Route path="/test4" element={<Test4Page />} />
           </Routes>
         </HashRouter>
       </QueryClientProvider>

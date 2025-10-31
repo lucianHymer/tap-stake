@@ -9,6 +9,7 @@ import heroMolochImg from '/assets/hero-moloch.png';
 import nfcCardImg from '/assets/nfc-card.png';
 import heroChoicesImg from '/assets/hero-choices.png';
 import heroSlainImg from '/assets/hero-slain.png';
+import heroRisesImg from '/assets/hero-rises.png';
 import swordIconSvg from '/assets/sword-icon.svg';
 import wandIconSvg from '/assets/wand-icon.svg';
 import xIconSvg from '/assets/x-icon-figma.svg';
@@ -18,6 +19,7 @@ export const ASSETS = {
   heroMoloch: heroMolochImg,
   heroChoices: heroChoicesImg,
   heroSlain: heroSlainImg,
+  heroRises: heroRisesImg,
   nfcCard: nfcCardImg,
 
   // SVG Icons - imported directly for better dev experience
