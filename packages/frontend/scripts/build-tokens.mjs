@@ -9,7 +9,30 @@ const rootDir = join(__dirname, '..');
 
 console.log('🎨 Building Moloch design tokens...\n');
 
-// No custom formats needed - using built-in css/variables format
+// Register custom format to handle SVG paths properly
+StyleDictionary.registerFormat({
+  name: 'css/variables-quoted-assets',
+  format: ({ dictionary, options = {} }) => {
+    const { selector = ':root' } = options;
+
+    // Helper to format token value - quote SVG paths for valid CSS
+    const formatValue = (token) => {
+      const value = token.value;
+      // If it's an asset path (ends with .svg, .png, .jpg, etc), wrap in quotes
+      if (typeof value === 'string' && /\.(svg|png|jpg|jpeg|gif|webp)$/i.test(value)) {
+        return `"${value}"`;
+      }
+      return value;
+    };
+
+    // Build CSS variables
+    const variables = dictionary.allTokens
+      .map(token => `  --${token.name}: ${formatValue(token)};`)
+      .join('\n');
+
+    return `${selector} {\n${variables}\n}\n`;
+  }
+});
 
 // Configuration
 const config = {
@@ -23,10 +46,9 @@ const config = {
       files: [
         {
           destination: 'moloch-tokens.css',
-          format: 'css/variables',
+          format: 'css/variables-quoted-assets',
           options: {
-            selector: ':root[data-theme="moloch"]',
-            outputReferences: true
+            selector: ':root[data-theme="moloch"]'
           }
         }
       ]
