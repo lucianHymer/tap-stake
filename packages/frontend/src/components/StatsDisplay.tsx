@@ -61,12 +61,12 @@ const StatBar: React.FC<StatBarProps> = ({ label, value, color, maxValue }) => {
 
 // Class-specific content - easy to edit per class
 const CLASS_CONTENT: Record<string, string> = {
-  Wizard: 'unravels the deepest mysteries of cooperation and conjures entirely new spells of unity.',
-  Paladin: 'walks ahead with radiant conviction, showing everyone the path toward collective flourishing.',
-  Bard: 'weaves inspiring tales and songs of what we can build together when hearts align.',
-  Monk: 'channels inner balance outward through gentle presence, drawing all hearts into serene harmony.',
-  Seer: 'peers through the mists of possibility to guide communities toward futures where all can flourish.',
-  Artificer: 'mends fractured bonds and forges enchanted tools that draw hearts together in common cause.',
+  Wizard: 'bends reality itself to shatter the arcane chains of dis-coordination, summoning coordination spells from the void.',
+  Paladin: 'strikes with righteous fury and unbreakable will, forging a blazing path where cooperation reigns supreme.',
+  Bard: 'unleashes sonic waves of inspiration that melt hearts and minds into thunderous unity.',
+  Monk: 'channels disciplined inner power outward, harmonizing chaos into perfect coordinated destruction.',
+  Seer: 'tears through the veil of fate itself, wielding foresight as a weapon to guide the righteous toward inevitable victory.',
+  Artificer: 'wields ingenious creation and destruction in equal measure, forging reality-warping tools that bind hearts as one.',
 };
 
 export const StatsDisplay: React.FC<StatsDisplayProps> = ({
