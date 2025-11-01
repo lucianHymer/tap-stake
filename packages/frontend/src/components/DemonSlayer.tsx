@@ -242,7 +242,7 @@ export function DemonSlayer({ connection }: DemonSlayerProps) {
               ✓ MOLOCH BANISHED TO THE BLOCKCHAIN
             </div>
 
-            <button onClick={handleClear} className="btn-demon">
+            <button type="button" onClick={handleClear} className="btn-demon">
               RESURRECT MOLOCH (START OVER)
             </button>
           </div>
