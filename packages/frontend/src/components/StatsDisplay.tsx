@@ -59,12 +59,38 @@ const StatBar: React.FC<StatBarProps> = ({ label, value, color, maxValue }) => {
   );
 };
 
+// Class-specific content - easy to edit per class
+const CLASS_CONTENT: Record<string, string> = {
+  Wizard: 'unravels the deepest mysteries of cooperation and conjures entirely new spells of unity.',
+  Paladin: 'walks ahead with radiant conviction, showing everyone the path toward collective flourishing.',
+  Bard: 'weaves inspiring tales and songs of what we can build together when hearts align.',
+  Monk: 'channels inner balance outward through gentle presence, drawing all hearts into serene harmony.',
+  Seer: 'peers through the mists of possibility to guide communities toward futures where all can flourish.',
+  Artificer: 'mends fractured bonds and forges enchanted tools that draw hearts together in common cause.',
+};
+
 export const StatsDisplay: React.FC<StatsDisplayProps> = ({
   stats,
   className = '',
   characterClass = 'Slayer',
   primaryStats,
 }) => {
+  // Handle "Decide" state differently
+  if (characterClass === 'Decide') {
+    return (
+      <LazyMotion features={domAnimation}>
+        <div className={`${styles.statsDisplay} ${className}`}>
+          <div className={styles.classInfo}>
+            <p className={styles.description}>
+              You have 100 GTC to spread amongst these choices. It'll be spread evenly. Your choices
+              will determine your stats and class.
+            </p>
+          </div>
+        </div>
+      </LazyMotion>
+    );
+  }
+
   // Calculate total of all stats for percentage-based scaling
   const totalStats = stats.charisma + stats.intelligence + stats.wisdom;
 
@@ -74,6 +100,9 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
     { label: 'Intelligence', value: stats.intelligence, color: 'red' as const },
     { label: 'Wisdom', value: stats.wisdom, color: 'purple' as const },
   ].sort((a, b) => b.value - a.value);
+
+  // Get class-specific content or fall back to generic message
+  const classContent = CLASS_CONTENT[characterClass] || 'channels coordination magic through chosen weapons to slay Moloch.';
 
   return (
     <LazyMotion features={domAnimation}>
@@ -86,10 +115,7 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
                 ({primaryStats[0]} + {primaryStats[1]})
               </span>
             )}{' '}
-            {primaryStats
-              /* Max 140 chars */
-              ? 'channels coordination magic through chosen weapons to slay Moloch.channels coordination magic through chosen weapons to slay Moloch.channels'
-              : 'awaits your weapon selection.'}
+            {classContent}
           </p>
         </div>
         <div className={styles.statsContainer}>
