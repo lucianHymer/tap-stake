@@ -9,6 +9,7 @@ import { useAppContext } from '../contexts/AppContext';
 import { CHOICE_NAMES } from '../utils/balances';
 import { calculateAvailableAmount } from '../utils/staking';
 import { prepareStakingData } from '../utils/staking';
+import styles from './ChoicesPage.module.css';
 
 const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:8787';
 
@@ -174,11 +175,13 @@ export function ChoicesPage() {
 
   // Normal choices card with controlled state
   return (
-    <ChoicesCard
-      onSlayMoloch={handleSlayMoloch}
-      onRunAway={handleRunAway}
-      selectedChoices={state.selectedChoices}
-      onToggleChoice={actions.toggleChoice}
-    />
+    <div className={styles.choicesPage}>
+      <ChoicesCard
+        onSlayMoloch={handleSlayMoloch}
+        onRunAway={handleRunAway}
+        selectedChoices={state.selectedChoices}
+        onToggleChoice={actions.toggleChoice}
+      />
+    </div>
   );
 }
