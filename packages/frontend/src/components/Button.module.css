@@ -57,7 +57,7 @@
   border: 3px solid transparent;
   border-radius: var(--component-button-primary-radius);
   box-shadow: var(--component-button-primary-shadow);
-  font-family: 'Jacquard 12', var(--core-type-font-family-display);
+  font-family: "Jacquard 12", var(--core-type-font-family-display);
   font-size: 32px;
   font-weight: 400;
   line-height: normal;

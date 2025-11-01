@@ -38,10 +38,7 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({ onConnect }) => {
         <p>You have been given 100 GTC to allocate in the fight against Moloch.</p>
       </div>
       <div className={styles.centerIllustration}>
-        <img
-          src={ASSETS.nfcCard}
-          alt="NFC card tap animation"
-        />
+        <img src={ASSETS.nfcCard} alt="NFC card tap animation" />
       </div>
       <div className={styles.detailText}>
         <p>Tap your Burner card at the top of your phone when prompted.</p>

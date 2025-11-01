@@ -105,19 +105,19 @@ export const GameCard: React.FC<GameCardProps> = ({
       <div className={styles.border} />
 
       {/* This background border prevents scrolled content from peaking from behind the header */}
-      <div className={styles.background } />
+      <div className={styles.background} />
 
-          <div className={styles.headingContainer}>
-            {/* Heading pill - extends beyond image */}
-            <div className={styles.heading}>
-              <p>{heading}</p>
-              {headingIcons.map((icon, i) => (
-                <div key={i} className={styles.headingIcon}>
-                  {icon}
-                </div>
-              ))}
+      <div className={styles.headingContainer}>
+        {/* Heading pill - extends beyond image */}
+        <div className={styles.heading}>
+          <p>{heading}</p>
+          {headingIcons.map((icon, i) => (
+            <div key={i} className={styles.headingIcon}>
+              {icon}
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
       {/* Main content */}
       <div className={styles.contents}>
@@ -133,48 +133,29 @@ export const GameCard: React.FC<GameCardProps> = ({
             >
               <div className={`${styles.flipCard} ${isFlipped ? styles.flipped : ''}`}>
                 <div className={styles.flipCardFront}>
-                  <img
-                    src={heroImage}
-                    alt={heroImageAlt}
-                    className={styles.heroImage}
-                  />
+                  <img src={heroImage} alt={heroImageAlt} className={styles.heroImage} />
                 </div>
-                <div className={styles.flipCardBack}>
-                  {heroImageBackside}
-                </div>
+                <div className={styles.flipCardBack}>{heroImageBackside}</div>
               </div>
             </div>
           ) : (
-            <img
-              src={heroImage}
-              alt={heroImageAlt}
-              className={styles.heroImage}
-            />
+            <img src={heroImage} alt={heroImageAlt} className={styles.heroImage} />
           )}
 
           <div className={styles.subheadingContainer}>
             {/* Subheading pill - contained within image */}
             <div className={styles.subheading}>
               <p>{subheading}</p>
-              {subheadingIcon && (
-                <div className={styles.subheadingIcon}>
-                  {subheadingIcon}
-                </div>
-              )}
+              {subheadingIcon && <div className={styles.subheadingIcon}>{subheadingIcon}</div>}
             </div>
           </div>
         </div>
 
         {/* Details section */}
-        <div className={styles.detailsSection}>
-          {children}
-        </div>
-
+        <div className={styles.detailsSection}>{children}</div>
       </div>
       {/* Control panel */}
-      <div className={styles.controlPanel}>
-      {primaryAction}
-      </div>
+      <div className={styles.controlPanel}>{primaryAction}</div>
     </div>
   );
 };

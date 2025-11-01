@@ -36,11 +36,7 @@ export const MolochRisesCard: React.FC<MolochRisesCardProps> = ({ onRunAway, onG
       heroImageAlt="Moloch demon rising with warriors fleeing"
       primaryAction={
         <div className={styles.controlPanel}>
-          <Button
-            variant="primary"
-            onClick={handleRunAway}
-            disabled={!destinationAddress}
-          >
+          <Button variant="primary" onClick={handleRunAway} disabled={!destinationAddress}>
             Run Away
           </Button>
           <Button

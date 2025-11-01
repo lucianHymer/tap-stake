@@ -13,6 +13,7 @@ import heroRisesImg from '/assets/hero-rises.png';
 import swordIconSvg from '/assets/sword-icon.svg';
 import wandIconSvg from '/assets/wand-icon.svg';
 import xIconSvg from '/assets/x-icon-figma.svg';
+import moneyBagImg from '/assets/moneyBag.png';
 
 export const ASSETS = {
   // Images - imported directly for better dev experience
@@ -21,6 +22,7 @@ export const ASSETS = {
   heroSlain: heroSlainImg,
   heroRises: heroRisesImg,
   nfcCard: nfcCardImg,
+  moneyBag: moneyBagImg,
 
   // SVG Icons - imported directly for better dev experience
   helmetIcon: helmetIconSvg,

@@ -11,10 +11,7 @@ export const ToggleButtonDemo: React.FC = () => {
     <div className={styles.container}>
       <h1 className={styles.title}>ToggleButton Demo</h1>
       <div className={styles.toggleWrapper}>
-        <ToggleButton
-          label="Slay Moloch"
-          onToggle={handleToggle}
-        />
+        <ToggleButton label="Slay Moloch" onToggle={handleToggle} />
       </div>
     </div>
   );

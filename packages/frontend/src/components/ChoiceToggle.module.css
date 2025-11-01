@@ -27,8 +27,7 @@
   -webkit-tap-highlight-color: transparent;
 
   /* Transitions for smooth state changes */
-  transition:
-    all var(--core-motion-normal) var(--core-motion-easing-in-out);
+  transition: all var(--core-motion-normal) var(--core-motion-easing-in-out);
 }
 
 .choiceToggle:focus-visible {
@@ -51,9 +50,8 @@
   box-sizing: border-box;
 
   /* Transitions */
-  transition:
-    border-color var(--core-motion-normal) var(--core-motion-easing-in-out),
-    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
+  transition: border-color var(--core-motion-normal) var(--core-motion-easing-in-out), box-shadow
+    var(--core-motion-normal) var(--core-motion-easing-in-out);
 }
 
 /* Name - main text */
@@ -69,8 +67,17 @@
   flex-shrink: 0;
 
   /* Transitions */
-  transition:
-    color var(--core-motion-normal) var(--core-motion-easing-in-out);
+  transition: color var(--core-motion-normal) var(--core-motion-easing-in-out);
+}
+
+.bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 100%;
+  flex-grow: 1;
 }
 
 /* Stats container */
@@ -81,12 +88,39 @@
   font-size: 20px;
   line-height: 20px;
   text-align: center;
-  width: 100%;
   flex-shrink: 0;
 
   /* Transitions */
-  transition:
-    color var(--core-motion-normal) var(--core-motion-easing-in-out);
+  transition: color var(--core-motion-normal) var(--core-motion-easing-in-out);
+}
+
+.moneyBag {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  font-family: var(--core-type-font-family-display); /* 'Jacquard 24' */
+  font-size: 28px;
+  align-items: center;
+  justify-content: center;
+  transition: all;
+}
+
+.moneyBagImg {
+  transition: all;
+  height: 40px;
+  width: 36px;
+  grid-column: 1;
+  grid-row: 1;
+  z-index: 0;
+}
+
+.amount {
+  transition: all;
+  color: var(--core-color-accent-yellow);
+  grid-column: 1;
+  grid-row: 1;
+  z-index: 10;
+  margin-top: 10px;
 }
 
 /* ============================================
@@ -94,6 +128,10 @@
    ============================================ */
 .inactive .container {
   border-color: var(--core-color-grey-500);
+}
+
+.inactive .moneyBag {
+  filter: grayscale();
 }
 
 .inactive .name {

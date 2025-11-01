@@ -7,7 +7,7 @@
 
 /* Register custom property for gradient animation */
 @property --gradient-angle {
-  syntax: '<angle>';
+  syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }
@@ -35,15 +35,13 @@
   z-index: 20;
   background: conic-gradient(
     from var(--gradient-angle, 4deg) at 50% 50%,
-    #7ED1C6 0deg,
-    #49433F 119.42deg,
-    #3BA1FF 223.82deg,
-    #7ED1C6 360deg
+    #7ed1c6 0deg,
+    #49433f 119.42deg,
+    #3ba1ff 223.82deg,
+    #7ed1c6 360deg
   );
   /* Create the border effect using a mask */
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   padding: 8px;
@@ -105,7 +103,6 @@
   border-bottom-right-radius: 20px;
 }
 
-
 /* Top section - image area with overlays */
 .topSection {
   position: relative;
@@ -164,7 +161,7 @@
 }
 
 .heading p {
-  font-family: var(--core-type-font-family-display, 'Jacquard 12', sans-serif);
+  font-family: var(--core-type-font-family-display, "Jacquard 12", sans-serif);
   font-size: 31.25px;
   font-weight: 400;
   line-height: normal;
@@ -197,7 +194,7 @@
 }
 
 .subheading p {
-  font-family: var(--core-type-font-family-display, 'Jacquard 12', sans-serif);
+  font-family: var(--core-type-font-family-display, "Jacquard 12", sans-serif);
   font-size: 31.25px;
   font-weight: 400;
   line-height: normal;

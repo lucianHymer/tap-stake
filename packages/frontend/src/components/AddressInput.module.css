@@ -16,7 +16,7 @@
 
 /* Label */
 .label {
-  font-family: var(--core-type-font-family-serif, 'EB Garamond', serif);
+  font-family: var(--core-type-font-family-serif, "EB Garamond", serif);
   font-size: 20px;
   font-weight: 400;
   line-height: normal;
@@ -87,7 +87,7 @@
 .message,
 .successMessage,
 .errorMessage {
-  font-family: var(--core-type-font-family-serif, 'EB Garamond', serif);
+  font-family: var(--core-type-font-family-serif, "EB Garamond", serif);
   font-size: 16px;
   font-weight: 400;
   line-height: normal;

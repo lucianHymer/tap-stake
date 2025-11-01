@@ -47,11 +47,7 @@ export const Playground: Story = {
     subheadingIcon: <HelmetIcon />,
     heroImage: ASSETS.heroMoloch,
     heroImageAlt: 'Test image',
-    primaryAction: (
-      <Button variant="primary">
-        Action
-      </Button>
-    ),
+    primaryAction: <Button variant="primary">Action</Button>,
     children: (
       <div style={{ padding: '20px', textAlign: 'center', color: 'white' }}>
         <p>Custom content goes here!</p>

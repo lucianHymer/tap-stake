@@ -19,7 +19,9 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [debouncedValue, setDebouncedValue] = useState('');
-  const [validationState, setValidationState] = useState<'neutral' | 'valid' | 'invalid' | 'resolving'>('neutral');
+  const [validationState, setValidationState] = useState<
+    'neutral' | 'valid' | 'invalid' | 'resolving'
+  >('neutral');
   const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -41,7 +43,11 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
   // ENS resolution hook - only active when input looks like ENS
   const shouldResolveENS = looksLikeENS(debouncedValue) && debouncedValue.length > 0;
-  const { data: ensResolvedAddress, isLoading: isResolvingENS, error: ensError } = useEnsAddress({
+  const {
+    data: ensResolvedAddress,
+    isLoading: isResolvingENS,
+    error: ensError,
+  } = useEnsAddress({
     name: shouldResolveENS ? debouncedValue : undefined,
     chainId: 1, // Use mainnet for ENS resolution
     query: {
@@ -126,7 +132,10 @@ export const AddressInput: React.FC<AddressInputProps> = ({
         <div className={styles.successMessage}>
           {looksLikeENS(inputValue) ? (
             <>
-              Resolved to: <span className={styles.address}>{resolvedAddress.slice(0, 6)}...{resolvedAddress.slice(-4)}</span>
+              Resolved to:{' '}
+              <span className={styles.address}>
+                {resolvedAddress.slice(0, 6)}...{resolvedAddress.slice(-4)}
+              </span>
             </>
           ) : (
             'Valid address'

@@ -102,7 +102,8 @@ export const Interactive = () => {
 Interactive.parameters = {
   docs: {
     description: {
-      story: 'Interactive example showing how to control toggle state from a parent component. Click either option to select it.',
+      story:
+        'Interactive example showing how to control toggle state from a parent component. Click either option to select it.',
     },
   },
 };

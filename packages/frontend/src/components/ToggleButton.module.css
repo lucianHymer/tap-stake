@@ -55,9 +55,8 @@
   border: 8px solid var(--component-button-pill-border);
   border-radius: var(--core-radius-pill);
 
-  transition:
-    border-color var(--core-motion-normal) var(--core-motion-easing-in-out),
-    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
+  transition: border-color var(--core-motion-normal) var(--core-motion-easing-in-out), box-shadow
+    var(--core-motion-normal) var(--core-motion-easing-in-out);
 }
 
 .toggleButton:hover:not(:disabled) .track {
@@ -97,10 +96,9 @@
   align-self: start;
 
   /* Smooth sliding animation */
-  transition:
-    transform var(--core-motion-slow) var(--core-motion-easing-emph),
-    border-color var(--core-motion-normal) var(--core-motion-easing-in-out),
-    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
+  transition: transform var(--core-motion-slow) var(--core-motion-easing-emph), border-color
+    var(--core-motion-normal) var(--core-motion-easing-in-out), box-shadow var(--core-motion-normal)
+    var(--core-motion-easing-in-out);
 
   z-index: 2;
 }

@@ -17,25 +17,10 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   return (
-    <button
-      className={`${styles.button} ${styles[variant]} ${className || ''}`}
-      {...props}
-    >
-      {leftIcon && (
-        <img
-          src={leftIcon}
-          alt=""
-          className={styles.icon}
-        />
-      )}
+    <button className={`${styles.button} ${styles[variant]} ${className || ''}`} {...props}>
+      {leftIcon && <img src={leftIcon} alt="" className={styles.icon} />}
       {children}
-      {rightIcon && (
-        <img
-          src={rightIcon}
-          alt=""
-          className={styles.icon}
-        />
-      )}
+      {rightIcon && <img src={rightIcon} alt="" className={styles.icon} />}
     </button>
   );
 };
