@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import type React from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from './GameCard.module.css';
 
 export interface GameCardProps {
@@ -55,10 +56,9 @@ export const GameCard: React.FC<GameCardProps> = ({
         if (prev === null) {
           // First click while hovering - flip to front
           return false;
-        } else {
+        }
           // Toggle between front and back
           return !prev;
-        }
       });
 
       // Set transitioning flag to prevent rapid clicks

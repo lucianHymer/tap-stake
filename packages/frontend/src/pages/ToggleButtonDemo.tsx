@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { ToggleButton } from '../components/ToggleButton';
 import styles from './ToggleButtonDemo.module.css';
 

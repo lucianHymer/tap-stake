@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import type React from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { GameCard } from './GameCard';
 import { Button } from './Button';
 import { ChoiceToggle, type StatName } from './ChoiceToggle';
@@ -83,7 +84,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
       selectedCount: selectedChoices.size,
       totalAmount,
       amountPerChoice: selectedChoices.size > 0 ? totalAmount / selectedChoices.size : 0,
-      choices: selectedChoicesWithDetails
+      choices: selectedChoicesWithDetails,
     });
   }, [selectedChoices, totalAmount, selectedChoicesWithDetails]);
 
@@ -105,12 +106,12 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
       totalAmount,
       selectedCount: selectedChoices.size,
       amountPerChoice: selectedChoices.size > 0 ? totalAmount / selectedChoices.size : 0,
-      choices: selectedChoicesWithDetails.map(c => ({
+      choices: selectedChoicesWithDetails.map((c) => ({
         name: c.name,
         stats: c.stats,
         amount: c.amount,
-        displayAmount: Math.floor(c.amount)
-      }))
+        displayAmount: Math.floor(c.amount),
+      })),
     });
     onSlayMoloch?.();
   };

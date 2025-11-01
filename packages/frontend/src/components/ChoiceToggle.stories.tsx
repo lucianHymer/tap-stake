@@ -123,11 +123,12 @@ export const MultipleOptions = () => {
   const selectedCount = activeChoice ? 1 : 0;
   const amountPerChoice = selectedCount > 0 ? totalAmount / selectedCount : 0;
 
-  const choices: Array<{ id: string; name: string; stats: { major: StatName; minor: StatName } }> = [
-    { id: 'warrior', name: 'Warrior', stats: { major: 'wisdom', minor: 'intelligence' } },
-    { id: 'mage', name: 'Mage', stats: { major: 'intelligence', minor: 'wisdom' } },
-    { id: 'rogue', name: 'Rogue', stats: { major: 'charisma', minor: 'intelligence' } },
-  ];
+  const choices: Array<{ id: string; name: string; stats: { major: StatName; minor: StatName } }> =
+    [
+      { id: 'warrior', name: 'Warrior', stats: { major: 'wisdom', minor: 'intelligence' } },
+      { id: 'mage', name: 'Mage', stats: { major: 'intelligence', minor: 'wisdom' } },
+      { id: 'rogue', name: 'Rogue', stats: { major: 'charisma', minor: 'intelligence' } },
+    ];
 
   return (
     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
