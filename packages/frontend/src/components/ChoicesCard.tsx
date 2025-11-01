@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { GameCard } from './GameCard';
 import { Button } from './Button';
 import { ChoiceToggle, type StatName } from './ChoiceToggle';
+import { StatsDisplay } from './StatsDisplay';
 import { ASSETS } from '../config/assets';
 import styles from './ChoicesCard.module.css';
 
@@ -196,11 +197,12 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
   }, [selectedChoices, totalAmount]);
 
   // Calculate accumulated stats from selected choices
+  // All stats start at 1 (base value)
   const accumulatedStats = useMemo(() => {
     const stats = {
-      charisma: 0,
-      intelligence: 0,
-      wisdom: 0,
+      charisma: 1,
+      intelligence: 1,
+      wisdom: 1,
     };
 
     selectedChoicesWithDetails.forEach((choice) => {
@@ -212,9 +214,9 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
   }, [selectedChoicesWithDetails]);
 
   // Determine class based on top 2 stats
-  const selectedClass = useMemo(() => {
+  const { selectedClass, primaryStats } = useMemo(() => {
     // If nothing selected, prompt user to decide
-    if (selectedChoices.size === 0) return 'Decide';
+    if (selectedChoices.size === 0) return { selectedClass: 'Decide', primaryStats: undefined };
 
     const { charisma, intelligence, wisdom } = accumulatedStats;
 
@@ -239,7 +241,13 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
       'wisdom/intelligence': 'Seer',
     };
 
-    return classMap[statPair] || 'Artificer';
+    // Capitalize stat names for display
+    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+    return {
+      selectedClass: classMap[statPair] || 'Artificer',
+      primaryStats: [capitalize(first.name), capitalize(second.name)] as [string, string],
+    };
   }, [accumulatedStats]);
 
   // Log selected choices with details whenever selection changes
@@ -301,12 +309,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
       heroImageAlt={`${selectedClass} choosing weapons`}
       hintKey={selectedClass}
       heroImageBackside={
-        <div className={styles.backContent}>
-          <h2>Hidden Power Unlocked!</h2>
-          <p>You have discovered the ancient weapons of coordination.</p>
-          <p>These tools will aid you in your battle against Moloch.</p>
-          <p>Click to keep viewing the front...</p>
-        </div>
+        <StatsDisplay stats={accumulatedStats} characterClass={selectedClass} primaryStats={primaryStats} />
       }
       primaryAction={
         <div className={styles.controlPanel}>

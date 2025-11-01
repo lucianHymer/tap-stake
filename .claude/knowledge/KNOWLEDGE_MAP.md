@@ -20,7 +20,7 @@
 - [EIP-7702 Relayer Integration](frontend/eip-7702-relayer-integration.md) - Gasless transaction flow via Cloudflare Worker relayer
 
 ## 🎯 Patterns
-- [Framer Motion Animations](patterns/framer-motion-animations.md) - LazyMotion bundle optimization and spring-based counter animations
+- [Framer Motion Animations](patterns/framer-motion-animations.md) - LazyMotion bundle optimization, spring-based counter animations, and hint animation pattern for teaching affordances
 - [Type-Safe Stats](patterns/type-safe-stats.md) - Separation of data model and display logic for stats
 
 ## 🧪 Testing

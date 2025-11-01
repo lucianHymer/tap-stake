@@ -54,3 +54,68 @@ function Counter({ amount }: { amount: number }) {
 - Visual feedback for stat changes
 
 **Related files**: packages/frontend/src/components/ChoiceToggle.tsx
+
+## Hint Animation Pattern for Teaching Affordances
+Micro-interaction pattern using Framer Motion springs to teach users about interactive elements:
+
+```tsx
+import { m } from 'framer-motion';
+import { useState, useEffect } from 'react';
+
+function InteractiveCard() {
+  const [hintRotation, setHintRotation] = useState(0);
+
+  useEffect(() => {
+    // Show hint after 1s dwell time
+    const showHint = setTimeout(() => setHintRotation(15), 1000);
+    // Reset after showing hint
+    const resetHint = setTimeout(() => setHintRotation(0), 1500);
+
+    return () => {
+      clearTimeout(showHint);
+      clearTimeout(resetHint);
+    };
+  }, []);
+
+  return (
+    <m.div
+      animate={{ rotateY: hintRotation }}
+      transition={{
+        type: "spring",
+        stiffness: 200,  // Snappy response
+        damping: 25,     // Allow bounce/overshoot for attention
+        mass: 0.8        // Heavier feel for teaching moment
+      }}
+    >
+      Card content
+    </m.div>
+  );
+}
+```
+
+### Spring Configuration for Hints
+- **stiffness: ~200** - Snappy, attention-grabbing
+- **damping: ~25** - Lower than counter springs to allow bounce/overshoot
+- **mass: ~0.8** - Heavier feel makes the hint more noticeable
+
+### Pattern Flow
+1. Component mounts with neutral state (rotation: 0)
+2. setTimeout triggers state change after dwell period
+3. Spring animates to hint position (partial rotation, etc.)
+4. Second setTimeout resets state
+5. Spring animates back to neutral
+
+### Benefits Over CSS Keyframes
+- More natural, organic motion with bounce/overshoot
+- Can interrupt mid-animation smoothly if user interacts
+- Consistent with other springs in the app
+- Less code (no keyframe definitions, no transition classes)
+- State-driven, easy to control timing and conditions
+
+### Use Cases
+- Flip cards: Show partial flip to indicate interactivity
+- Buttons: Slight scale pulse to draw attention
+- Drawers: Peek animation to reveal content
+- Sliders: Wiggle to show draggability
+
+**Related files**: packages/frontend/src/components/GameCard.tsx, packages/frontend/src/components/ChoiceToggle.tsx

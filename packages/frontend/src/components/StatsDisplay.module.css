@@ -1,0 +1,180 @@
+@import "../styles/moloch-tokens.css";
+
+.statsDisplay {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--core-spacing-2);
+  padding: 24px var(--core-spacing-3);
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(126, 209, 198, 0.12) 0%,
+    rgba(59, 161, 255, 0.08) 40%,
+    var(--semantic-bg-primary) 100%
+  );
+  border-radius: var(--core-radius-lg);
+  box-shadow:
+    inset 0 0 40px rgba(126, 209, 198, 0.15),
+    inset 0 0 20px rgba(59, 161, 255, 0.12);
+}
+
+.classInfo {
+  margin-bottom: 0;
+}
+
+.description {
+  font-family: var(--core-type-font-family-serif);
+  font-size: var(--core-type-size-md);
+  color: var(--semantic-text-primary);
+  margin: 0;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.className {
+  font-family: var(--core-type-font-family-display);
+  color: var(--core-color-accent-yellow);
+  font-size: var(--core-type-size-lg);
+  line-height: 1;
+  display: inline-block;
+  vertical-align: baseline;
+  text-shadow: 0 0 12px rgba(255, 217, 0, 0.4);
+}
+
+.statPair {
+  color: var(--semantic-text-primary);
+  font-size: var(--core-type-size-md);
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--core-spacing-2);
+}
+
+.title {
+  font-family: var(--core-type-font-family-serif);
+  font-size: var(--core-type-size-lg);
+  font-weight: var(--core-type-weight-regular);
+  color: var(--semantic-text-primary);
+  margin: 0;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.statRow {
+  width: 80%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--core-spacing-2);
+  padding: 2px 0;
+}
+
+.statLabel {
+  font-family: var(--core-type-font-family-display);
+  font-size: var(--core-type-size-md);
+  text-align: right;
+  min-width: 80px;
+  white-space: nowrap;
+}
+
+.label-green {
+  color: var(--core-color-neon-green);
+}
+
+.label-red {
+  color: var(--core-color-accent-red);
+}
+
+.label-purple {
+  color: var(--core-color-accent-purple);
+}
+
+.barContainer {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bar {
+  height: 18px;
+  border-radius: var(--core-radius-sm);
+  position: relative;
+  min-width: 16px; /* Ensure even value of 1 shows */
+  transition: box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
+
+  /* Add subtle inner glow for depth */
+  box-shadow:
+    inset 0 0 6px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Green bar (Charisma) */
+.bar-green {
+  background: var(--core-color-neon-green);
+  box-shadow:
+    inset 0 0 6px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3),
+    0 0 8px rgba(57, 255, 20, 0.5);
+}
+
+.bar-green:hover {
+  box-shadow:
+    inset 0 0 6px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3),
+    0 0 16px rgba(57, 255, 20, 0.7);
+}
+
+/* Red bar (Intelligence) */
+.bar-red {
+  background: var(--core-color-accent-red);
+  box-shadow:
+    inset 0 0 6px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3),
+    0 0 8px rgba(245, 3, 3, 0.5);
+}
+
+.bar-red:hover {
+  box-shadow:
+    inset 0 0 6px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3),
+    0 0 16px rgba(245, 3, 3, 0.7);
+}
+
+/* Purple bar (Wisdom) */
+.bar-purple {
+  background: var(--core-color-accent-purple);
+  box-shadow:
+    inset 0 0 6px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3),
+    0 0 8px rgba(166, 18, 240, 0.5);
+}
+
+.bar-purple:hover {
+  box-shadow:
+    inset 0 0 6px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3),
+    0 0 16px rgba(166, 18, 240, 0.7);
+}
+
+.statValue {
+  font-family: var(--core-type-font-family-mono);
+  font-size: var(--core-type-size-sm);
+  font-weight: var(--core-type-weight-bold);
+  color: var(--semantic-text-primary);
+  min-width: 24px;
+  text-align: right;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+}
