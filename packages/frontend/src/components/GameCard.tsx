@@ -120,7 +120,10 @@ export const GameCard: React.FC<GameCardProps> = ({
       // Return to 0 after a brief moment (spring will handle the animation)
       setTimeout(() => {
         setHintRotation(0);
-        setShowHintGlow(false);
+        // Keep glow visible during spring animation back to 0
+        setTimeout(() => {
+          setShowHintGlow(false);
+        }, 200); // Short delay for spring
       }, 300);
     }, 1000);
 
@@ -168,11 +171,13 @@ export const GameCard: React.FC<GameCardProps> = ({
           <LazyMotion features={domAnimation}>
             {heroImageBackside ? (
               <div
-                className={`${styles.flipCardContainer} ${showHintGlow ? styles.hintGlow : ''}`}
+                className={styles.flipCardContainer}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 onClick={handleCardClick}
               >
+                {/* Glow background element */}
+                <div className={`${styles.glowBackground} ${showHintGlow ? styles.glowActive : ''}`} />
                 <m.div
                   className={styles.flipCard}
                   animate={{
