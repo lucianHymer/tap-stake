@@ -1,6 +1,6 @@
 # 📚 Project Knowledge Map
 
-*Last updated: 2025-09-29*
+*Last updated: 2025-10-31*
 
 ## 🏗️ Architecture
 - [NFC Wallet Integration](architecture/nfc-wallet-integration.md) - LibHalo NFC patterns, EOA paymaster support, EIP-7702 NFC implementation with signAuthorization, two-tap demo flow, approve+transfer batching, frontend integration strategy, BatchExecutor pattern
@@ -10,7 +10,7 @@
 - [Foundry](dependencies/foundry.md) - Smart contract development framework installation and setup
 
 ## 🚀 Deployment
-- [EIP-7702 Optimism Sepolia](deployment/eip-7702-optimism-sepolia.md) - Deployment configuration for EIP-7702 contracts on OP Sepolia
+- [EIP-7702 Optimism Sepolia](deployment/eip-7702-optimism-sepolia.md) - Deployment configuration for EIP-7702 contracts on OP Sepolia, deployed contract addresses (SelfBatchExecutor, TestERC20, StakerWallet, StakeChoicesERC6909), relayer configuration with supported operations
 
 ## 🎨 Frontend
 - [Tap-Stake Demon-Slayer Theme](frontend/tap-stake-demon-slayer-theme.md) - Dark themed UI with demon-slaying metaphors

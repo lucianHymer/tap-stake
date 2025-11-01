@@ -31,25 +31,36 @@ EIP-7702 is live on:
 - Ethereum testnets (Sepolia, Holesky)
 - Scheduled for Ethereum mainnet: May 7, 2025
 
-## Latest Deployment (September 30, 2025)
-Successfully deployed all contracts to Optimism Sepolia (Chain ID: 11155420):
+## Latest Deployment (October 31, 2025)
+Successfully deployed updated contracts to Optimism Sepolia (Chain ID: 11155420):
 
 ### Contract Addresses
 - **SelfBatchExecutor**: 0x7Edd1EBd251eE6D943Ae64A20969Cf40a1aa236C
-- **TestERC20**: 0xC7480B7CAaDc8Aaa8b0ddD0552EC5F77A464F649
-- **Stake**: 0x334559433296D9Dd9a861c200aFB1FEAF77388AA
-- **StakerWallet**: 0xB9f60eb68B55396CEb1a0a347aEfA48AE6473F33 (NEW - gasless staking)
+- **TestERC20**: 0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756
+- **StakerWallet**: 0x0568033352086AD7Bc23B218D8b9ff6733BA4448 (gasless staking with restaking support)
+- **StakeChoicesERC6909**: 0xb0a727f57841910752F0f1ef96871Cc28C086012 (multi-position staking)
 
-### Deployment Stats
-- Gas used: ~2,318,835
-- Total cost: ~0.00000232 ETH
+### Relayer Configuration
+The relayer has been configured with the latest deployed addresses:
+- **ALLOWED_CONTRACT_ADDRESS**: StakerWallet (0x0568033352086AD7Bc23B218D8b9ff6733BA4448)
+- **TOKEN_ADDRESS**: TestERC20 (0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756)
+- **STAKE_CHOICES_ADDRESS**: StakeChoicesERC6909 (0xb0a727f57841910752F0f1ef96871Cc28C086012)
+- **Minimum holdings requirement**: 90 tokens (90e18 wei)
+
+### Supported Operations
+The relayer supports 4 gasless operations:
+1. **addStakes**: Add new stake positions
+2. **updateStakes**: Update existing stake positions
+3. **withdraw**: Withdraw tokens from the wallet
+4. **unstakeAllAndWithdraw**: Unstake all positions and withdraw
+
+All operations require users to have at least 90 tokens (wallet + staked balances combined).
 
 ### Frontend Updates
 Contract addresses updated in:
 - packages/frontend/src/pages/EIP7702Experimental.tsx
 - packages/frontend/src/pages/EIP7702NFC.tsx
 - packages/frontend/src/pages/EIP7702Relayed.tsx
-
-**Note**: Contract verification failed due to API key issue but contracts are functional on-chain.
+- packages/relayer/wrangler.toml
 
 **Related files**: packages/contracts/foundry.toml, packages/contracts/script/Deploy.s.sol, packages/contracts/DEPLOYMENT.md, packages/contracts/DEPLOYED_ADDRESSES.md

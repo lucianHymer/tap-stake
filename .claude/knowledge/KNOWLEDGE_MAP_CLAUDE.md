@@ -8,7 +8,7 @@
 - @dependencies/foundry.md - Smart contract development framework installation and setup
 
 ## 🚀 Deployment
-- @deployment/eip-7702-optimism-sepolia.md - Deployment configuration for EIP-7702 contracts on OP Sepolia, deployed contract addresses (SelfBatchExecutor, TestERC20, Stake, StakerWallet)
+- @deployment/eip-7702-optimism-sepolia.md - Deployment configuration for EIP-7702 contracts on OP Sepolia, deployed contract addresses (SelfBatchExecutor, TestERC20, StakerWallet, StakeChoicesERC6909), relayer configuration with supported operations
 
 ## 🎨 Frontend
 - @frontend/tap-stake-demon-slayer-theme.md - Dark themed UI with demon-slaying metaphors
