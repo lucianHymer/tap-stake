@@ -26,6 +26,8 @@ export interface GameCardProps {
   primaryAction: React.ReactNode;
   /** Optional className */
   className?: string;
+  /** Key to track when content changes for flip hint (e.g., class name) */
+  hintKey?: string;
 }
 
 export const GameCard: React.FC<GameCardProps> = ({
@@ -40,12 +42,16 @@ export const GameCard: React.FC<GameCardProps> = ({
   children,
   primaryAction,
   className = '',
+  hintKey,
 }) => {
   // Flip card state - only used if heroImageBackside is provided
   const [isHovering, setIsHovering] = useState(false);
   const [manualOverride, setManualOverride] = useState<boolean | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [hintRotation, setHintRotation] = useState(0);
+  const [showHintGlow, setShowHintGlow] = useState(false);
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Card is flipped based on hover, but manual override takes precedence
   const isFlipped = manualOverride !== null ? manualOverride : isHovering;
@@ -92,6 +98,40 @@ export const GameCard: React.FC<GameCardProps> = ({
     setIsTransitioning(false);
   };
 
+  // Flip hint effect - triggers after 1s of dwelling on the same content
+  // Triggered by hintKey change
+  useEffect(() => {
+    // Only show hint if we have a flip backside and hintKey
+    if (!heroImageBackside || !hintKey) return;
+
+    // Clear any existing hint timeout
+    if (hintTimeoutRef.current) {
+      clearTimeout(hintTimeoutRef.current);
+    }
+
+    // Reset hint rotation immediately when content changes
+    setHintRotation(0);
+
+    // Set new timeout to show hint after 1s
+    hintTimeoutRef.current = setTimeout(() => {
+      // Trigger the hint animation by rotating to 35deg with glow
+      setHintRotation(35);
+      setShowHintGlow(true);
+      // Return to 0 after a brief moment (spring will handle the animation)
+      setTimeout(() => {
+        setHintRotation(0);
+        setShowHintGlow(false);
+      }, 300);
+    }, 1000);
+
+    return () => {
+      if (hintTimeoutRef.current) {
+        clearTimeout(hintTimeoutRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hintKey]); // Only trigger on hintKey change, not heroImageBackside (it's recreated every render)
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -128,12 +168,26 @@ export const GameCard: React.FC<GameCardProps> = ({
           <LazyMotion features={domAnimation}>
             {heroImageBackside ? (
               <div
-                className={styles.flipCardContainer}
+                className={`${styles.flipCardContainer} ${showHintGlow ? styles.hintGlow : ''}`}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 onClick={handleCardClick}
               >
-                <div className={`${styles.flipCard} ${isFlipped ? styles.flipped : ''}`}>
+                <m.div
+                  className={styles.flipCard}
+                  animate={{
+                    rotateY: isFlipped ? 180 : hintRotation,
+                  }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 200,
+                    damping: 25,
+                    mass: 0.8,
+                  }}
+                  style={{
+                    transformStyle: 'preserve-3d',
+                  }}
+                >
                   <div className={styles.flipCardFront}>
                     <div className={styles.imageWrapper}>
                       <AnimatePresence>
@@ -155,7 +209,7 @@ export const GameCard: React.FC<GameCardProps> = ({
                     </div>
                   </div>
                   <div className={styles.flipCardBack}>{heroImageBackside}</div>
-                </div>
+                </m.div>
               </div>
             ) : (
               <div className={styles.imageWrapper}>

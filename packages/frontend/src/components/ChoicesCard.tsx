@@ -299,6 +299,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
       subheadingIcon={getClassIcon(selectedClass)}
       heroImage={classImages.choice}
       heroImageAlt={`${selectedClass} choosing weapons`}
+      hintKey={selectedClass}
       heroImageBackside={
         <div className={styles.backContent}>
           <h2>Hidden Power Unlocked!</h2>
