@@ -139,7 +139,11 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
       }
       primaryAction={
         <div className={styles.controlPanel}>
-          <Button variant="primary" onClick={handleSlayMoloch}>
+          <Button
+            variant="primary"
+            onClick={handleSlayMoloch}
+            disabled={selectedChoices.size === 0}
+          >
             Slay Moloch.
           </Button>
           <Button
@@ -162,6 +166,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
             amount={getDisplayAmount(choice.id)}
             active={selectedChoices.has(choice.id)}
             onClick={() => toggleChoice(choice.id)}
+            animationStyle="pulse"
           />
         ))}
       </div>

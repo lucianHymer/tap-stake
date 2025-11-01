@@ -17,6 +17,8 @@ export interface ChoiceToggleProps {
   active: boolean;
   onClick: () => void;
   className?: string;
+  /** Animation style to test: 'scale' | 'pulse' | 'rotate' | 'none' */
+  animationStyle?: 'scale' | 'pulse' | 'rotate' | 'none';
 }
 
 export const ChoiceToggle: React.FC<ChoiceToggleProps> = ({
@@ -26,6 +28,7 @@ export const ChoiceToggle: React.FC<ChoiceToggleProps> = ({
   active,
   onClick,
   className,
+  animationStyle = 'scale',
 }) => {
   // Motion value for animated counter with duration-based animation
   const motionAmount = useMotionValue(0);
@@ -43,14 +46,39 @@ export const ChoiceToggle: React.FC<ChoiceToggleProps> = ({
     return controls.stop;
   }, [amount, motionAmount]);
 
+  // Get animation props based on style
+  const getAnimationProps = () => {
+    switch (animationStyle) {
+      case 'scale':
+        return {
+          whileTap: { scale: 0.95 },
+          transition: { type: 'spring' as const, stiffness: 400, damping: 25 },
+        };
+      case 'pulse':
+        return {
+          whileTap: { scale: 0.92 },
+          transition: { duration: 0.08 },
+        };
+      case 'rotate':
+        return {
+          whileTap: { scale: 0.95, rotate: 2 },
+          transition: { duration: 0.2 },
+        };
+      case 'none':
+      default:
+        return {};
+    }
+  };
+
   return (
     <LazyMotion features={domAnimation}>
-      <button
+      <m.button
         className={`${styles.choiceToggle} ${
           active ? styles.active : styles.inactive
         } ${className || ''}`}
         onClick={onClick}
         type="button"
+        {...getAnimationProps()}
       >
         <div className={styles.container}>
           <div className={styles.name}>{name}</div>
@@ -65,7 +93,7 @@ export const ChoiceToggle: React.FC<ChoiceToggleProps> = ({
             </div>
           </div>
         </div>
-      </button>
+      </m.button>
     </LazyMotion>
   );
 };

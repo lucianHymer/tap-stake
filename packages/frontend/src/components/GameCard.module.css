@@ -235,6 +235,8 @@
   aspect-ratio: 5 / 3;
   perspective: 1000px;
   cursor: pointer;
+  /* Remove tap highlight on mobile browsers */
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* The flip card inner wrapper */
