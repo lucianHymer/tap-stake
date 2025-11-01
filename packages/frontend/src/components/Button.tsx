@@ -3,10 +3,7 @@ import { LazyMotion, domAnimation, m, type HTMLMotionProps } from 'framer-motion
 import styles from './Button.module.css';
 
 export interface ButtonProps
-  extends Omit<
-    HTMLMotionProps<'button'>,
-    'children' | 'variant' | 'leftIcon' | 'rightIcon'
-  > {
+  extends Omit<HTMLMotionProps<'button'>, 'children' | 'variant' | 'leftIcon' | 'rightIcon'> {
   variant?: 'primary' | 'outline' | 'cancel';
   children: React.ReactNode;
   leftIcon?: string;
