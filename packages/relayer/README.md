@@ -47,6 +47,54 @@ npm run deploy
 
 ## API
 
+### POST /test-mint
+
+**Test endpoint only - works exclusively on Optimism Sepolia (chain ID 11155420)**
+
+Mint TestERC20 tokens to any address using the relayer's wallet. This endpoint is useful for testing without needing to manage test tokens yourself.
+
+**Request:**
+```json
+{
+  "address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+  "amount": "100000000000000000000"
+}
+```
+
+- `address`: The address to mint tokens to
+- `amount`: Amount in wei (e.g., "100000000000000000000" = 100 tokens)
+
+**Response:**
+```json
+{
+  "success": true,
+  "txHash": "0x...",
+  "details": {
+    "to": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "amount": "100000000000000000000",
+    "tokenAddress": "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756",
+    "minter": "0x..."
+  }
+}
+```
+
+**Restrictions:**
+- Only works when CHAIN_ID is 11155420 (Optimism Sepolia)
+- Returns 403 error on any other chain
+- Amount must be > 0
+
+**Example usage:**
+```bash
+curl -X POST https://your-relayer.workers.dev/test-mint \
+  -H "Content-Type: application/json" \
+  -d '{
+    "address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "amount": "100000000000000000000"
+  }'
+```
+
+---
+
 ### POST /
 
 Submit a StakerWallet transaction with an EIP-7702 authorization.

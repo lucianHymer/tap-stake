@@ -57,6 +57,21 @@ const ERC20_ABI = [
   },
 ] as const;
 
+// Test-only ABI for TestERC20 with public mint function
+const TEST_ERC20_ABI = [
+  ...ERC20_ABI,
+  {
+    name: 'mint',
+    type: 'function',
+    inputs: [
+      { name: 'to', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+] as const;
+
 const ERC6909_ABI = [
   {
     name: 'balanceOf',
@@ -184,6 +199,162 @@ const corsHeaders = {
   'Content-Type': 'application/json',
 };
 
+// Test mint endpoint handler - only works on Optimism Sepolia
+async function handleTestMint(request: Request, env: Env): Promise<Response> {
+  // Only accept POST requests
+  if (request.method !== 'POST') {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: 'Method not allowed',
+        details: 'Only POST requests are accepted',
+      }),
+      {
+        status: 405,
+        headers: corsHeaders,
+      }
+    );
+  }
+
+  try {
+    // Validate chain ID is Optimism Sepolia
+    const chainId = Number.parseInt(env.CHAIN_ID);
+    if (chainId !== 11155420) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Test mint only available on Optimism Sepolia',
+          details: `Current chain ID is ${chainId}, but test mint only works on 11155420 (Optimism Sepolia)`,
+        }),
+        {
+          status: 403,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    // Parse request body
+    const body = (await request.json()) as {
+      address: Address;
+      amount: string;
+    };
+
+    // Validate required fields
+    if (!body.address || !body.amount) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Missing required fields',
+          details: 'Request must include address and amount fields',
+        }),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    // Parse amount
+    const amount = BigInt(body.amount);
+    if (amount <= 0n) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Invalid amount',
+          details: 'Amount must be greater than 0',
+        }),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    // Get chain configuration
+    const chain = getChainConfig(chainId);
+
+    // Create wallet client for the relayer
+    const account = privateKeyToAccount(env.PRIVATE_KEY as Hex);
+    const walletClient = createWalletClient({
+      account,
+      chain,
+      transport: http(env.RPC_URL),
+    });
+
+    if (env.ENVIRONMENT !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log('Test minting:', {
+        to: body.address,
+        amount: amount.toString(),
+        tokenAddress: env.TOKEN_ADDRESS,
+      });
+    }
+
+    // Call mint function on TestERC20
+    const txHash = await walletClient.writeContract({
+      address: env.TOKEN_ADDRESS as Address,
+      abi: TEST_ERC20_ABI,
+      functionName: 'mint',
+      args: [body.address, amount],
+    });
+
+    if (env.ENVIRONMENT !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log('Mint transaction sent:', txHash);
+    }
+
+    // Return success response
+    return new Response(
+      JSON.stringify({
+        success: true,
+        txHash,
+        details: {
+          to: body.address,
+          amount: amount.toString(),
+          tokenAddress: env.TOKEN_ADDRESS,
+          minter: account.address,
+        },
+      }),
+      {
+        status: 200,
+        headers: corsHeaders,
+      }
+    );
+  } catch (error) {
+    if (env.ENVIRONMENT !== 'production') {
+      // eslint-disable-next-line no-console
+      console.error('Mint error:', error);
+    }
+
+    const err = error as Error & {
+      cause?: unknown;
+      details?: unknown;
+      shortMessage?: string;
+      metaMessages?: unknown;
+    };
+
+    const errorDetails = {
+      message: err.message || 'Unknown error',
+      cause: err.cause,
+      details: err.details,
+      shortMessage: err.shortMessage,
+      metaMessages: err.metaMessages,
+    };
+
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: err.shortMessage || err.message || 'Mint failed',
+        details: errorDetails,
+      }),
+      {
+        status: 500,
+        headers: corsHeaders,
+      }
+    );
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     // Handle CORS preflight
@@ -191,7 +362,16 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
-    // Only accept POST requests
+    // Get the URL path for routing
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    // Route to test mint endpoint
+    if (path === '/test-mint') {
+      return handleTestMint(request, env);
+    }
+
+    // Only accept POST requests for relay endpoint
     if (request.method !== 'POST') {
       return new Response(
         JSON.stringify({
