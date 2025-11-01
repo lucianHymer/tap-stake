@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
+import { LazyMotion, domAnimation, m, AnimatePresence } from 'framer-motion';
 import styles from './GameCard.module.css';
 
 export interface GameCardProps {
@@ -124,23 +125,59 @@ export const GameCard: React.FC<GameCardProps> = ({
         {/* Top section with image and overlays */}
         <div className={styles.topSection}>
           {/* Hero image - with optional flip card */}
-          {heroImageBackside ? (
-            <div
-              className={styles.flipCardContainer}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-              onClick={handleCardClick}
-            >
-              <div className={`${styles.flipCard} ${isFlipped ? styles.flipped : ''}`}>
-                <div className={styles.flipCardFront}>
-                  <img src={heroImage} alt={heroImageAlt} className={styles.heroImage} />
+          <LazyMotion features={domAnimation}>
+            {heroImageBackside ? (
+              <div
+                className={styles.flipCardContainer}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                onClick={handleCardClick}
+              >
+                <div className={`${styles.flipCard} ${isFlipped ? styles.flipped : ''}`}>
+                  <div className={styles.flipCardFront}>
+                    <div className={styles.imageWrapper}>
+                      <AnimatePresence>
+                        <m.img
+                          key={heroImage}
+                          src={heroImage}
+                          alt={heroImageAlt}
+                          className={styles.heroImage}
+                          initial={{ x: 50, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          exit={{ x: -50, opacity: 0 }}
+                          transition={{
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 30,
+                          }}
+                        />
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                  <div className={styles.flipCardBack}>{heroImageBackside}</div>
                 </div>
-                <div className={styles.flipCardBack}>{heroImageBackside}</div>
               </div>
-            </div>
-          ) : (
-            <img src={heroImage} alt={heroImageAlt} className={styles.heroImage} />
-          )}
+            ) : (
+              <div className={styles.imageWrapper}>
+                <AnimatePresence>
+                  <m.img
+                    key={heroImage}
+                    src={heroImage}
+                    alt={heroImageAlt}
+                    className={styles.heroImage}
+                    initial={{ x: 50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: -50, opacity: 0 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 30,
+                    }}
+                  />
+                </AnimatePresence>
+              </div>
+            )}
+          </LazyMotion>
 
           <div className={styles.subheadingContainer}>
             {/* Subheading pill - contained within image */}
