@@ -6,12 +6,15 @@
 @import "../styles/moloch-tokens.css";
 
 .detailText {
+  text-align: center;
+  gap: 16px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   width: 100%;
   min-height: 54px;
   flex-shrink: 0;
+  padding: 8px 8px 0px 8px;
 }
 
 .detailText p {
@@ -21,6 +24,23 @@
   line-height: normal;
   color: #ffffff;
   margin: 0;
+}
+
+/* Moloch text styling - red color and stylized font */
+.molochText {
+  color: var(--core-color-accent-red);
+  font-family: var(--core-type-font-family-display);
+}
+
+/* Yellow text styling */
+.yellowText {
+  color: var(--core-color-accent-yellow);
+}
+
+/* Burner text styling - yellow color and stylized font */
+.burnerText {
+  color: var(--core-color-accent-yellow);
+  font-family: var(--core-type-font-family-display);
 }
 
 .centerIllustration {

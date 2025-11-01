@@ -14,6 +14,7 @@ import swordIconSvg from '/assets/sword-icon.svg';
 import wandIconSvg from '/assets/wand-icon.svg';
 import xIconSvg from '/assets/x-icon-figma.svg';
 import moneyBagImg from '/assets/moneyBag.png';
+import burnerTapImg from '/assets/burnerTap.png';
 
 // Class-specific images - compressed versions
 import artificerChoiceImg from '/assets/GG-POC-SlayMoloch_Artificer.png';
@@ -37,6 +38,7 @@ export const ASSETS = {
   heroRises: heroRisesImg,
   nfcCard: nfcCardImg,
   moneyBag: moneyBagImg,
+  burnerTap: burnerTapImg,
 
   // SVG Icons - imported directly for better dev experience
   helmetIcon: helmetIconSvg,
@@ -47,6 +49,10 @@ export const ASSETS = {
 
   // Class-specific choice images
   classImages: {
+    Decide: {
+      choice: heroMolochImg,
+      slain: heroMolochImg,
+    },
     Artificer: {
       choice: artificerChoiceImg,
       slain: artificerSlainImg,
