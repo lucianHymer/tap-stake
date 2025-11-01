@@ -298,6 +298,14 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
 
   const classImages = useMemo(() => getClassImages(selectedClass), [selectedClass]);
 
+  // Track last interaction time to reset hint timer
+  const [lastInteractionTime, setLastInteractionTime] = useState(Date.now());
+
+  // Update interaction time whenever choices change
+  useEffect(() => {
+    setLastInteractionTime(Date.now());
+  }, [selectedChoices]);
+
   return (
     <GameCard
       variant="default"
@@ -308,6 +316,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({ onSlayMoloch, onRunAwa
       heroImage={classImages.choice}
       heroImageAlt={`${selectedClass} choosing weapons`}
       hintKey={selectedClass}
+      lastInteractionTime={lastInteractionTime}
       heroImageBackside={
         <StatsDisplay stats={accumulatedStats} characterClass={selectedClass} primaryStats={primaryStats} />
       }

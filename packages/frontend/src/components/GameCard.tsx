@@ -28,6 +28,8 @@ export interface GameCardProps {
   className?: string;
   /** Key to track when content changes for flip hint (e.g., class name) */
   hintKey?: string;
+  /** Timestamp for last interaction to reset hint timer */
+  lastInteractionTime?: number;
 }
 
 export const GameCard: React.FC<GameCardProps> = ({
@@ -43,6 +45,7 @@ export const GameCard: React.FC<GameCardProps> = ({
   primaryAction,
   className = '',
   hintKey,
+  lastInteractionTime,
 }) => {
   // Flip card state - only used if heroImageBackside is provided
   const [isHovering, setIsHovering] = useState(false);
@@ -98,34 +101,42 @@ export const GameCard: React.FC<GameCardProps> = ({
     setIsTransitioning(false);
   };
 
-  // Flip hint effect - triggers after 1s of dwelling on the same content
-  // Triggered by hintKey change
-  useEffect(() => {
-    // Only show hint if we have a flip backside and hintKey
-    if (!heroImageBackside || !hintKey) return;
+  // Function to show the hint animation
+  const showHintAnimation = () => {
+    // Timer has fired, clear the ref so we know it's no longer active
+    hintTimeoutRef.current = null;
 
-    // Clear any existing hint timeout
+    // Trigger the hint animation by rotating to 35deg with glow
+    setHintRotation(35);
+    setShowHintGlow(true);
+
+    // Return to 0 after a brief moment (spring will handle the animation)
+    setTimeout(() => {
+      setHintRotation(0);
+      // Keep glow visible during spring animation back to 0
+      setTimeout(() => {
+        setShowHintGlow(false);
+      }, 200); // Short delay for spring
+    }, 300);
+  };
+
+  // Set up hint timer when class (hintKey) changes
+  useEffect(() => {
+    // Clear any existing timeout
     if (hintTimeoutRef.current) {
       clearTimeout(hintTimeoutRef.current);
+      hintTimeoutRef.current = null;
     }
 
-    // Reset hint rotation immediately when content changes
+    // Reset visuals
     setHintRotation(0);
+    setShowHintGlow(false);
+
+    // Only set up new timer if we have a flip backside and hintKey
+    if (!heroImageBackside || !hintKey) return;
 
     // Set new timeout to show hint after 1s
-    hintTimeoutRef.current = setTimeout(() => {
-      // Trigger the hint animation by rotating to 35deg with glow
-      setHintRotation(35);
-      setShowHintGlow(true);
-      // Return to 0 after a brief moment (spring will handle the animation)
-      setTimeout(() => {
-        setHintRotation(0);
-        // Keep glow visible during spring animation back to 0
-        setTimeout(() => {
-          setShowHintGlow(false);
-        }, 200); // Short delay for spring
-      }, 300);
-    }, 1000);
+    hintTimeoutRef.current = setTimeout(showHintAnimation, 1000);
 
     return () => {
       if (hintTimeoutRef.current) {
@@ -133,7 +144,39 @@ export const GameCard: React.FC<GameCardProps> = ({
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hintKey]); // Only trigger on hintKey change, not heroImageBackside (it's recreated every render)
+  }, [hintKey]); // Only trigger on hintKey change
+
+  // Bump the timer when interaction happens (but only if timer exists)
+  useEffect(() => {
+    // Only bump if we have an active timeout
+    if (lastInteractionTime && hintTimeoutRef.current) {
+      // Clear existing timeout
+      clearTimeout(hintTimeoutRef.current);
+
+      // Reset visuals immediately
+      setHintRotation(0);
+      setShowHintGlow(false);
+
+      // Restart the timer (bump it out by 1 second)
+      if (heroImageBackside && hintKey) {
+        hintTimeoutRef.current = setTimeout(showHintAnimation, 1000);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastInteractionTime]); // Only trigger on interaction
+
+  // Turn off hint glow and reset rotation when card flips
+  useEffect(() => {
+    if (isFlipped) {
+      setShowHintGlow(false);
+      setHintRotation(0);
+      // Clear any pending hint animations
+      if (hintTimeoutRef.current) {
+        clearTimeout(hintTimeoutRef.current);
+        hintTimeoutRef.current = null;
+      }
+    }
+  }, [isFlipped]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -201,7 +244,7 @@ export const GameCard: React.FC<GameCardProps> = ({
                           src={heroImage}
                           alt={heroImageAlt}
                           className={styles.heroImage}
-                          initial={{ x: 50, opacity: 0 }}
+                          initial={variant === 'connect' ? false : { x: 50, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           exit={{ x: -50, opacity: 0 }}
                           transition={{
@@ -224,7 +267,7 @@ export const GameCard: React.FC<GameCardProps> = ({
                     src={heroImage}
                     alt={heroImageAlt}
                     className={styles.heroImage}
-                    initial={{ x: 50, opacity: 0 }}
+                    initial={variant === 'connect' ? false : { x: 50, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: -50, opacity: 0 }}
                     transition={{
