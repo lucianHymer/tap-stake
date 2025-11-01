@@ -76,3 +76,50 @@ export function calculateAvailableAmount(
   const total = calculateTotalHoldings(walletBalance, existingStakes);
   return total > maxAmount ? maxAmount : total;
 }
+
+/**
+ * Calculate optimistic balances after a successful staking transaction
+ * This allows immediate UI updates without waiting for chain reads
+ */
+export function calculateOptimisticBalances(
+  stakingData: ReturnType<typeof prepareStakingData>,
+  currentWalletBalance: bigint,
+  currentStakes: Map<string, bigint>
+): { walletBalance: bigint; existingStakes: Map<string, bigint> } {
+  // Reverse the CHOICE_ID_MAPPING to map back from IDs to names
+  const ID_TO_CHOICE_NAME: Record<string, string> = {};
+  for (const [name, id] of Object.entries(CHOICE_ID_MAPPING)) {
+    ID_TO_CHOICE_NAME[id] = name;
+  }
+
+  if (stakingData.operation === 'addStakes') {
+    // First time staking: deduct from wallet, add to stakes
+    const totalStaked = stakingData.amounts!.reduce((sum, amt) => sum + BigInt(amt), 0n);
+    const newWalletBalance = currentWalletBalance - totalStaked;
+
+    const newStakes = new Map(currentStakes);
+    stakingData.choiceIds!.forEach((choiceId, i) => {
+      const choiceName = ID_TO_CHOICE_NAME[choiceId];
+      const amount = BigInt(stakingData.amounts![i]);
+      newStakes.set(choiceName, (newStakes.get(choiceName) || 0n) + amount);
+    });
+
+    return {
+      walletBalance: newWalletBalance,
+      existingStakes: newStakes,
+    };
+  } else {
+    // updateStakes: replace all stakes with new ones, wallet becomes 0
+    const newStakes = new Map<string, bigint>();
+    stakingData.newChoiceIds!.forEach((choiceId, i) => {
+      const choiceName = ID_TO_CHOICE_NAME[choiceId];
+      const amount = BigInt(stakingData.newAmounts![i]);
+      newStakes.set(choiceName, amount);
+    });
+
+    return {
+      walletBalance: 0n,
+      existingStakes: newStakes,
+    };
+  }
+}

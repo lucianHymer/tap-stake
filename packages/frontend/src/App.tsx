@@ -5,6 +5,7 @@ import { WagmiProvider } from 'wagmi';
 import { DemonSlayer } from './components/DemonSlayer';
 import { NFCErrorBoundary } from './components/NFCErrorBoundary';
 import { NFCPrompt } from './components/NFCPrompt';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { wagmiConfig } from './config/wagmi';
 import { AppProvider } from './contexts/AppContext';
 import { readNFCConnection } from './lib/nfcResource';
@@ -64,9 +65,30 @@ function App() {
             <Routes>
               {/* Main user flow */}
               <Route path="/" element={<ConnectPage />} />
-              <Route path="/choices" element={<ChoicesPage />} />
-              <Route path="/slain" element={<SlainPage />} />
-              <Route path="/withdraw" element={<WithdrawPage />} />
+              <Route
+                path="/choices"
+                element={
+                  <ProtectedRoute>
+                    <ChoicesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/slain"
+                element={
+                  <ProtectedRoute>
+                    <SlainPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/withdraw"
+                element={
+                  <ProtectedRoute>
+                    <WithdrawPage />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Test/setup page */}
               <Route path="/test" element={<TestSetupPage />} />

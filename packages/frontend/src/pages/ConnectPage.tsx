@@ -4,6 +4,7 @@ import { http, createPublicClient } from 'viem';
 import { type PrivateKeyAccount, privateKeyToAccount } from 'viem/accounts';
 import { optimismSepolia } from 'viem/chains';
 import { ConnectCard } from '../components/ConnectCard';
+import { PageWrapper } from '../components/PageWrapper';
 import { useAppContext } from '../contexts/AppContext';
 import { createNFCAccount, getCardData } from '../lib/nfc';
 import { checkBalances } from '../utils/balances';
@@ -106,7 +107,7 @@ export function ConnectPage() {
   };
 
   return (
-    <div className={styles.connectPage}>
+    <PageWrapper>
       <ConnectCard onConnect={handleConnect} />
 
       {/* Status overlay - shown during connection */}
@@ -126,6 +127,6 @@ export function ConnectPage() {
           <strong>Connection Failed:</strong> {error}
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }

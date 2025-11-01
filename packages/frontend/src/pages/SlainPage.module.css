@@ -1,21 +1,6 @@
 @import "../styles/moloch-tokens.css";
 
-.slainPage {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px;
-  box-sizing: border-box;
-  overflow: hidden;
-  touch-action: none;
-  background: var(--core-color-bg-primary, #12061f);
-}
-
+/* Control panel - buttons in GameCard footer */
 .controlPanel {
   display: flex;
   flex-direction: column;
@@ -28,17 +13,6 @@
   flex-direction: column;
   gap: 24px;
   padding: 0;
-}
-
-.victoryHeading {
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 24px;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  color: var(--core-color-text-primary, #ffffff);
-  margin: 0;
-  text-align: center;
-  text-shadow: 0 0 10px rgba(245, 3, 3, 0.6), 0 0 20px rgba(245, 3, 3, 0.4);
 }
 
 .stakeList {
@@ -79,4 +53,16 @@
   color: var(--core-color-text-secondary, #cccccc);
   margin: 0;
   text-align: center;
+}
+
+.blockchainLink {
+  font-weight: 700;
+  color: var(--component-text-success, #00ff88);
+  text-decoration: none;
+  transition: color var(--core-motion-fast, 0.15s) ease-in-out;
+}
+
+.blockchainLink:hover {
+  color: var(--core-color-brand-primary, #F50303);
+  text-decoration: underline;
 }

@@ -4,6 +4,8 @@ import { http, createPublicClient, formatEther, parseEther } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { optimismSepolia } from 'viem/chains';
 import { Button } from '../components/Button';
+import { GameCard } from '../components/GameCard';
+import { PageWrapper } from '../components/PageWrapper';
 import { useAppContext } from '../contexts/AppContext';
 import { createNFCAccount, getCardData } from '../lib/nfc';
 import { checkBalances } from '../utils/balances';
@@ -156,40 +158,43 @@ export function TestPage() {
   };
 
   return (
-    <div className={styles.testPage}>
-      <div className={styles.container}>
-        <h1 className={styles.title}>
-          <span className={styles.titleWord}>TAP</span>
-          <span className={styles.titleWord}>STAKE</span>
-        </h1>
-
-        <p className={styles.subtitle}>Choose your path to slay Moloch:</p>
-
-        <div className={styles.options}>
-          <Button variant="outline" onClick={handleBurnerCard} disabled={loading}>
-            I have a burner card
-          </Button>
-
-          <Button variant="outline" onClick={handleNoCard} disabled={loading}>
-            I don't have a burner
-          </Button>
-        </div>
-
-        {loading && <p className={styles.loading}>Preparing for battle...</p>}
-
-        {error && (
-          <div className={styles.error}>
-            <strong>Failed:</strong> {error}
+    <PageWrapper>
+      <GameCard
+        variant="default"
+        heading="TAP STAKE"
+        subheading="Test Setup"
+        heroImage="/assets/burnerTap.png"
+        heroImageAlt="Burner card tap"
+        primaryAction={
+          <div className={styles.actions}>
+            <Button variant="outline" onClick={handleBurnerCard} disabled={loading}>
+              I have a burner card
+            </Button>
+            <Button variant="outline" onClick={handleNoCard} disabled={loading}>
+              I don't have a burner
+            </Button>
           </div>
-        )}
+        }
+      >
+        <div className={styles.content}>
+          <p className={styles.subtitle}>Choose your path to slay Moloch:</p>
 
-        <div className={styles.note}>
-          <p>
-            <strong>Note:</strong> This is the test page for setting up new accounts. If you're
-            returning, go directly to the <a href="#/">main page</a>.
-          </p>
+          {loading && <p className={styles.loading}>Preparing for battle...</p>}
+
+          {error && (
+            <div className={styles.error}>
+              <strong>Failed:</strong> {error}
+            </div>
+          )}
+
+          <div className={styles.note}>
+            <p>
+              <strong>Note:</strong> This is the test page for setting up new accounts. If you're
+              returning, go directly to the <a href="#/">main page</a>.
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
+      </GameCard>
+    </PageWrapper>
   );
 }

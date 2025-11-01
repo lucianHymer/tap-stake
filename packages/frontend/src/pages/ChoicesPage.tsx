@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { http, createPublicClient, parseEther } from 'viem';
 import { optimismSepolia } from 'viem/chains';
 import { ChoicesCard } from '../components/ChoicesCard';
+import { PageWrapper } from '../components/PageWrapper';
 import { TransactionStatus } from '../components/TransactionStatus';
 import { CONTRACTS } from '../config/contracts';
 import { useAppContext } from '../contexts/AppContext';
 import { CHOICE_NAMES } from '../utils/balances';
-import { calculateAvailableAmount } from '../utils/staking';
+import { calculateAvailableAmount, calculateOptimisticBalances } from '../utils/staking';
 import { prepareStakingData } from '../utils/staking';
-import styles from './ChoicesPage.module.css';
 
 const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:8787';
 
@@ -138,13 +138,23 @@ export function ChoicesPage() {
         gasUsed: receipt.gasUsed.toString(),
       });
 
-      actions.setTransactionHash(result.txHash);
-      actions.setTransactionStatus('success');
+      // Optimistically update balances based on what we just staked
+      console.log('⚔️ Choices: Calculating optimistic balances...');
+      const optimisticBalances = calculateOptimisticBalances(
+        stakingData,
+        state.balances.walletBalance,
+        state.balances.existingStakes
+      );
+      actions.setBalances(optimisticBalances);
+      console.log('⚔️ Choices: Balances updated (optimistic):', {
+        wallet: optimisticBalances.walletBalance.toString(),
+        stakes: optimisticBalances.existingStakes.size,
+      });
 
-      // Navigate to slain page after short delay
-      setTimeout(() => {
-        navigate('/slain');
-      }, 1500);
+      // Navigate immediately - no need to wait for chain state
+      actions.setTransactionHash(result.txHash);
+      actions.resetTransaction();
+      navigate('/slain');
     } catch (err) {
       console.error('⚔️ Choices: Transaction failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Transaction failed';
@@ -175,13 +185,13 @@ export function ChoicesPage() {
 
   // Normal choices card with controlled state
   return (
-    <div className={styles.choicesPage}>
+    <PageWrapper>
       <ChoicesCard
         onSlayMoloch={handleSlayMoloch}
         onRunAway={handleRunAway}
         selectedChoices={state.selectedChoices}
         onToggleChoice={actions.toggleChoice}
       />
-    </div>
+    </PageWrapper>
   );
 }

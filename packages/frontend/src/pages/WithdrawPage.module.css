@@ -1,0 +1,41 @@
+@import "../styles/moloch-tokens.css";
+
+/* Loading state */
+.loadingContent {
+  text-align: center;
+  color: var(--core-color-text-primary, #ffffff);
+}
+
+.loadingIcon {
+  font-size: 48px;
+  margin-bottom: 24px;
+}
+
+.loadingHeading {
+  font-family: var(--core-type-font-family-display, "Jacquard 12", sans-serif);
+  font-size: 31.25px;
+  margin: 0 0 16px 0;
+  color: var(--core-color-text-primary, #ffffff);
+}
+
+.loadingText {
+  font-size: 16px;
+  color: var(--core-color-text-secondary, #cccccc);
+  margin: 0;
+}
+
+/* Error message */
+.errorMessage {
+  margin-top: 24px;
+  padding: 16px;
+  max-width: 500px;
+  color: var(--component-text-error, #ff4444);
+  border: 1px solid var(--component-border-error, #ff4444);
+  border-radius: 8px;
+  background: rgba(255, 68, 68, 0.1);
+}
+
+.errorMessage strong {
+  display: block;
+  margin-bottom: 8px;
+}

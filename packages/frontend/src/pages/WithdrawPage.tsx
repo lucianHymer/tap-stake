@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { http, createPublicClient } from 'viem';
 import { optimismSepolia } from 'viem/chains';
 import { MolochRisesCard } from '../components/MolochRisesCard';
+import { PageWrapper } from '../components/PageWrapper';
 import { CONTRACTS } from '../config/contracts';
 import { useAppContext } from '../contexts/AppContext';
 import { CHOICE_ID_MAPPING } from '../utils/balances';
+import styles from './WithdrawPage.module.css';
 
 const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:8787';
 
@@ -147,61 +149,25 @@ export function WithdrawPage() {
   // Show loading state in card if withdrawing
   if (isWithdrawing) {
     return (
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          background: '#12061f',
-        }}
-      >
-        <div style={{ textAlign: 'center', color: '#ffffff' }}>
-          <div style={{ fontSize: '48px', marginBottom: '24px' }}>🏃</div>
-          <h2>Running away...</h2>
-          <p>Please wait while we process your withdrawal</p>
+      <PageWrapper>
+        <div className={styles.loadingContent}>
+          <div className={styles.loadingIcon}>🏃</div>
+          <h2 className={styles.loadingHeading}>Running away...</h2>
+          <p className={styles.loadingText}>Please wait while we process your withdrawal</p>
         </div>
-      </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '8px',
-        background: '#12061f',
-      }}
-    >
+    <PageWrapper>
       <MolochRisesCard onRunAway={handleRunAway} onGoBack={handleGoBack} />
 
       {error && (
-        <div
-          style={{
-            marginTop: '24px',
-            padding: '16px',
-            maxWidth: '500px',
-            color: '#ff4444',
-            border: '1px solid #ff4444',
-            borderRadius: '8px',
-            background: 'rgba(255, 68, 68, 0.1)',
-          }}
-        >
+        <div className={styles.errorMessage}>
           <strong>Withdrawal Failed:</strong> {error}
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }

@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatEther } from 'viem';
 import { Button } from '../components/Button';
 import { GameCard } from '../components/GameCard';
+import { PageWrapper } from '../components/PageWrapper';
 import { ASSETS } from '../config/assets';
 import { useAppContext } from '../contexts/AppContext';
 import styles from './SlainPage.module.css';
@@ -31,11 +33,20 @@ export function SlainPage() {
     0n
   );
 
+  // Format total - rounded up to nearest whole number
+  const totalFormatted = Math.ceil(Number(formatEther(totalStaked)));
+
+  // Format individual amounts - truncated to 1 decimal
+  const formatStakeAmount = (amount: bigint): string => {
+    const fullAmount = Number(formatEther(amount));
+    return Math.floor(fullAmount * 10) / 10 + '';
+  };
+
   const handleShareTwitter = () => {
     // TODO: Implement Twitter sharing
     console.log('📱 Share to Twitter');
     const text = encodeURIComponent(
-      `I just staked ${formatEther(totalStaked)} GTC to slay Moloch! Join the fight for coordination at [URL]`
+      `I just staked ${totalFormatted} GTC to slay Moloch! Join the fight for coordination at [URL]`
     );
     window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
   };
@@ -47,20 +58,21 @@ export function SlainPage() {
     navigate('/choices');
   };
 
-  // If no stakes exist, redirect to choices
-  if (state.balances.existingStakes.size === 0) {
-    console.log('⚠️ No stakes found, redirecting to choices');
-    navigate('/choices');
-    return null;
-  }
+  // If no stakes exist, redirect to choices (in useEffect to avoid React Router warning)
+  useEffect(() => {
+    if (state.balances.existingStakes.size === 0) {
+      console.log('⚠️ No stakes found, redirecting to choices');
+      navigate('/choices');
+    }
+  }, [state.balances.existingStakes.size, navigate]);
 
   return (
-    <div className={styles.slainPage}>
+    <PageWrapper>
       <GameCard
         variant="default"
         heading="Moloch is Slain!"
         headingIcons={[<SwordIcon key="sword" />]}
-        subheading="Victory"
+        subheading={`${totalFormatted} GTC Staked`}
         heroImage={ASSETS.heroSlain}
         heroImageAlt="Moloch defeated"
         primaryAction={
@@ -80,28 +92,40 @@ export function SlainPage() {
         }
       >
         <div className={styles.detailsContent}>
-          <h2 className={styles.victoryHeading}>
-            You staked {formatEther(totalStaked)} GTC on {state.balances.existingStakes.size}{' '}
-            {state.balances.existingStakes.size === 1 ? 'choice' : 'choices'}
-          </h2>
-
           <ul className={styles.stakeList}>
             {Array.from(state.balances.existingStakes.entries()).map(([choiceId, amount]) => (
               <li key={choiceId} className={styles.stakeItem}>
                 <span className={styles.choiceName}>
                   {CHOICE_DISPLAY_NAMES[choiceId] || choiceId}
                 </span>
-                <span className={styles.amount}>{formatEther(amount)} GTC</span>
+                <span className={styles.amount}>{formatStakeAmount(amount)} GTC</span>
               </li>
             ))}
           </ul>
 
           <p className={styles.bodyText}>
-            Your stake has been recorded on the blockchain. The forces of coordination grow stronger
-            with each slayer who joins the fight.
+            {state.transaction.txHash ? (
+              <>
+                Your stake has been{' '}
+                <a
+                  href={`https://sepolia-optimism.etherscan.io/tx/${state.transaction.txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.blockchainLink}
+                >
+                  recorded on the blockchain
+                </a>
+                . The forces of coordination grow stronger with each slayer who joins the fight.
+              </>
+            ) : (
+              <>
+                Your stake has been recorded on the blockchain. The forces of coordination grow
+                stronger with each slayer who joins the fight.
+              </>
+            )}
           </p>
         </div>
       </GameCard>
-    </div>
+    </PageWrapper>
   );
 }
