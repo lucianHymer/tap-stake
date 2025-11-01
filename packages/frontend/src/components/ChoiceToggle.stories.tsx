@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { ChoiceToggle } from './ChoiceToggle';
+import { ChoiceToggle, type StatName } from './ChoiceToggle';
 
 const meta = {
   title: 'Components/ChoiceToggle',
@@ -37,9 +37,10 @@ export const Inactive: Story = {
   args: {
     name: 'Giveth',
     stats: {
-      major: '++charisma',
-      minor: '+intelligence',
+      major: 'charisma',
+      minor: 'intelligence',
     },
+    amount: 0,
     active: false,
     onClick: () => console.log('Toggle clicked'),
   },
@@ -50,9 +51,10 @@ export const Active: Story = {
   args: {
     name: 'Giveth',
     stats: {
-      major: '++charisma',
-      minor: '+intelligence',
+      major: 'charisma',
+      minor: 'intelligence',
     },
+    amount: 33,
     active: true,
     onClick: () => console.log('Toggle clicked'),
   },
@@ -63,9 +65,10 @@ export const DifferentChoice: Story = {
   args: {
     name: 'Taketh',
     stats: {
-      major: '++strength',
-      minor: '+constitution',
+      major: 'wisdom',
+      minor: 'intelligence',
     },
+    amount: 0,
     active: false,
     onClick: () => console.log('Toggle clicked'),
   },
@@ -74,24 +77,29 @@ export const DifferentChoice: Story = {
 // Interactive example with state management
 export const Interactive = () => {
   const [activeChoice, setActiveChoice] = useState<'giveth' | 'taketh' | null>(null);
+  const totalAmount = 100;
+  const selectedCount = activeChoice ? 1 : 0;
+  const amountPerChoice = selectedCount > 0 ? totalAmount / selectedCount : 0;
 
   return (
     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
       <ChoiceToggle
         name="Giveth"
         stats={{
-          major: '++charisma',
-          minor: '+intelligence',
+          major: 'charisma',
+          minor: 'intelligence',
         }}
+        amount={activeChoice === 'giveth' ? Math.floor(amountPerChoice) : 0}
         active={activeChoice === 'giveth'}
         onClick={() => setActiveChoice('giveth')}
       />
       <ChoiceToggle
         name="Taketh"
         stats={{
-          major: '++strength',
-          minor: '+constitution',
+          major: 'wisdom',
+          minor: 'intelligence',
         }}
+        amount={activeChoice === 'taketh' ? Math.floor(amountPerChoice) : 0}
         active={activeChoice === 'taketh'}
         onClick={() => setActiveChoice('taketh')}
       />
@@ -111,11 +119,14 @@ Interactive.parameters = {
 // Multiple options example
 export const MultipleOptions = () => {
   const [activeChoice, setActiveChoice] = useState<string | null>(null);
+  const totalAmount = 100;
+  const selectedCount = activeChoice ? 1 : 0;
+  const amountPerChoice = selectedCount > 0 ? totalAmount / selectedCount : 0;
 
-  const choices = [
-    { id: 'warrior', name: 'Warrior', stats: { major: '++strength', minor: '+constitution' } },
-    { id: 'mage', name: 'Mage', stats: { major: '++intelligence', minor: '+wisdom' } },
-    { id: 'rogue', name: 'Rogue', stats: { major: '++dexterity', minor: '+charisma' } },
+  const choices: Array<{ id: string; name: string; stats: { major: StatName; minor: StatName } }> = [
+    { id: 'warrior', name: 'Warrior', stats: { major: 'wisdom', minor: 'intelligence' } },
+    { id: 'mage', name: 'Mage', stats: { major: 'intelligence', minor: 'wisdom' } },
+    { id: 'rogue', name: 'Rogue', stats: { major: 'charisma', minor: 'intelligence' } },
   ];
 
   return (
@@ -125,6 +136,7 @@ export const MultipleOptions = () => {
           key={choice.id}
           name={choice.name}
           stats={choice.stats}
+          amount={activeChoice === choice.id ? Math.floor(amountPerChoice) : 0}
           active={activeChoice === choice.id}
           onClick={() => setActiveChoice(choice.id)}
         />
@@ -146,9 +158,10 @@ export const Playground: Story = {
   args: {
     name: 'Custom',
     stats: {
-      major: '++attribute',
-      minor: '+secondary',
+      major: 'intelligence',
+      minor: 'wisdom',
     },
+    amount: 50,
     active: false,
     onClick: () => console.log('Clicked'),
   },
