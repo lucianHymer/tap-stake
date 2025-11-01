@@ -902,11 +902,117 @@ packages/frontend/src/
 
 ## 📝 Notes for Junior Developers
 
-1. **Start with state management** - Get AppContext working first as everything depends on it
-2. **Test balance checking early** - Use console logs to verify you're getting correct values
-3. **Use the existing components** - Don't recreate UI elements, just update logic
-4. **Keep the theme** - All text should maintain the demon-slayer narrative
-5. **Test with small amounts first** - Use test amounts before the full 100 GTC
-6. **Ask questions** - If something is unclear, it's better to ask than assume
+### Required Setup
+1. **Environment Variables** - Create `.env` file in `packages/frontend/`:
+   ```
+   VITE_RELAYER_URL=https://eip7702-relayer.lucianhymer.workers.dev
+   ```
+   For local testing use: `VITE_RELAYER_URL=http://localhost:8787`
+
+2. **Dependencies Already Installed** - These are already in package.json:
+   - `viem` - For blockchain interactions and wallet generation
+   - `react-router-dom` - For navigation
+   - `@arx-research/libhalo` - For NFC card interactions
+
+### Common Gotchas & Solutions
+
+1. **BigInt JSON Serialization**
+   - Problem: `JSON.stringify()` can't serialize BigInt values
+   - Solution: Always convert to string before sending to relayer: `amount.toString()`
+
+2. **Choice ID Format**
+   - Problem: Choice IDs are huge numbers that must be strings
+   - Solution: Keep them as strings in `CHOICE_ID_MAPPING`, only convert to BigInt when calling contracts
+
+3. **NFC Testing Without Card**
+   - Add to `.env`: `VITE_USE_DEV_WALLET=true`
+   - This uses a hardcoded test wallet (see `nfcResource.ts`)
+   - Remember to set back to `false` for production
+
+4. **Generated Wallet Persistence**
+   - Problem: User refreshes page and loses generated wallet
+   - Solution: Consider sessionStorage (NOT localStorage) for temporary persistence
+   - Clear it after withdrawal completes
+
+5. **Race Conditions**
+   - Problem: User rapidly clicks buttons causing multiple submissions
+   - Solution: Always disable buttons during async operations
+   - Use `loading` states consistently
+
+### Debugging Tips
+
+1. **Console Logging Points** - Add logs at these critical points:
+   ```typescript
+   console.log('Balance check:', { walletBalance, existingStakes });
+   console.log('Staking data:', { operation, choiceIds, amounts });
+   console.log('Relayer response:', response);
+   ```
+
+2. **Network Tab** - Monitor these endpoints:
+   - `/test-mint` - Should return 200 with txHash
+   - `/relay` - Check the request payload structure
+   - Look for CORS errors (should be fine with current setup)
+
+3. **Common Error Messages & Fixes**:
+   - "Insufficient holdings" → User has less than 90 GTC total
+   - "Invalid authorization" → NFC signing failed, retry
+   - "Choice ID not approved" → Check CHOICE_ID_MAPPING matches relayer config
+   - "WebAuthn error" → HaLo Bridge not connected (desktop) or NFC disabled (mobile)
+
+### Testing Checklist by Page
+
+**Test Page:**
+- [ ] "I have a burner" → connects → tops up → navigates
+- [ ] "I don't have a burner" → generates wallet → mints 100 → navigates
+- [ ] Error handling for mint failures
+
+**Connect Page:**
+- [ ] Shows "Communing..." during connection
+- [ ] With stakes → goes to /slain
+- [ ] Without stakes → goes to /choices
+- [ ] Error message appears below button
+- [ ] Works with both NFC and generated wallets
+
+**Choices Page:**
+- [ ] Dynamic amount calculation correct
+- [ ] Selected choices persist if navigating away and back
+- [ ] Transaction status replaces choices area
+- [ ] Error messages are user-friendly
+- [ ] Can retry after error
+
+**Slain Page:**
+- [ ] Shows actual stake amounts (not hardcoded)
+- [ ] "Start Over" pre-selects previous choices
+- [ ] Class calculation matches selected stats
+
+**Withdraw Page:**
+- [ ] "Run Away" vs "Run Away with Everything" text changes
+- [ ] Address validation works
+- [ ] Correct operation called based on stakes
+
+### Performance Tips
+
+1. **Batch RPC Calls** - When checking 6 stake balances, consider using multicall
+2. **Memoize Calculations** - Use `useMemo` for amount calculations
+3. **Debounce Navigation** - Prevent double-navigation with a flag
+
+### DO NOT:
+- Store private keys in localStorage (memory or sessionStorage only)
+- Submit transactions without explicit user action
+- Modify the demon-slayer theme or existing component designs
+- Create new UI components when existing ones work
+- Skip error handling "to save time"
+
+### Quick Start Order:
+1. Create AppContext first
+2. Test balance checking in console
+3. Implement Test page
+4. Update Connect page
+5. Refactor Choices page with transaction handling
+6. Update Slain page
+7. Test full flow end-to-end
+8. Add error handling polish
+
+Remember: **It's better to ask for clarification than to make assumptions!** The existing codebase has working NFC integration, relayer communication, and UI components - your job is mainly connecting them with proper state management and flow control.
 
 This implementation maintains the existing design while adding sophisticated state management and proper transaction handling. The demon-slayer theme is preserved throughout, and the user experience is smooth whether using NFC cards or generated wallets.
