@@ -5,6 +5,9 @@
 ## 🏗️ Architecture
 - [NFC Wallet Integration](architecture/nfc-wallet-integration.md) - LibHalo NFC patterns, EOA paymaster support, EIP-7702 NFC implementation with signAuthorization, two-tap demo flow, approve+transfer batching, frontend integration strategy, SelfBatchExecutor pattern, EIP-7702 relayer architecture, StakerWallet implementation with ERC-7201 and EIP-712
 
+## 🔌 API
+- [Relayer Test Mint Endpoint](api/relayer-test-mint.md) - Test endpoint for minting TestERC20 tokens on Optimism Sepolia
+
 ## 📦 Dependencies
 - [LibHalo NFC Library](dependencies/libhalo.md) - WebAuthn integration and platform requirements
 - [Foundry](dependencies/foundry.md) - Smart contract development framework installation and setup
@@ -23,8 +26,12 @@
 - [Framer Motion Animations](patterns/framer-motion-animations.md) - LazyMotion bundle optimization, spring-based counter animations, and hint animation pattern for teaching affordances
 - [Type-Safe Stats](patterns/type-safe-stats.md) - Separation of data model and display logic for stats
 
+## 🎯 Patterns
+- [ABI Organization Pattern](patterns/abi-organization.md) - Separating standard and test-specific ABIs for clean contract interfaces
+
 ## 🧪 Testing
 - [EIP-7702 NFC Verification](testing/eip-7702-nfc-verification.md) - Signature verification confirming NFC implementation compatibility with EIP-7702
+- [Relayer Unit Testing Strategy](testing/relayer-unit-testing.md) - Vitest-based unit testing with stubbed blockchain interactions
 
 ## ⚠️ Gotchas
 - [WebAuthn Restrictions](gotchas/webauthn-restrictions.md) - RP ID limitations, NotAllowedError causes, user gesture requirements for NFC
