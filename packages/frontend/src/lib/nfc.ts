@@ -190,7 +190,7 @@ export const createNFCAccount = (address: `0x${string}`) => {
       // Check if this is an EIP-7702 authorization message
       // EIP-7702 messages start with 0x05 magic byte
       let isEIP7702 = false;
-      let messageToSign;
+      let messageToSign: string | Hex;
 
       if (typeof message === 'object' && 'raw' in message) {
         const rawHex = message.raw;

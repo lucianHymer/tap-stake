@@ -32,7 +32,7 @@ export function NFCPrompt({ onConnect, connecting = false }: NFCPromptProps) {
           </div>
         </div>
 
-        <button onClick={onConnect} className="retry-button" disabled={connecting}>
+        <button type="button" onClick={onConnect} className="retry-button" disabled={connecting}>
           {connecting ? 'CONNECTING...' : 'CONNECT NFC'}
         </button>
       </div>
