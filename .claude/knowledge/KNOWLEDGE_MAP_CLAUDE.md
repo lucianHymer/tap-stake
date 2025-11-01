@@ -14,8 +14,12 @@
 - @frontend/tap-stake-demon-slayer-theme.md - Dark themed UI with demon-slaying metaphors
 - @frontend/nfc-auto-connect-suspense.md - React Suspense pattern for automatic NFC connection
 - @frontend/eip-7702-viem-integration.md - Viem client integration for EIP-7702 delegation features
-- @frontend/moloch-design-system.md - Pure token approach with component-owned styling
+- @frontend/moloch-design-system.md - Pure token approach with consolidated CSS file
 - @frontend/eip-7702-relayer-integration.md - Gasless transaction flow via Cloudflare Worker relayer
+
+## 🎯 Patterns
+- @patterns/framer-motion-animations.md - LazyMotion bundle optimization and spring-based counter animations
+- @patterns/type-safe-stats.md - Separation of data model and display logic for stats
 
 ## 🧪 Testing
 - @testing/eip-7702-nfc-verification.md - Signature verification confirming NFC implementation compatibility with EIP-7702

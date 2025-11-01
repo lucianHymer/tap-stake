@@ -10,9 +10,10 @@ Simplified design token integration that keeps tokens pure and lets components o
 - **Token source**: `packages/frontend/design-system/Moloch_Stylekit_DarkGrim/moloch-design-tokens.json`
 - **Build script**: `packages/frontend/scripts/build-tokens.mjs`
 - **Generated tokens**: `packages/frontend/src/styles/`
-  - `moloch-tokens.css` - Core design tokens (colors, typography, spacing, etc.)
-  - `moloch-components.css` - Component-specific tokens (button colors, input borders, etc.)
+  - `moloch-tokens.css` - Contains ALL tokens (core, semantic, AND component tokens)
   - `moloch-tokens.ts` - TypeScript constants
+
+**IMPORTANT**: There is NO separate moloch-components.css file. All tokens are consolidated into moloch-tokens.css.
 
 ## Build Process
 Run `npm run build:tokens` in frontend package
@@ -34,7 +35,6 @@ Components import tokens and define their own structure:
 ```css
 /* Button.module.css */
 @import "../styles/moloch-tokens.css";
-@import "../styles/moloch-components.css";
 
 .button {
   /* Structure - owned by component */
@@ -65,4 +65,4 @@ Components import tokens and define their own structure:
 - Generated files are predictable and pure
 - No opinions about HTML structure in token layer
 
-**Related files**: packages/frontend/scripts/build-tokens.mjs, packages/frontend/src/styles/moloch-tokens.css, packages/frontend/src/styles/moloch-components.css
+**Related files**: packages/frontend/scripts/build-tokens.mjs, packages/frontend/src/styles/moloch-tokens.css
