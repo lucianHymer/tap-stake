@@ -1,8 +1,8 @@
 import type React from 'react';
-import { GameCard } from './GameCard';
-import { Button } from './Button';
 import { ASSETS } from '../config/assets';
+import { Button } from './Button';
 import styles from './ConnectCard.module.css';
+import { GameCard } from './GameCard';
 
 export interface ConnectCardProps {
   /** Callback when connect button is clicked */
@@ -30,9 +30,18 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({ onConnect }) => {
       }
     >
       <div className={styles.detailText}>
-        <p>You have been given 100 GTC to allocate in the fight against <span className={styles.molochText}>Moloch</span>.</p>
-        <p>Once connected, you will choose how to allocate your GTC. It will be split evenly among your choices.</p>
-        <p>Tap your <span className={styles.burnerText}>Burner</span> card at the top of your phone when prompted.</p>
+        <p>
+          You have been given 100 GTC to allocate in the fight against{' '}
+          <span className={styles.molochText}>Moloch</span>.
+        </p>
+        <p>
+          Once connected, you will choose how to allocate your GTC. It will be split evenly among
+          your choices.
+        </p>
+        <p>
+          Tap your <span className={styles.burnerText}>Burner</span> card at the top of your phone
+          when prompted.
+        </p>
       </div>
     </GameCard>
   );

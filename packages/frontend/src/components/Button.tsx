@@ -1,5 +1,5 @@
+import { type HTMLMotionProps, LazyMotion, domAnimation, m } from 'framer-motion';
 import type React from 'react';
-import { LazyMotion, domAnimation, m, type HTMLMotionProps } from 'framer-motion';
 import styles from './Button.module.css';
 
 export interface ButtonProps

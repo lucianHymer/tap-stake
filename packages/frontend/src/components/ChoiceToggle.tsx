@@ -1,8 +1,8 @@
+import { LazyMotion, animate, domAnimation, m, useMotionValue, useTransform } from 'framer-motion';
 import type React from 'react';
 import { useEffect } from 'react';
-import { LazyMotion, domAnimation, m, useMotionValue, useTransform, animate } from 'framer-motion';
-import styles from './ChoiceToggle.module.css';
 import { ASSETS } from '../config/assets';
+import styles from './ChoiceToggle.module.css';
 
 export type StatName = 'intelligence' | 'charisma' | 'wisdom';
 

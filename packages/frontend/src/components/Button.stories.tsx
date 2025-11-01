@@ -1,5 +1,5 @@
-import { Button } from './Button';
 import { ASSETS } from '../config/assets';
+import { Button } from './Button';
 
 export default {
   title: 'Components/Button',

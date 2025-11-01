@@ -1,5 +1,5 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
 import type { Address, Hex } from 'viem';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import worker, { type Env } from './index';
 
 // Mock viem modules
@@ -30,9 +30,7 @@ vi.mock('viem/experimental', async () => {
   const actual = await vi.importActual('viem/experimental');
   return {
     ...actual,
-    recoverAuthorizationAddress: vi.fn(() =>
-      Promise.resolve('0xUSER' as Address)
-    ),
+    recoverAuthorizationAddress: vi.fn(() => Promise.resolve('0xUSER' as Address)),
   };
 });
 
@@ -54,8 +52,8 @@ const createValidAuth = () => ({
   address: '0xSTAKERWALLET' as Address,
   chainId: 11155420,
   nonce: 0,
-  r: '0x' + '2'.repeat(64) as Hex,
-  s: '0x' + '3'.repeat(64) as Hex,
+  r: ('0x' + '2'.repeat(64)) as Hex,
+  s: ('0x' + '3'.repeat(64)) as Hex,
   yParity: 0,
 });
 

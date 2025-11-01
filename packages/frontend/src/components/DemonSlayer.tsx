@@ -3,8 +3,8 @@ import { http, createPublicClient, parseEther } from 'viem';
 import { optimismSepolia } from 'viem/chains';
 import moloch1 from '../assets/images/moloch1.png';
 import moloch2 from '../assets/images/moloch2.png';
-import type { NFCConnection } from '../lib/nfcResource';
 import { CONTRACTS } from '../config/contracts';
+import type { NFCConnection } from '../lib/nfcResource';
 
 const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:8787';
 

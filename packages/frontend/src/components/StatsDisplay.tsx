@@ -1,6 +1,6 @@
+import { LazyMotion, animate, domAnimation, m, useMotionValue, useTransform } from 'framer-motion';
 import type React from 'react';
 import { useEffect } from 'react';
-import { LazyMotion, domAnimation, m, useMotionValue, useTransform, animate } from 'framer-motion';
 import styles from './StatsDisplay.module.css';
 
 export interface StatsDisplayProps {
@@ -61,12 +61,15 @@ const StatBar: React.FC<StatBarProps> = ({ label, value, color, maxValue }) => {
 
 // Class-specific content - easy to edit per class
 const CLASS_CONTENT: Record<string, string> = {
-  Wizard: 'bends reality itself to shatter the arcane chains of dis-coordination, summoning coordination spells from the void.',
-  Paladin: 'strikes with righteous fury and unbreakable will, forging a blazing path where cooperation reigns supreme.',
+  Wizard:
+    'bends reality itself to shatter the arcane chains of dis-coordination, summoning coordination spells from the void.',
+  Paladin:
+    'strikes with righteous fury and unbreakable will, forging a blazing path where cooperation reigns supreme.',
   Bard: 'unleashes sonic waves of inspiration that melt hearts and minds into thunderous unity.',
   Monk: 'channels disciplined inner power outward, harmonizing chaos into perfect coordinated destruction.',
   Seer: 'tears through the veil of fate itself, wielding foresight as a weapon to guide the righteous toward inevitable victory.',
-  Artificer: 'wields ingenious creation and destruction in equal measure, forging reality-warping tools that bind hearts as one.',
+  Artificer:
+    'wields ingenious creation and destruction in equal measure, forging reality-warping tools that bind hearts as one.',
 };
 
 export const StatsDisplay: React.FC<StatsDisplayProps> = ({
@@ -102,7 +105,9 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
   ].sort((a, b) => b.value - a.value);
 
   // Get class-specific content or fall back to generic message
-  const classContent = CLASS_CONTENT[characterClass] || 'channels coordination magic through chosen weapons to slay Moloch.';
+  const classContent =
+    CLASS_CONTENT[characterClass] ||
+    'channels coordination magic through chosen weapons to slay Moloch.';
 
   return (
     <LazyMotion features={domAnimation}>

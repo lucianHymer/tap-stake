@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { isAddress } from 'viem';
 import { useEnsAddress } from 'wagmi';
 import styles from './AddressInput.module.css';
@@ -90,16 +90,16 @@ export const AddressInput: React.FC<AddressInputProps> = ({
         onAddressChange?.(ensResolvedAddress, debouncedValue);
         return;
       }
-        // ENS resolution completed but no address found
-        setValidationState('invalid');
-        if (ensError) {
-          setErrorMessage(`ENS error: ${ensError.message}`);
-        } else {
-          setErrorMessage('ENS name not found');
-        }
-        setResolvedAddress(null);
-        onAddressChange?.(null);
-        return;
+      // ENS resolution completed but no address found
+      setValidationState('invalid');
+      if (ensError) {
+        setErrorMessage(`ENS error: ${ensError.message}`);
+      } else {
+        setErrorMessage('ENS name not found');
+      }
+      setResolvedAddress(null);
+      onAddressChange?.(null);
+      return;
     }
 
     // Invalid format

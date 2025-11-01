@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import StyleDictionary from 'style-dictionary';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 import fs from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import StyleDictionary from 'style-dictionary';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..');
@@ -27,11 +27,11 @@ StyleDictionary.registerFormat({
 
     // Build CSS variables
     const variables = dictionary.allTokens
-      .map(token => `  --${token.name}: ${formatValue(token)};`)
+      .map((token) => `  --${token.name}: ${formatValue(token)};`)
       .join('\n');
 
     return `${selector} {\n${variables}\n}\n`;
-  }
+  },
 });
 
 // Configuration
@@ -48,10 +48,10 @@ const config = {
           destination: 'moloch-tokens.css',
           format: 'css/variables-quoted-assets',
           options: {
-            selector: ':root[data-theme="moloch"]'
-          }
-        }
-      ]
+            selector: ':root[data-theme="moloch"]',
+          },
+        },
+      ],
     },
     // TypeScript constants for type-safe access
     typescript: {
@@ -63,12 +63,12 @@ const config = {
           destination: 'moloch-tokens.ts',
           format: 'javascript/es6',
           options: {
-            typescript: true
-          }
-        }
-      ]
-    }
-  }
+            typescript: true,
+          },
+        },
+      ],
+    },
+  },
 };
 
 // Ensure output directory exists

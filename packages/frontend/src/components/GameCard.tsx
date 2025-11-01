@@ -1,6 +1,6 @@
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion';
 import type React from 'react';
-import { useState, useRef, useEffect } from 'react';
-import { LazyMotion, domAnimation, m, AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import styles from './GameCard.module.css';
 
 export interface GameCardProps {
@@ -67,8 +67,8 @@ export const GameCard: React.FC<GameCardProps> = ({
           // First click while hovering - flip to front
           return false;
         }
-          // Toggle between front and back
-          return !prev;
+        // Toggle between front and back
+        return !prev;
       });
 
       // Set transitioning flag to prevent rapid clicks
@@ -220,7 +220,9 @@ export const GameCard: React.FC<GameCardProps> = ({
                 onClick={handleCardClick}
               >
                 {/* Glow background element */}
-                <div className={`${styles.glowBackground} ${showHintGlow ? styles.glowActive : ''}`} />
+                <div
+                  className={`${styles.glowBackground} ${showHintGlow ? styles.glowActive : ''}`}
+                />
                 <m.div
                   className={styles.flipCard}
                   animate={{

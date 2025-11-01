@@ -1,4 +1,11 @@
-import { http, type Address, type Hex, createWalletClient, createPublicClient, encodeFunctionData } from 'viem';
+import {
+  http,
+  type Address,
+  type Hex,
+  createPublicClient,
+  createWalletClient,
+  encodeFunctionData,
+} from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { optimismSepolia } from 'viem/chains';
 import { recoverAuthorizationAddress } from 'viem/experimental';
@@ -406,7 +413,12 @@ export default {
       }
 
       // Validate operation type
-      const validOperations: OperationType[] = ['addStakes', 'updateStakes', 'withdraw', 'unstakeAllAndWithdraw'];
+      const validOperations: OperationType[] = [
+        'addStakes',
+        'updateStakes',
+        'withdraw',
+        'unstakeAllAndWithdraw',
+      ];
       if (!validOperations.includes(body.operation)) {
         return new Response(
           JSON.stringify({
@@ -489,7 +501,11 @@ export default {
             }
           );
         }
-        if (body.oldChoiceIds && body.oldAmounts && body.oldChoiceIds.length !== body.oldAmounts.length) {
+        if (
+          body.oldChoiceIds &&
+          body.oldAmounts &&
+          body.oldChoiceIds.length !== body.oldAmounts.length
+        ) {
           return new Response(
             JSON.stringify({
               success: false,

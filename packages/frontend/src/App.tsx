@@ -5,14 +5,16 @@ import { WagmiProvider } from 'wagmi';
 import { DemonSlayer } from './components/DemonSlayer';
 import { NFCErrorBoundary } from './components/NFCErrorBoundary';
 import { NFCPrompt } from './components/NFCPrompt';
-import { ConnectCard } from './components/ConnectCard';
-import { ChoicesCard } from './components/ChoicesCard';
-import { SlainCard } from './components/SlainCard';
-import { MolochRisesCard } from './components/MolochRisesCard';
-import { ButtonDemo } from './pages/ButtonDemo';
-import { ToggleButtonDemo } from './pages/ToggleButtonDemo';
 import { wagmiConfig } from './config/wagmi';
+import { AppProvider } from './contexts/AppContext';
 import { readNFCConnection } from './lib/nfcResource';
+import { ButtonDemo } from './pages/ButtonDemo';
+import { ChoicesPage } from './pages/ChoicesPage';
+import { ConnectPage } from './pages/ConnectPage';
+import { SlainPage } from './pages/SlainPage';
+import { TestPage as TestSetupPage } from './pages/TestPage';
+import { ToggleButtonDemo } from './pages/ToggleButtonDemo';
+import { WithdrawPage } from './pages/WithdrawPage';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -53,127 +55,30 @@ function AdminPage() {
   );
 }
 
-function TestPage() {
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '8px',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-        touchAction: 'none',
-        background: '#12061f',
-      }}
-    >
-      <ConnectCard onConnect={() => console.log('Connect clicked!')} />
-    </div>
-  );
-}
-
-function Test2Page() {
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '8px',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-        touchAction: 'none',
-        background: '#12061f',
-      }}
-    >
-      <ChoicesCard
-        onSlayMoloch={() => console.log('Slay Moloch!')}
-        onRunAway={() => console.log('Running away!')}
-      />
-    </div>
-  );
-}
-
-function Test3Page() {
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '8px',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-        touchAction: 'none',
-        background: '#12061f',
-      }}
-    >
-      <SlainCard
-        onShareTwitter={() => console.log('Share to Twitter!')}
-        onStartOver={() => console.log('Starting over!')}
-      />
-    </div>
-  );
-}
-
-function Test4Page() {
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '8px',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-        touchAction: 'none',
-        background: '#12061f',
-      }}
-    >
-      <MolochRisesCard
-        onRunAway={(address) => console.log('Running away to:', address)}
-        onGoBack={() => console.log('Go back!')}
-      />
-    </div>
-  );
-}
-
 function App() {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <HashRouter>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/button-demo" element={<ButtonDemo />} />
-            <Route path="/toggle-demo" element={<ToggleButtonDemo />} />
-            <Route path="/test" element={<TestPage />} />
-            <Route path="/test2" element={<Test2Page />} />
-            <Route path="/test3" element={<Test3Page />} />
-            <Route path="/test4" element={<Test4Page />} />
-          </Routes>
-        </HashRouter>
+        <AppProvider>
+          <HashRouter>
+            <Routes>
+              {/* Main user flow */}
+              <Route path="/" element={<ConnectPage />} />
+              <Route path="/choices" element={<ChoicesPage />} />
+              <Route path="/slain" element={<SlainPage />} />
+              <Route path="/withdraw" element={<WithdrawPage />} />
+
+              {/* Test/setup page */}
+              <Route path="/test" element={<TestSetupPage />} />
+
+              {/* Admin and demos */}
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/button-demo" element={<ButtonDemo />} />
+              <Route path="/toggle-demo" element={<ToggleButtonDemo />} />
+              <Route path="/nfc-demo" element={<HomePage />} />
+            </Routes>
+          </HashRouter>
+        </AppProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

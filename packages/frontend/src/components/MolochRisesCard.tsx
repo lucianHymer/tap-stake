@@ -1,9 +1,9 @@
 import type React from 'react';
 import { useState } from 'react';
-import { GameCard } from './GameCard';
-import { Button } from './Button';
-import { AddressInput } from './AddressInput';
 import { ASSETS } from '../config/assets';
+import { AddressInput } from './AddressInput';
+import { Button } from './Button';
+import { GameCard } from './GameCard';
 import styles from './MolochRisesCard.module.css';
 
 export interface MolochRisesCardProps {

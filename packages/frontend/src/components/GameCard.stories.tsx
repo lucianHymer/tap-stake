@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { GameCard } from './GameCard';
-import { ConnectCard } from './ConnectCard';
-import { Button } from './Button';
 import { ASSETS } from '../config/assets';
+import { Button } from './Button';
+import { ConnectCard } from './ConnectCard';
+import { GameCard } from './GameCard';
 
 const meta = {
   title: 'Components/GameCard',
