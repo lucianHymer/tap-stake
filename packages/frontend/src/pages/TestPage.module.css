@@ -22,7 +22,7 @@
 .sectionTitle {
   font-size: 14px;
   font-weight: 600;
-  color: var(--core-color-text-secondary, #cccccc);
+  color: var(--semantic-text-muted);
   margin: 0;
   text-align: center;
   text-transform: uppercase;
@@ -40,7 +40,7 @@
 
 .loading {
   font-size: 14px;
-  color: var(--component-text-warning, #ffaa00);
+  color: var(--semantic-status-warning);
   margin: 0;
   text-align: center;
   animation: pulse 1.5s ease-in-out infinite;
@@ -59,10 +59,10 @@
 .error {
   padding: 12px;
   margin: 0;
-  border: 1px solid var(--component-border-error, #ff4444);
+  border: 1px solid var(--semantic-status-error);
   border-radius: 8px;
-  background: rgba(255, 68, 68, 0.1);
-  color: var(--component-text-error, #ff4444);
+  background: rgba(245, 3, 3, 0.1);
+  color: var(--semantic-status-error);
   text-align: center;
   font-size: 14px;
 }

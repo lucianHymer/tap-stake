@@ -29,11 +29,11 @@
   user-select: none;
 
   /* Transitions for smooth state changes */
-  transition: background var(--core-motion-normal)
-    var(--core-motion-easing-in-out), color var(--core-motion-normal)
-    var(--core-motion-easing-in-out), outline-color var(--core-motion-normal)
-    var(--core-motion-easing-in-out), box-shadow var(--core-motion-normal)
-    var(--core-motion-easing-in-out);
+  transition:
+    background var(--core-motion-normal) var(--core-motion-easing-in-out),
+    color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    outline-color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
 }
 
 /* Outline button variant styling */
@@ -81,7 +81,7 @@
   gap: 8px;
   padding: 8px 14px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--core-color-border-tertiary, #3a3a3a);
+  border: 1px solid var(--semantic-border-subtle);
   border-radius: 20px;
   white-space: nowrap;
 }
@@ -89,33 +89,33 @@
 .choiceName {
   font-size: 14px;
   font-weight: 600;
-  color: var(--core-color-text-primary, #ffffff);
+  color: var(--semantic-text-primary);
 }
 
 .amount {
   font-size: 14px;
   font-weight: 700;
-  color: var(--component-text-success, #00ff88);
+  color: var(--semantic-accent-glyph);
   font-variant-numeric: tabular-nums;
 }
 
 .bodyText {
   font-size: 14px;
   line-height: 1.6;
-  color: var(--core-color-text-secondary, #cccccc);
+  color: var(--semantic-text-muted);
   margin: 0;
   text-align: center;
 }
 
 .blockchainLink {
   font-weight: 700;
-  color: var(--component-text-success, #00ff88);
+  color: var(--semantic-accent-glyph);
   text-decoration: none;
-  transition: color var(--core-motion-fast, 0.15s) ease-in-out;
+  transition: color var(--core-motion-fast) ease-in-out;
 }
 
 .blockchainLink:hover {
-  color: var(--core-color-brand-primary, #f50303);
+  color: var(--semantic-accent-primary);
   text-decoration: underline;
 }
 
@@ -128,19 +128,19 @@
 }
 
 .slayerLabel {
-  font-family: var(--core-type-font-family-display, "Jacquard 12", sans-serif);
+  font-family: var(--core-type-font-family-display);
   font-size: 20px;
   font-weight: 700;
-  color: var(--core-color-brand-primary, #f50303);
+  color: var(--semantic-accent-primary);
   letter-spacing: 0.5px;
 }
 
 .addressLink {
-  font-family: var(--core-type-font-family-serif, "EB Garamond", serif);
+  font-family: var(--core-type-font-family-serif);
   font-size: 14px;
-  color: var(--core-color-text-primary, #ffffff);
+  color: var(--semantic-text-primary);
   text-decoration: underline;
-  transition: opacity var(--core-motion-fast, 0.15s) ease-in-out;
+  transition: opacity var(--core-motion-fast) ease-in-out;
   word-break: break-all;
 }
 

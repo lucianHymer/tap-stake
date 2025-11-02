@@ -16,11 +16,11 @@
 
 /* Label */
 .label {
-  font-family: var(--core-type-font-family-serif, "EB Garamond", serif);
+  font-family: var(--core-type-font-family-serif);
   font-size: 20px;
   font-weight: 400;
   line-height: normal;
-  color: #ffffff;
+  color: var(--semantic-text-primary);
   margin: 0;
 }
 
@@ -38,7 +38,7 @@
 }
 
 .inputWrapper.neutral:focus-within {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: var(--semantic-border-default);
 }
 
 /* Resolving state */
@@ -63,7 +63,7 @@
 .input {
   width: 100%;
   background: var(--core-color-grey-800);
-  color: #ffffff;
+  color: var(--semantic-text-primary);
   font-family: var(--core-type-font-family-mono);
   font-size: 16px;
   font-weight: 400;
@@ -81,14 +81,14 @@
 }
 
 .input:focus {
-  background: #252525;
+  background: var(--core-color-grey-800);
 }
 
 /* Messages */
 .message,
 .successMessage,
 .errorMessage {
-  font-family: var(--core-type-font-family-serif, "EB Garamond", serif);
+  font-family: var(--core-type-font-family-serif);
   font-size: 16px;
   font-weight: 400;
   line-height: normal;

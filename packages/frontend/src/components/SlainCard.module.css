@@ -11,7 +11,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--core-spacing-base);
+  gap: var(--core-spacing-1);
 }
 
 /* Whitepaper button - styled as link with outline button appearance */
@@ -35,11 +35,11 @@
   user-select: none;
 
   /* Transitions for smooth state changes */
-  transition: background var(--core-motion-normal)
-    var(--core-motion-easing-in-out), color var(--core-motion-normal)
-    var(--core-motion-easing-in-out), outline-color var(--core-motion-normal)
-    var(--core-motion-easing-in-out), box-shadow var(--core-motion-normal)
-    var(--core-motion-easing-in-out);
+  transition:
+    background var(--core-motion-normal) var(--core-motion-easing-in-out),
+    color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    outline-color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
 }
 
 /* Outline button variant styling */
@@ -90,11 +90,76 @@
 
 /* Body text */
 .bodyText {
-  font-family: var(--core-type-font-family-serif, "EB Garamond", serif);
+  font-family: var(--core-type-font-family-serif);
   font-size: 20px;
   font-weight: 400;
   line-height: normal;
-  color: #ffffff;
+  color: var(--semantic-text-primary);
   margin: 0;
   max-width: 354px;
+}
+
+/* Stake list - horizontal chips */
+.stakeList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.stakeItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--semantic-border-subtle);
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.choiceName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--semantic-text-primary);
+}
+
+.amount {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--semantic-accent-glyph);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Slayer address display */
+.slayerAddress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slayerLabel {
+  font-family: var(--core-type-font-family-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--semantic-accent-primary);
+  letter-spacing: 0.5px;
+}
+
+.addressLink {
+  font-family: var(--core-type-font-family-serif);
+  font-size: 14px;
+  color: var(--semantic-text-primary);
+  text-decoration: underline;
+  transition: opacity var(--core-motion-fast) ease-in-out;
+  word-break: break-all;
+}
+
+.addressLink:hover {
+  opacity: 0.7;
 }

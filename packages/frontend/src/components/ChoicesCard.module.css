@@ -37,13 +37,13 @@
 }
 
 .statusText {
-  color: var(--core-color-text-muted);
-  font-size: var(--core-font-size-sm);
+  color: var(--semantic-text-muted);
+  font-size: var(--core-type-size-sm);
   margin: 0;
 }
 
 .errorText {
-  color: var(--component-error-text-default);
-  font-size: var(--core-font-size-sm);
+  color: var(--semantic-status-error);
+  font-size: var(--core-type-size-sm);
   margin: 0;
 }

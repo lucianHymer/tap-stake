@@ -11,7 +11,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--core-spacing-base);
+  gap: var(--core-spacing-1);
   width: 100%;
 }
 
@@ -42,11 +42,11 @@
 
 /* Body text */
 .bodyText {
-  font-family: var(--core-type-font-family-serif, "EB Garamond", serif);
+  font-family: var(--core-type-font-family-serif);
   font-size: 20px;
   font-weight: 400;
   line-height: normal;
-  color: #ffffff;
+  color: var(--semantic-text-primary);
   margin: 0;
   max-width: 354px;
 }
@@ -62,13 +62,13 @@
 }
 
 .statusText {
-  color: var(--core-color-text-muted);
-  font-size: var(--core-font-size-sm);
+  color: var(--semantic-text-muted);
+  font-size: var(--core-type-size-sm);
   margin: 0;
 }
 
 .errorText {
-  color: var(--component-error-text-default);
-  font-size: var(--core-font-size-sm);
+  color: var(--semantic-status-error);
+  font-size: var(--core-type-size-sm);
   margin: 0;
 }
