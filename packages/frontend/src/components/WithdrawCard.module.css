@@ -1,0 +1,74 @@
+/**
+ * MolochRisesCard Component Styles
+ * Run away screen styling
+ */
+
+@import "../styles/moloch-tokens.css";
+
+/* Control panel - stacked buttons */
+.controlPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--core-spacing-1);
+  width: 100%;
+}
+
+/* Details content container */
+.detailsContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+  gap: var(--core-spacing-2);
+  padding: var(--core-spacing-2) 0;
+}
+
+/* Running heading - yellow with underline */
+.runningHeading {
+  font-family: "Jacquard 12", var(--core-type-font-family-display);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--core-color-accent-yellow);
+  text-decoration: underline;
+  text-decoration-skip-ink: none;
+  text-underline-position: from-font;
+  margin: 0;
+}
+
+/* Body text */
+.bodyText {
+  font-family: var(--core-type-font-family-serif);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--semantic-text-primary);
+  margin: 0;
+  max-width: 354px;
+}
+
+/* Transaction status - simple and low-key */
+.transactionStatus {
+  padding: var(--core-spacing-2);
+  text-align: center;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusText {
+  color: var(--semantic-text-muted);
+  font-size: var(--core-type-size-sm);
+  margin: 0;
+}
+
+.errorText {
+  color: var(--semantic-status-error);
+  font-size: var(--core-type-size-sm);
+  margin: 0;
+}

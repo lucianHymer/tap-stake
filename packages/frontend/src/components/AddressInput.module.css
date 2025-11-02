@@ -1,0 +1,114 @@
+/**
+ * AddressInput Component Styles
+ * Ethereum address/ENS name input with validation states
+ */
+
+@import "../styles/moloch-tokens.css";
+
+/* Container */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-spacing-2);
+  width: 100%;
+  max-width: 354px;
+}
+
+/* Label */
+.label {
+  font-family: var(--core-type-font-family-serif);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--semantic-text-primary);
+  margin: 0;
+}
+
+/* Input wrapper with validation states */
+.inputWrapper {
+  position: relative;
+  width: 100%;
+  border-radius: var(--core-radius-md);
+  transition: all var(--core-motion-normal) var(--core-motion-easing-in-out);
+}
+
+/* Neutral state */
+.inputWrapper.neutral {
+  border: 2px solid var(--semantic-border-default);
+}
+
+.inputWrapper.neutral:focus-within {
+  border-color: var(--semantic-border-default);
+}
+
+/* Resolving state */
+.inputWrapper.resolving {
+  border: 2px solid rgba(255, 217, 0, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 217, 0, 0.2);
+}
+
+/* Valid state - green */
+.inputWrapper.valid {
+  border: 2px solid var(--core-color-neon-green);
+  box-shadow: var(--core-shadow-glow-green);
+}
+
+/* Invalid state - red */
+.inputWrapper.invalid {
+  border: 2px solid var(--core-color-accent-red);
+  box-shadow: var(--core-shadow-glow-red);
+}
+
+/* Input field */
+.input {
+  width: 100%;
+  background: var(--core-color-grey-800);
+  color: var(--semantic-text-primary);
+  font-family: var(--core-type-font-family-mono);
+  font-size: 16px;
+  font-weight: 400;
+  padding: 14px 16px;
+  border: none;
+  border-radius: var(--core-radius-md);
+  outline: none;
+  box-sizing: border-box;
+  transition: background var(--core-motion-fast)
+    var(--core-motion-easing-in-out);
+}
+
+.input::placeholder {
+  color: var(--core-color-grey-500);
+}
+
+.input:focus {
+  background: var(--core-color-grey-800);
+}
+
+/* Messages */
+.message,
+.successMessage,
+.errorMessage {
+  font-family: var(--core-type-font-family-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
+  margin: 0;
+}
+
+.message {
+  color: var(--core-color-accent-yellow);
+}
+
+.successMessage {
+  color: var(--core-color-neon-green);
+}
+
+.errorMessage {
+  color: var(--core-color-accent-red);
+}
+
+/* Address display in success message */
+.address {
+  font-family: var(--core-type-font-family-mono);
+  font-size: 14px;
+}

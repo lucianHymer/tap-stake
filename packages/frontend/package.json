@@ -6,35 +6,51 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:tokens": "node scripts/build-tokens.mjs",
     "format": "biome format --write src/",
     "lint": "biome lint src/",
     "check": "biome check src/",
     "check:write": "biome check --write src/",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@arx-research/libhalo": "^1.15.0",
     "@ethereumjs/rlp": "^10.0.0",
     "@playwright/test": "^1.55.0",
     "@tanstack/react-query": "^5.90.2",
+    "framer-motion": "^12.23.24",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "viem": "^2.37.5",
     "wagmi": "^2.17.5"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^4.1.2",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+    "@storybook/addon-a11y": "^10.0.2",
+    "@storybook/addon-docs": "^10.0.2",
+    "@storybook/addon-onboarding": "^10.0.2",
+    "@storybook/addon-vitest": "^10.0.2",
+    "@storybook/react-vite": "^10.0.2",
     "@types/node": "^24.8.1",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-basic-ssl": "^2.1.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/browser-playwright": "^4.0.5",
+    "@vitest/coverage-v8": "^4.0.5",
     "buffer": "^6.0.3",
     "events": "^3.3.0",
+    "playwright": "^1.56.1",
     "rollup-plugin-polyfill-node": "^0.13.0",
+    "storybook": "^10.0.2",
+    "style-dictionary": "^5.1.1",
     "typescript": "~5.8.3",
     "vite": "^7.1.2",
-    "vite-plugin-node-polyfills": "^0.24.0"
+    "vite-plugin-node-polyfills": "^0.24.0",
+    "vitest": "^4.0.5"
   }
 }

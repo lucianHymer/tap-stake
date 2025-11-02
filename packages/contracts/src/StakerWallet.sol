@@ -45,14 +45,15 @@ contract StakerWallet is IStakeChoicesERC6909 {
     /// @notice Address of the authorized relayer for gasless transactions
     address public immutable relayer;
 
-    /// @notice Maximum amount that can be staked in a single transaction
-    uint256 public immutable maxStakePerTx;
+    /// @notice Maximum amount that can be transferred in a single transaction
+    uint256 public immutable maxAmountPerTx;
 
     // ============ Errors ============
 
     error OnlyRelayer();
     error AmountTooHigh();
     error ZeroAddress();
+    error ZeroBalance();
 
     // ============ Modifiers ============
 
@@ -68,9 +69,9 @@ contract StakerWallet is IStakeChoicesERC6909 {
      * @param _token Address of the ERC20 token to be staked
      * @param _stakeChoicesAddress Address of the StakeChoicesERC6909 contract
      * @param _relayer Address of the authorized relayer
-     * @param _maxStakePerTx Maximum amount allowed per transaction
+     * @param _maxAmountPerTx Maximum amount allowed per transaction
      */
-    constructor(address _token, address _stakeChoicesAddress, address _relayer, uint256 _maxStakePerTx) {
+    constructor(address _token, address _stakeChoicesAddress, address _relayer, uint256 _maxAmountPerTx) {
         if (_token == address(0)) revert ZeroAddress();
         if (_stakeChoicesAddress == address(0)) revert ZeroAddress();
         if (_relayer == address(0)) revert ZeroAddress();
@@ -78,7 +79,7 @@ contract StakerWallet is IStakeChoicesERC6909 {
         tokenAddress = _token;
         stakeChoicesAddress = _stakeChoicesAddress;
         relayer = _relayer;
-        maxStakePerTx = _maxStakePerTx;
+        maxAmountPerTx = _maxAmountPerTx;
     }
 
     // ============ Staking Functions ============
@@ -90,7 +91,7 @@ contract StakerWallet is IStakeChoicesERC6909 {
      */
     function addStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external onlyRelayer {
         uint256 total = _sum(amounts);
-        if (total > maxStakePerTx) revert AmountTooHigh();
+        if (total > maxAmountPerTx) revert AmountTooHigh();
 
         // Approve multi-token contract for exact amount needed
         IERC20(tokenAddress).safeIncreaseAllowance(stakeChoicesAddress, total);
@@ -105,6 +106,69 @@ contract StakerWallet is IStakeChoicesERC6909 {
      */
     function removeStakes(uint256[] calldata choiceIds, uint256[] calldata amounts) external onlyRelayer {
         IStakeChoicesERC6909(stakeChoicesAddress).removeStakes(choiceIds, amounts);
+    }
+
+    /**
+     * @notice Update stakes: remove all old stakes and redistribute to new choices
+     * @param oldChoiceIds Array of choice IDs to remove stake from
+     * @param oldAmounts Array of amounts to remove from each old choice
+     * @param newChoiceIds Array of choice IDs to stake to
+     * @param newAmounts Array of amounts to stake to each new choice
+     */
+    function updateStakes(
+        uint256[] calldata oldChoiceIds,
+        uint256[] calldata oldAmounts,
+        uint256[] calldata newChoiceIds,
+        uint256[] calldata newAmounts
+    ) external onlyRelayer {
+        // Remove all old stakes
+        if (oldChoiceIds.length > 0) {
+            IStakeChoicesERC6909(stakeChoicesAddress).removeStakes(oldChoiceIds, oldAmounts);
+        }
+
+        // Add new stakes
+        uint256 total = _sum(newAmounts);
+        if (total > maxAmountPerTx) revert AmountTooHigh();
+
+        if (total > 0) {
+            IERC20(tokenAddress).safeIncreaseAllowance(stakeChoicesAddress, total);
+            IStakeChoicesERC6909(stakeChoicesAddress).addStakes(newChoiceIds, newAmounts);
+        }
+    }
+
+    /**
+     * @notice Withdraw up to 100 GTC from wallet to recipient
+     * @param recipient Address to receive the tokens
+     */
+    function withdraw(address recipient) external onlyRelayer {
+        uint256 balance = IERC20(tokenAddress).balanceOf(address(this));
+        if (balance == 0) revert ZeroBalance();
+
+        uint256 toTransfer = balance < 100e18 ? balance : 100e18;
+        IERC20(tokenAddress).safeTransfer(recipient, toTransfer);
+    }
+
+    /**
+     * @notice Remove all stakes and withdraw tokens to recipient in one transaction
+     * @param choiceIds Array of choice IDs to remove stake from
+     * @param amounts Array of amounts to remove from each choice
+     * @param recipient Address to receive the withdrawn tokens
+     */
+    function unstakeAllAndWithdraw(uint256[] calldata choiceIds, uint256[] calldata amounts, address recipient)
+        external
+        onlyRelayer
+    {
+        // Remove all stakes
+        if (choiceIds.length > 0) {
+            IStakeChoicesERC6909(stakeChoicesAddress).removeStakes(choiceIds, amounts);
+        }
+
+        // Withdraw tokens to recipient
+        uint256 balance = IERC20(tokenAddress).balanceOf(address(this));
+        if (balance == 0) revert ZeroBalance();
+
+        uint256 toTransfer = balance < 100e18 ? balance : 100e18;
+        IERC20(tokenAddress).safeTransfer(recipient, toTransfer);
     }
 
     // ============ Helper Functions ============

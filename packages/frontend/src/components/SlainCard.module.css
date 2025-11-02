@@ -1,0 +1,165 @@
+/**
+ * SlainCard Component Styles
+ * Victory screen styling
+ */
+
+@import "../styles/moloch-tokens.css";
+
+/* Control panel - stacked buttons */
+.controlPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--core-spacing-1);
+}
+
+/* Whitepaper button - styled as link with outline button appearance */
+.whitepaperButton {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+
+  padding: var(--core-spacing-3) var(--core-spacing-9);
+
+  /* Typography */
+  font-size: var(--core-type-size-xl);
+  font-weight: var(--core-type-weight-bold);
+  line-height: var(--core-type-line-height-tight);
+  font-family: var(--core-type-font-family-serif);
+
+  /* Interactions */
+  cursor: pointer;
+  user-select: none;
+
+  /* Transitions for smooth state changes */
+  transition:
+    background var(--core-motion-normal) var(--core-motion-easing-in-out),
+    color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    outline-color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
+}
+
+/* Outline button variant styling */
+.outlineButton {
+  background: var(--core-color-bg-purple);
+  color: var(--component-button-outline-text-default);
+  border: 3px solid transparent;
+  border-radius: var(--component-button-outline-radius);
+  outline: 3px solid var(--core-color-white);
+  outline-offset: -3px;
+  box-shadow: var(--core-shadow-elev-0);
+}
+
+.outlineButton:hover {
+  outline-color: var(--semantic-accent-glyph);
+  color: var(--semantic-accent-glyph);
+  box-shadow: var(--core-shadow-glow-green);
+}
+
+.outlineButton:active {
+  outline-color: var(--core-color-white);
+}
+
+/* Details content container */
+.detailsContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+  gap: var(--core-spacing-2);
+  padding: var(--core-spacing-2) 0;
+}
+
+/* Victory heading - yellow with underline */
+.victoryHeading {
+  font-family: "Jacquard 12", var(--core-type-font-family-display);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--core-color-accent-yellow);
+  text-decoration: underline;
+  text-decoration-skip-ink: none;
+  text-underline-position: from-font;
+  margin: 0;
+}
+
+/* Body text */
+.bodyText {
+  font-family: var(--core-type-font-family-serif);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--semantic-text-primary);
+  margin: 0;
+  max-width: 354px;
+}
+
+/* Stake list - horizontal chips */
+.stakeList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.stakeItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--semantic-border-subtle);
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.choiceName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--semantic-text-primary);
+}
+
+.amount {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--semantic-accent-glyph);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Slayer address display */
+.slayerAddress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slayerLabel {
+  font-family: var(--core-type-font-family-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--semantic-accent-primary);
+  letter-spacing: 0.5px;
+}
+
+.addressLink {
+  font-family: var(--core-type-font-family-serif);
+  font-size: 14px;
+  color: var(--semantic-text-primary);
+  text-decoration: underline;
+  transition: opacity var(--core-motion-fast) ease-in-out;
+  word-break: break-all;
+}
+
+.addressLink:hover {
+  opacity: 0.7;
+}

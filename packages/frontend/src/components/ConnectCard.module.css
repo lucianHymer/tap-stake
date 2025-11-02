@@ -1,0 +1,90 @@
+/**
+ * ConnectCard Component Styles
+ * Specific styling for the Connect screen details section
+ */
+
+@import "../styles/moloch-tokens.css";
+
+.detailText {
+  text-align: center;
+  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  min-height: 54px;
+  flex-shrink: 0;
+  padding: 8px 8px 0px 8px;
+}
+
+.detailText p {
+  font-family: var(--core-type-font-family-serif);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--semantic-text-primary);
+  margin: 0;
+}
+
+/* Moloch text styling - red color and stylized font */
+.molochText {
+  color: var(--core-color-accent-red);
+  font-family: var(--core-type-font-family-display);
+}
+
+/* Yellow text styling */
+.yellowText {
+  color: var(--core-color-accent-yellow);
+}
+
+/* Burner text styling - yellow color and stylized font */
+.burnerText {
+  color: var(--core-color-accent-yellow);
+  font-family: var(--core-type-font-family-display);
+}
+
+.centerIllustration {
+  width: 106px;
+  height: 175px;
+  flex-shrink: 0;
+}
+
+.centerIllustration img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+/* Status and error text */
+.statusText {
+  text-align: center;
+  padding: var(--core-spacing-2);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusText p {
+  color: var(--semantic-text-muted);
+  font-size: var(--core-type-size-sm);
+  margin: 0;
+  font-family: var(--core-type-font-family-serif);
+}
+
+.errorText {
+  text-align: center;
+  padding: var(--core-spacing-2);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.errorText p {
+  color: var(--semantic-status-error);
+  font-size: var(--core-type-size-sm);
+  margin: 0;
+  font-family: var(--core-type-font-family-serif);
+}

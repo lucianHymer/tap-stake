@@ -1,0 +1,321 @@
+/**
+ * GameCard Component Styles
+ * Based on Figma "Property 1=connect" design
+ */
+
+@import "../styles/moloch-tokens.css";
+
+/* Register custom property for gradient animation */
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* Card container - responsive with max constraints */
+.card {
+  --control-panel-height: 124px;
+
+  display: grid;
+  grid-template: 20px 1fr / 1fr;
+  width: 100%;
+  max-width: 440px;
+  height: 100%;
+  max-height: 956px;
+  border-radius: 20px;
+  background: var(--core-color-bg-purple);
+  z-index: 0;
+}
+
+/* Conic gradient border - 8px wide with animated gradient rotation */
+.border {
+  grid-area: 2 / 1;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 20;
+  background: conic-gradient(
+    from var(--gradient-angle, 4deg) at 50% 50%,
+    #7ed1c6 0deg,
+    #49433f 119.42deg,
+    #3ba1ff 223.82deg,
+    #7ed1c6 360deg
+  );
+  /* Create the border effect using a mask */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 8px;
+  animation: rotateGradient 6s linear infinite;
+}
+
+@keyframes rotateGradient {
+  from {
+    --gradient-angle: 0deg;
+  }
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+/* Main contents wrapper */
+.contents {
+  grid-area: 1 / 1 / 3 / 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-bottom: var(--control-panel-height);
+  box-sizing: border-box;
+  z-index: -10;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+
+.background {
+  grid-area: 1 / 1 / 3 / 2;
+  background: transparent;
+  pointer-events: none;
+  border: 12px solid #12061f;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Control panel - bottom section */
+.controlPanel {
+  place-self: end;
+  grid-area: 2 / 1;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--control-panel-height);
+  background: var(--core-color-grey-700, #333333);
+  overflow: hidden;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+/* Top section - image area with overlays */
+.topSection {
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+  padding: 0 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Wrapper for animated images - allows overlapping */
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  margin: 32px 0 24px 0;
+  aspect-ratio: 5 / 3;
+  overflow: hidden;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.heroImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Content overlay - absolute positioned over image */
+.headingContainer {
+  grid-area: 1 / 1 / 3 / 2;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.subheadingContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  pointer-events: none;
+}
+
+/* Heading pill - extends beyond image edges */
+.heading {
+  display: flex;
+  gap: 8px;
+  align-items: start;
+  padding: 8px 16px;
+  margin: 0 8px;
+  background: var(--core-color-grey-700, #333333);
+  border-radius: 99px;
+  overflow: hidden;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+.heading p {
+  font-family: var(--core-type-font-family-display);
+  font-size: 31.25px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--semantic-text-primary);
+  flex: 1;
+  margin: 0;
+}
+
+.headingIcon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Subheading pill - more contained than image */
+.subheading {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 64px;
+  width: 70%;
+  margin: 0 auto;
+  background: var(--core-color-grey-700);
+  border-radius: 99px;
+  overflow: hidden;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+.subheading p {
+  font-family: var(--core-type-font-family-display);
+  font-size: 31.25px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--semantic-text-primary);
+  white-space: pre;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.subheadingIcon {
+  width: 28px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.subheadingIcon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Details section - grows to fill available space */
+.detailsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 12px;
+  width: 100%;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+/* Flip card container */
+.flipCardContainer {
+  width: 100%;
+  margin: 32px 0 24px 0;
+  aspect-ratio: 5 / 3;
+  perspective: 1000px;
+  cursor: pointer;
+  position: relative;
+  /* Remove tap highlight on mobile browsers */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Glow background element - sits behind the card */
+.glowBackground {
+  position: absolute;
+  top: -30px;
+  left: -30px;
+  right: -30px;
+  bottom: -30px;
+  border-radius: 50px;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse 100% 60% at 50% 35%,
+    rgba(123, 161, 255, 0.5) 0%,
+    rgba(123, 161, 255, 0.35) 35%,
+    rgba(123, 161, 255, 0.15) 65%,
+    transparent 100%
+  );
+}
+
+/* Active glow state */
+.glowBackground.glowActive {
+  opacity: 1;
+}
+
+/* The flip card inner wrapper - animation handled by Framer Motion */
+.flipCard {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  /* transform-style moved to inline style for Framer Motion */
+}
+
+/* Front and back face base styles */
+.flipCardFront,
+.flipCardBack {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  overflow: hidden;
+}
+
+/* Front face */
+.flipCardFront {
+  transform: rotateY(0deg);
+}
+
+.flipCardFront .imageWrapper {
+  border-radius: 0;
+  margin: 0;
+}
+
+/* Back face */
+.flipCardBack {
+  transform: rotateY(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}

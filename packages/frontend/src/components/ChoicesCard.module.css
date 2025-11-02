@@ -1,0 +1,49 @@
+/**
+ * ChoicesCard Component Styles
+ * Grid layout for choice toggles and control panel buttons
+ */
+
+@import "../styles/moloch-tokens.css";
+
+/* 2x3 grid of choices */
+.choicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(164px, 1fr));
+  gap: var(--core-spacing-1);
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+  place-items: stretch;
+}
+
+/* Control panel - stacked buttons */
+.controlPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--core-spacing-1);
+  width: 100%;
+}
+
+/* Transaction status - simple and low-key */
+.transactionStatus {
+  padding: var(--core-spacing-2);
+  text-align: center;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusText {
+  color: var(--semantic-text-muted);
+  font-size: var(--core-type-size-sm);
+  margin: 0;
+}
+
+.errorText {
+  color: var(--semantic-status-error);
+  font-size: var(--core-type-size-sm);
+  margin: 0;
+}

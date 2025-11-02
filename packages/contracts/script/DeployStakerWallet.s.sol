@@ -11,7 +11,7 @@ contract DeployStakerWalletScript is Script {
         address stakeChoicesAddress = vm.envAddress("STAKE_CHOICES_ADDRESS");
 
         // Use the existing deployed token from the previous deployment
-        address tokenAddress = 0xC7480B7CAaDc8Aaa8b0ddD0552EC5F77A464F649;
+        address tokenAddress = 0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756;
 
         vm.startBroadcast(deployerPrivateKey);
 
@@ -20,14 +20,14 @@ contract DeployStakerWalletScript is Script {
             tokenAddress,
             stakeChoicesAddress,
             relayerAddress,
-            100 ether // MAX_STAKE_PER_TX
+            100 ether // maxAmountPerTx
         );
 
         console.log("StakerWallet deployed at:", address(stakerWallet));
         console.log("  Token address:", tokenAddress);
         console.log("  StakeChoices address:", stakeChoicesAddress);
         console.log("  Relayer:", relayerAddress);
-        console.log("  Max stake per tx:", stakerWallet.maxStakePerTx());
+        console.log("  Max amount per tx:", stakerWallet.maxAmountPerTx());
 
         vm.stopBroadcast();
     }

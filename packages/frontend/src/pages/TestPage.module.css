@@ -1,0 +1,73 @@
+@import "../styles/moloch-tokens.css";
+
+/* Compact container */
+.compact {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Section wrapper */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--semantic-text-muted);
+  margin: 0;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Horizontal button row */
+.buttonRow {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.loading {
+  font-size: 14px;
+  color: var(--semantic-status-warning);
+  margin: 0;
+  text-align: center;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.error {
+  padding: 12px;
+  margin: 0;
+  border: 1px solid var(--semantic-status-error);
+  border-radius: 8px;
+  background: rgba(245, 3, 3, 0.1);
+  color: var(--semantic-status-error);
+  text-align: center;
+  font-size: 14px;
+}
+
+.error strong {
+  display: inline;
+  margin-right: 4px;
+}

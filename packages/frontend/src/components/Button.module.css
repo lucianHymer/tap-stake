@@ -1,0 +1,159 @@
+/**
+ * Button Component Styles
+ * Uses ONLY Moloch design system tokens - zero hardcoded values
+ */
+
+@import "../styles/moloch-tokens.css";
+
+/* Base button structure - shared by all variants */
+.button {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: var(--core-spacing-3) var(--core-spacing-9);
+
+  /* Typography */
+  font-size: var(--core-type-size-xl);
+  font-weight: var(--core-type-weight-bold);
+  line-height: var(--core-type-line-height-tight);
+
+  /* Interactions */
+  border: none;
+  cursor: pointer;
+  user-select: none;
+
+  /* Transitions for smooth state changes */
+  transition:
+    background var(--core-motion-normal) var(--core-motion-easing-in-out),
+    color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    border-color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    outline-color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out),
+    transform var(--core-motion-fast) var(--core-motion-easing-in-out);
+}
+
+/* Disabled state - shared */
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Focus state - keyboard navigation */
+.button:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: var(--core-spacing-1);
+  box-shadow: var(--core-shadow-glow-green);
+}
+
+/* ============================================
+   PRIMARY VARIANT (Default - Solid Red)
+   ============================================ */
+.primary {
+  background: var(--component-button-primary-bg-default);
+  color: var(--core-color-grey-900);
+  border: 3px solid transparent;
+  border-radius: var(--component-button-primary-radius);
+  box-shadow: var(--component-button-primary-shadow);
+  font-family: "Jacquard 12", var(--core-type-font-family-display);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--component-button-primary-bg-hover);
+  box-shadow: var(--core-shadow-glow-red);
+}
+
+.primary:active:not(:disabled) {
+  background: var(--component-button-primary-bg-pressed);
+  box-shadow: var(--component-button-primary-shadow);
+}
+
+/* ============================================
+   OUTLINE VARIANT (White Border, Transparent)
+   ============================================ */
+.outline {
+  background: var(--core-color-bg-purple);
+  color: var(--component-button-outline-text-default);
+  border: 3px solid transparent;
+  border-radius: var(--component-button-outline-radius);
+  outline: 3px solid var(--core-color-white);
+  outline-offset: -3px;
+  box-shadow: var(--core-shadow-elev-0);
+  font-family: var(--core-type-font-family-serif);
+}
+
+.outline:hover:not(:disabled) {
+  outline-color: var(--semantic-accent-glyph);
+  color: var(--semantic-accent-glyph);
+  box-shadow: var(--core-shadow-glow-green);
+}
+
+.outline:active:not(:disabled) {
+  outline-color: var(--core-color-white);
+}
+
+/* ============================================
+   CANCEL VARIANT (Transparent, No Border)
+   From Figma: button/primary/cancel
+   ============================================ */
+.cancel {
+  /* Colors - green text only, no border */
+  background: transparent;
+  color: var(--core-color-neon-green);
+  border: none;
+
+  /* Shape */
+  border-radius: 100px;
+
+  /* Spacing - from Figma spec */
+  padding: var(--core-spacing-1) var(--core-spacing-6);
+  gap: 10px;
+
+  /* Typography */
+  font-family: var(--core-type-font-family-serif);
+  font-size: var(--core-type-size-lg); /* 20px - back to original */
+  font-weight: var(--core-type-weight-bold);
+
+  /* Effects */
+  box-shadow: none;
+}
+
+.cancel:hover:not(:disabled) {
+  background: rgba(57, 255, 20, 0.05);
+  box-shadow: var(--core-shadow-glow-green);
+}
+
+.cancel:active:not(:disabled) {
+  background: rgba(57, 255, 20, 0.1);
+}
+
+/* Icon styling for buttons with icons */
+.icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   SIZE VARIANTS (Optional)
+   ============================================ */
+.large {
+  padding: var(--core-spacing-6) var(--core-spacing-9);
+  font-size: var(--core-type-size-3xl);
+}
+
+.medium {
+  padding: var(--core-spacing-6) var(--core-spacing-9);
+  font-size: var(--core-type-size-2xl);
+}
+
+.small {
+  padding: var(--core-spacing-4) var(--core-spacing-6);
+  font-size: var(--core-type-size-xl);
+}

@@ -1,6 +1,6 @@
-# EIP-7702 Transaction Relayer
+# EIP-7702 StakerWallet Relayer
 
-A minimal Cloudflare Worker that accepts EIP-7702 authorizations and submits transactions on behalf of users, enabling gasless transactions.
+A Cloudflare Worker that accepts EIP-7702 authorizations and submits StakerWallet transactions on behalf of users, enabling gasless staking operations with anti-spam protection.
 
 ## Setup
 
@@ -10,22 +10,25 @@ A minimal Cloudflare Worker that accepts EIP-7702 authorizations and submits tra
 npm install
 ```
 
-### 2. Configure secrets
+### 2. Configure secrets and environment variables
 
-Set the following secrets using wrangler:
-
+**Secrets** (set using `wrangler secret put`):
 ```bash
 # Relayer's private key (pays for gas)
 wrangler secret put PRIVATE_KEY
+```
 
-# RPC endpoint URL (e.g., https://sepolia.optimism.io)
-wrangler secret put RPC_URL
-
-# Chain ID (e.g., 11155420 for OP Sepolia)
-wrangler secret put CHAIN_ID
-
-# Allowed contract address for delegated execution (e.g., 0x...)
-wrangler secret put ALLOWED_CONTRACT_ADDRESS
+**Environment variables** (set in `wrangler.toml`):
+```toml
+[vars]
+ENVIRONMENT = "development"
+CHAIN_ID = "11155420"  # OP Sepolia
+RPC_URL = "https://sepolia.optimism.io"
+ALLOWED_CONTRACT_ADDRESS = "0x..."  # StakerWallet contract address
+TOKEN_ADDRESS = "0x..."  # ERC20 token being staked (e.g., GTC)
+STAKE_CHOICES_ADDRESS = "0x..."  # StakeChoicesERC6909 contract address
+MINIMUM_HOLDINGS = "90000000000000000000"  # 90 tokens in wei (90e18)
+APPROVED_CHOICE_IDS = "123,456,789"  # Comma-separated choice IDs
 ```
 
 ### 3. Local development
@@ -44,26 +47,22 @@ npm run deploy
 
 ## API
 
-### POST /relay
+### POST /test-mint
 
-Submit a transaction with an EIP-7702 authorization.
+**Test endpoint only - works exclusively on Optimism Sepolia (chain ID 11155420)**
+
+Mint TestERC20 tokens to any address using the relayer's wallet. This endpoint is useful for testing without needing to manage test tokens yourself.
 
 **Request:**
 ```json
 {
-  "authorization": {
-    "contractAddress": "0x...",
-    "chainId": 11155420,
-    "nonce": "0",
-    "r": "0x...",
-    "s": "0x...",
-    "yParity": 0
-  },
-  "to": "0x...",
-  "data": "0x...",
-  "value": "0"
+  "address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+  "amount": "100000000000000000000"
 }
 ```
+
+- `address`: The address to mint tokens to
+- `amount`: Amount in wei (e.g., "100000000000000000000" = 100 tokens)
 
 **Response:**
 ```json
@@ -71,9 +70,161 @@ Submit a transaction with an EIP-7702 authorization.
   "success": true,
   "txHash": "0x...",
   "details": {
+    "to": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "amount": "100000000000000000000",
+    "tokenAddress": "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756",
+    "minter": "0x..."
+  }
+}
+```
+
+**Restrictions:**
+- Only works when CHAIN_ID is 11155420 (Optimism Sepolia)
+- Returns 403 error on any other chain
+- Amount must be > 0
+
+**Example usage:**
+```bash
+curl -X POST https://your-relayer.workers.dev/test-mint \
+  -H "Content-Type: application/json" \
+  -d '{
+    "address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "amount": "100000000000000000000"
+  }'
+```
+
+---
+
+### POST /
+
+Submit a StakerWallet transaction with an EIP-7702 authorization.
+
+All operations require:
+- Valid EIP-7702 authorization
+- User has at least 90 tokens (wallet balance + staked balance)
+- Choice IDs are in the approved list
+
+---
+
+#### 1. Add Stakes
+
+Stake tokens to multiple choices.
+
+**Request:**
+```json
+{
+  "operation": "addStakes",
+  "authorization": {
+    "address": "0x...",
+    "chainId": 11155420,
+    "nonce": "0",
+    "r": "0x...",
+    "s": "0x...",
+    "yParity": 0
+  },
+  "choiceIds": ["123", "456"],
+  "amounts": ["1000000000000000000", "2000000000000000000"]
+}
+```
+
+**Validations:**
+- All amounts must be > 0
+- Total amount must be ≤ 1000 tokens
+- All choice IDs must be in approved list
+
+---
+
+#### 2. Update Stakes
+
+Atomically remove old stakes and add new stakes.
+
+**Request:**
+```json
+{
+  "operation": "updateStakes",
+  "authorization": { ... },
+  "oldChoiceIds": ["123", "456"],
+  "oldAmounts": ["1000000000000000000", "2000000000000000000"],
+  "newChoiceIds": ["789"],
+  "newAmounts": ["3000000000000000000"]
+}
+```
+
+**Validations:**
+- All old/new amounts must be > 0 (if provided)
+- Total new amount must be ≤ 1000 tokens
+- All choice IDs must be in approved list
+- Old choice IDs/amounts are optional (can just add new stakes)
+
+---
+
+#### 3. Withdraw
+
+Withdraw up to 100 tokens from wallet to recipient.
+
+**Request:**
+```json
+{
+  "operation": "withdraw",
+  "authorization": { ... },
+  "recipient": "0x..."
+}
+```
+
+**Validations:**
+- Wallet balance must be > 0
+- Recipient address required
+
+---
+
+#### 4. Unstake All and Withdraw
+
+Remove all stakes and withdraw tokens in one transaction.
+
+**Request:**
+```json
+{
+  "operation": "unstakeAllAndWithdraw",
+  "authorization": { ... },
+  "choiceIds": ["123", "456"],
+  "amounts": ["1000000000000000000", "2000000000000000000"],
+  "recipient": "0x..."
+}
+```
+
+**Validations:**
+- All amounts must be > 0
+- All choice IDs must be in approved list
+- Recipient address required
+
+---
+
+**Success Response (all operations):**
+```json
+{
+  "success": true,
+  "txHash": "0x...",
+  "details": {
     "relayer": "0x...",
     "chainId": 11155420,
-    "to": "0x..."
+    "eoa": "0x...",
+    "delegatedTo": "0x...",
+    "operation": "addStakes",
+    "choiceIds": ["123", "456"],
+    "amounts": ["1000000000000000000", "2000000000000000000"]
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "error": "Insufficient holdings",
+  "details": {
+    "message": "Must have at least 90 tokens",
+    "totalHoldings": "50000000000000000000",
+    "minimumRequired": "90000000000000000000"
   }
 }
 ```
@@ -81,24 +232,35 @@ Submit a transaction with an EIP-7702 authorization.
 ## How it works
 
 1. User signs an EIP-7702 authorization with their NFC card
-2. Frontend sends the authorization to this relayer
-3. Relayer constructs a transaction with:
+2. Frontend sends the authorization + operation details to this relayer
+3. Relayer validates:
+   - Authorization signature is valid
+   - User has at least 90 tokens (wallet + staked balances)
+   - All amounts are non-zero (gas optimization)
+   - Choice IDs are in the approved list
+   - Operation-specific requirements
+4. Relayer constructs a transaction with:
    - `from`: Relayer's address (pays gas)
    - `to`: User's EOA address
    - `authorizationList`: User's signed authorization
-   - `data`: The delegated call data
-4. Transaction is sent to the chain
-5. User's EOA executes the delegated logic without paying gas
+   - `data`: Encoded StakerWallet function call
+5. Transaction is sent to the chain
+6. User's EOA executes the StakerWallet logic without paying gas
 
-## Security Notes
+## Security Features
 
-Security features:
-- **Contract address restriction**: Only proxies approvals for a single allowed contract address
-- **Chain ID validation**: Ensures authorization matches the relayer's configured chain
+Built-in protections:
+- ✅ **Contract address restriction**: Only delegates to the configured StakerWallet contract
+- ✅ **Chain ID validation**: Ensures authorization matches the relayer's chain
+- ✅ **Minimum holdings check**: Users must have ≥90 tokens (anti-spam/sybil)
+- ✅ **Choice ID allowlist**: Only approved choice IDs can be staked
+- ✅ **Zero-amount prevention**: All amounts must be > 0 (prevents wasted gas)
+- ✅ **Maximum stake limit**: Total stake per transaction ≤ 1000 tokens
+- ✅ **Balance verification**: Checks wallet balance before withdraw operations
 
-Production deployments should also add:
-- Access control (allowlist of user addresses)
-- Rate limiting
-- Gas price management
+Additional production considerations:
+- Rate limiting per user address
+- Gas price management and monitoring
 - Nonce management for concurrent requests
-- Request validation and sanitization
+- Enhanced logging and monitoring
+- Multi-signature relayer key management

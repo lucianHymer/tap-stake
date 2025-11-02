@@ -1,0 +1,168 @@
+:root[data-theme="moloch"] {
+  --core-color-bg-purple: #12061f;
+  --core-color-bg-purple-2: #1a0c2a;
+  --core-color-grey-900: #0d0e0d;
+  --core-color-grey-800: #1e1e1e;
+  --core-color-grey-700: #333333;
+  --core-color-grey-500: #808080;
+  --core-color-grey-400: #9e9e9e;
+  --core-color-white: #ffffff;
+  --core-color-neon-green: #39ff14;
+  --core-color-accent-yellow: #ffd900;
+  --core-color-accent-red: #f50303;
+  --core-color-accent-purple: #a612f0;
+  --core-type-font-family-display: "Jacquard 24", "EB Garamond", serif;
+  --core-type-font-family-serif: "EB Garamond", Garamond, "Times New Roman",
+    serif;
+  --core-type-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Courier New", monospace;
+  --core-type-size-xs: 12px;
+  --core-type-size-sm: 14px;
+  --core-type-size-md: 16px;
+  --core-type-size-lg: 20px;
+  --core-type-size-xl: 24px;
+  --core-type-size-2xl: 32px;
+  --core-type-size-3xl: 40px;
+  --core-type-line-height-tight: 1.1;
+  --core-type-line-height-normal: 1.45;
+  --core-type-line-height-relaxed: 1.6;
+  --core-type-weight-regular: 400;
+  --core-type-weight-semibold: 600;
+  --core-type-weight-bold: 700;
+  --core-spacing-0: 0px;
+  --core-spacing-1: 4px;
+  --core-spacing-2: 8px;
+  --core-spacing-3: 12px;
+  --core-spacing-4: 16px;
+  --core-spacing-5: 24px;
+  --core-spacing-6: 32px;
+  --core-spacing-7: 40px;
+  --core-spacing-8: 48px;
+  --core-spacing-9: 64px;
+  --core-spacing-10: 96px;
+  --core-spacing-baseline: 8px;
+  --core-radius-sm: 6px;
+  --core-radius-md: 12px;
+  --core-radius-lg: 20px;
+  --core-radius-pill: 50px;
+  --core-shadow-elev-0: none;
+  --core-shadow-elev-1: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --core-shadow-elev-2: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --core-shadow-glow-red: 0 0 0 2px rgba(245, 3, 3, 0.4), 0 0 24px
+    rgba(245, 3, 3, 0.35);
+  --core-shadow-glow-green: 0 0 0 2px rgba(57, 255, 20, 0.4), 0 0 24px
+    rgba(57, 255, 20, 0.35);
+  --core-motion-fast: 120ms;
+  --core-motion-normal: 200ms;
+  --core-motion-slow: 320ms;
+  --core-motion-easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --core-motion-easing-emph: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --semantic-bg-primary: #12061f;
+  --semantic-bg-elevated: #1a0c2a;
+  --semantic-text-primary: #ffffff;
+  --semantic-text-muted: #9e9e9e;
+  --semantic-text-on-accent-dark: #0d0e0d;
+  --semantic-accent-primary: #f50303;
+  --semantic-accent-secondary: #a612f0;
+  --semantic-accent-tertiary: #ffd900;
+  --semantic-accent-glyph: #39ff14;
+  --semantic-border-default: rgba(255, 255, 255, 0.14);
+  --semantic-border-subtle: rgba(255, 255, 255, 0.08);
+  --semantic-border-focus: #39ff14;
+  --semantic-status-success: #20c57a;
+  --semantic-status-warning: #ffd900;
+  --semantic-status-error: #f50303;
+  --component-boon-button-default-bg: #1a0c2a;
+  --component-boon-button-default-text: #ffffff;
+  --component-boon-button-default-subtext: #9e9e9e;
+  --component-boon-button-default-border: rgba(255, 255, 255, 0.18);
+  --component-boon-button-default-radius: 20px;
+  --component-boon-button-default-padding-x: 20px;
+  --component-boon-button-default-padding-y: 16px;
+  --component-boon-button-default-gap: 8px;
+  --component-boon-button-default-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --component-boon-button-hover-border: #ffd900;
+  --component-boon-button-hover-glow: 0 0 0 2px rgba(255, 217, 0, 0.35), 0 0
+    24px rgba(255, 217, 0, 0.25);
+  --component-boon-button-active-text: #ffd900;
+  --component-boon-button-active-border: #ffd900;
+  --component-boon-button-active-bg: linear-gradient(
+    180deg,
+    rgba(255, 217, 0, 0.12) 0%,
+    rgba(18, 6, 31, 1) 70%
+  );
+  --component-boon-button-active-glow: 0 0 0 2px rgba(255, 217, 0, 0.5), 0 0
+    36px rgba(255, 217, 0, 0.32);
+  --component-boon-button-disabled-text: rgba(255, 255, 255, 0.4);
+  --component-boon-button-disabled-subtext: rgba(255, 255, 255, 0.25);
+  --component-boon-button-disabled-border: rgba(255, 255, 255, 0.16);
+  --component-boon-button-disabled-bg: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(18, 6, 31, 1) 80%
+  );
+  --component-boon-button-runes-stroke: #ffd900;
+  --component-boon-button-runes-opacity: 0.35;
+  --component-button-primary-bg-default: #f50303;
+  --component-button-primary-bg-hover: #d10404;
+  --component-button-primary-bg-pressed: #b90303;
+  --component-button-primary-text-default: #0d0e0d;
+  --component-button-primary-radius: 20px;
+  --component-button-primary-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --component-button-outline-bg-default: transparent;
+  --component-button-outline-text-default: #ffffff;
+  --component-button-outline-border: rgba(255, 255, 255, 0.14);
+  --component-button-outline-radius: 50px;
+  --component-button-pill-bg-top: #ffffff;
+  --component-button-pill-bg-bottom: #3a3a3a;
+  --component-button-pill-border: #f50303;
+  --component-button-pill-radius: 50px;
+  --component-chip-glyph-bg: rgba(57, 255, 20, 0.15);
+  --component-chip-glyph-text: #39ff14;
+  --component-chip-glyph-border: rgba(57, 255, 20, 0.35);
+  --component-input-bg: #1a0c2a;
+  --component-input-text: #ffffff;
+  --component-input-border-default: rgba(255, 255, 255, 0.14);
+  --component-input-border-focus: #39ff14;
+  --component-input-radius: 12px;
+  --component-input-shadow-focus: 0 0 0 2px rgba(57, 255, 20, 0.4), 0 0 24px
+    rgba(57, 255, 20, 0.35);
+  --iconography-style-stroke: 2px;
+  --iconography-style-size-sm: 16px;
+  --iconography-style-size-md: 20px;
+  --iconography-style-size-lg: 24px;
+  --iconography-style-grid: 16px;
+  --iconography-style-color-solid: #39ff14;
+  --iconography-style-color-line: #39ff14;
+  --iconography-style-color-clean: #ffffff;
+  --iconography-map-pixel-heart: "icons/pixel/heart.svg";
+  --iconography-map-pixel-leaf: "icons/pixel/leaf.svg";
+  --iconography-map-pixel-plant: "icons/pixel/plant.svg";
+  --iconography-map-pixel-plus: "icons/pixel/plus.svg";
+  --iconography-map-pixel-read: "icons/pixel/read.svg";
+  --iconography-map-pixel-search: "icons/pixel/search.svg";
+  --iconography-map-pixel-skull: "icons/pixel/skull.svg";
+  --iconography-map-pixel-sword: "icons/pixel/sword.svg";
+  --iconography-map-pixel-wand: "icons/pixel/wand.svg";
+  --iconography-map-pixel-web: "icons/pixel/web.svg";
+  --iconography-map-pixel-x: "icons/pixel/x.svg";
+  --iconography-map-glyph-burst: "icons/glyph/burst.svg";
+  --iconography-map-glyph-flame: "icons/glyph/flame.svg";
+  --iconography-map-glyph-icon-stylized-solid: "icons/glyph/icon-stylized-solid.svg";
+  --iconography-map-glyph-key: "icons/glyph/key.svg";
+  --iconography-map-glyph-star: "icons/glyph/star.svg";
+  --iconography-map-glyph-sword: "icons/glyph/sword.svg";
+  --layout-grid-desktop-columns: 12;
+  --layout-grid-desktop-gutter: 32px;
+  --layout-grid-desktop-margin: 96px;
+  --layout-grid-desktop-max-width: 1440px;
+  --layout-grid-tablet-columns: 8;
+  --layout-grid-tablet-gutter: 24px;
+  --layout-grid-tablet-margin: 64px;
+  --layout-grid-tablet-max-width: 1024px;
+  --layout-grid-mobile-columns: 4;
+  --layout-grid-mobile-gutter: 16px;
+  --layout-grid-mobile-margin: 24px;
+  --layout-grid-mobile-max-width: 414px;
+  --layout-grid-baseline: 8px;
+}

@@ -1,0 +1,6 @@
+/**
+ * ConnectPage Styles
+ * Status and error messages are now handled within ConnectCard component
+ */
+
+@import "../styles/moloch-tokens.css";

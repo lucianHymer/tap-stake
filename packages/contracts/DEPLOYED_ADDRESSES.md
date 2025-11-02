@@ -1,6 +1,6 @@
 # Deployed Contract Addresses - Optimism Sepolia
 
-## Latest Deployment Date: October 16, 2025
+## Latest Deployment Date: October 31, 2025
 
 ### Network: Optimism Sepolia (Chain ID: 11155420)
 
@@ -10,7 +10,7 @@
 | **StakeChoicesFactory** | `0xC9602099b8177f74bfD06aEC1D928ebCf1f41E87` | Factory for deploying StakeChoicesERC6909 multi-tokens |
 | **StakeChoicesERC6909 Implementation** | `0x0b8453a12d8E67cEB16c1A70eD8A78E4E75129A8` | Implementation contract for ERC6909 multi-choice staking |
 | **Sample StakeChoicesERC6909 MultiToken** | `0xb0a727f57841910752F0f1ef96871Cc28C086012` | Sample multi-token deployed via factory with 6 registered choices |
-| **StakerWallet** | `0x3bcc81ce0b65384f320ef60f281cc946a2f383a3` | Gasless staking via EIP-7702 (relayer: 0x872D0Cf468Ee82cC7D6828f63DDceebb7F19eA19) |
+| **StakerWallet** | `0x0568033352086AD7Bc23B218D8b9ff6733BA4448` | Gasless staking via EIP-7702 with restaking & withdrawal support (relayer: 0x872D0Cf468Ee82cC7D6828f63DDceebb7F19eA19) |
 
 ## Registered Choices
 
@@ -45,7 +45,11 @@ Choice IDs are computed deterministically using `computeId(creator, salt)` where
 - Nonce-based replay protection
 - Gasless staking operations via relayers
 - Bound to specific StakeChoices multi-token at deployment
-- Max stake per transaction: 100 ETH
+- Max amount per transaction: 100 ETH
+- **New features (Oct 31, 2025)**:
+  - `updateStakes()`: Atomic reallocation from old choices to new choices
+  - `withdraw()`: Extract up to 100 GTC to recipient
+  - `unstakeAllAndWithdraw()`: Single-transaction unstake and withdrawal
 
 ## Frontend Integration
 
@@ -58,7 +62,7 @@ const CONTRACTS = {
   testToken: "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756" as Address,
   stakeChoicesFactory: "0xC9602099b8177f74bfD06aEC1D928ebCf1f41E87" as Address,
   stakeChoicesToken: "0xb0a727f57841910752F0f1ef96871Cc28C086012" as Address,
-  stakerWallet: "0x3bcc81ce0b65384f320ef60f281cc946a2f383a3" as Address,
+  stakerWallet: "0x0568033352086AD7Bc23B218D8b9ff6733BA4448" as Address,
 };
 
 // Choice IDs for staking
@@ -82,7 +86,7 @@ const CHOICE_IDS = [
 | StakeChoicesFactory | ✅ Pass - Verified | [View Code](https://sepolia-optimism.etherscan.io/address/0xC9602099b8177f74bfD06aEC1D928ebCf1f41E87#code) |
 | StakeChoicesERC6909 Implementation | ✅ Pass - Verified | [View Code](https://sepolia-optimism.etherscan.io/address/0x0b8453a12d8E67cEB16c1A70eD8A78E4E75129A8#code) |
 | Sample MultiToken | ✅ Pass - Verified | [View Code](https://sepolia-optimism.etherscan.io/address/0xb0a727f57841910752F0f1ef96871Cc28C086012#code) |
-| StakerWallet | ✅ Pass - Verified | [View Code](https://sepolia-optimism.etherscan.io/address/0x3bcc81ce0b65384f320ef60f281cc946a2f383a3#code) |
+| StakerWallet | ✅ Pass - Verified | [View Code](https://sepolia-optimism.etherscan.io/address/0x0568033352086AD7Bc23B218D8b9ff6733BA4448#code) |
 
 **Compiler Settings Used:**
 - Compiler: v0.8.30+commit.73712a01
@@ -95,4 +99,4 @@ const CHOICE_IDS = [
 - [StakeChoicesFactory](https://sepolia-optimism.etherscan.io/address/0xC9602099b8177f74bfD06aEC1D928ebCf1f41E87)
 - [StakeChoicesERC6909 Implementation](https://sepolia-optimism.etherscan.io/address/0x0b8453a12d8E67cEB16c1A70eD8A78E4E75129A8)
 - [Sample MultiToken](https://sepolia-optimism.etherscan.io/address/0xb0a727f57841910752F0f1ef96871Cc28C086012)
-- [StakerWallet](https://sepolia-optimism.etherscan.io/address/0x3bcc81ce0b65384f320ef60f281cc946a2f383a3)
+- [StakerWallet](https://sepolia-optimism.etherscan.io/address/0x0568033352086AD7Bc23B218D8b9ff6733BA4448)

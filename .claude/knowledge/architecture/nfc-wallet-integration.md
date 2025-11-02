@@ -109,3 +109,82 @@ The BatchExecutor contract uses a self-referential security check (msg.sender ==
 Key implementation detail: This pattern can't be fully tested locally in Foundry since EIP-7702 delegation can't be simulated - the self-referential check will always fail in tests. Production testing requires actual on-chain deployment.
 
 **Related files**: packages/contracts/src/BatchExecutor.sol, packages/contracts/test/BatchExecutor.t.sol
+
+## EIP-7702 Relayer Architecture
+Implemented minimal Cloudflare Worker relayer for gasless EIP-7702 transactions. The relayer accepts signed authorizations from NFC cards and submits transactions on behalf of users.
+
+### Key Implementation Details
+- POST /relay endpoint accepts authorization + transaction details
+- Relayer constructs transaction with authorizationList containing user's signed authorization
+- Transaction sent to user's EOA address with relayer paying gas
+- Chain configurable via CHAIN_ID environment variable
+- Uses same viem version (2.37.5) as frontend for compatibility
+- CORS enabled for development (accepts all origins)
+- Detailed error responses for debugging
+
+### Transaction Flow
+1. Frontend sends NFC-signed authorization to relayer
+2. Relayer validates chain ID matches
+3. Constructs transaction with from=relayer, to=user EOA, authorizationList=[authorization]
+4. Signs with relayer's private key and submits
+5. Returns transaction hash
+
+### Package Structure
+Located at packages/relayer/:
+- src/index.ts - Worker implementation
+- wrangler.toml - Cloudflare configuration
+- Uses wrangler for local dev and deployment
+
+**Future enhancements planned**: access control, rate limiting, gas management, nonce tracking
+
+**Related files**: packages/relayer/src/index.ts, packages/relayer/wrangler.toml, packages/relayer/README.md
+
+## EIP-7702 StakerWallet Implementation
+Created StakerWallet contract for gasless staking via EIP-7702 delegation with ERC-7201 namespaced storage:
+
+### Key Design Patterns
+- **ERC-7201 namespaced storage** using assembly with `$` storage pointer convention
+- Storage slot calculated as: keccak256(abi.encode(uint256(keccak256("stakerwallet.main")) - 1)) & ~bytes32(uint256(0xff))
+- Actual slot: 0xf3eb2a05d627e0d8f655578323b722a8c5b2b37da7dffa80986448fef78f9d00
+- Uses mapping(address => uint256) nonces in namespaced storage to prevent replay attacks and storage collisions
+
+### EIP-712 Signature Flow
+- DOMAIN_SEPARATOR uses implementation address (SELF) for wallet UX and phishing protection
+- StakeAuthorization typehash: (address account, uint256 nonce, uint256 amount, uint256 deadline)
+- Signature verification: recovered signer must equal address(this) (the delegated EOA)
+- Nonces increment before external calls (CEI pattern)
+
+### Security Features
+- Deadline validation prevents expired signatures
+- Approve exact amount then clear to zero after execution
+- Custom errors for gas efficiency
+- Event emission for off-chain tracking
+
+### Testing Limitations
+- Foundry cannot simulate EIP-7702 delegation semantics
+- Tests verify signature construction, recovery, and basic logic
+- Full end-to-end testing requires deployment to EIP-7702-enabled network (Optimism Sepolia)
+
+Also renamed BatchExecutor to SelfBatchExecutor to clarify self-execution pattern.
+
+**Related files**: packages/contracts/src/StakerWallet.sol, packages/contracts/src/SelfBatchExecutor.sol, packages/contracts/test/StakerWallet.t.sol, packages/contracts/script/Deploy.s.sol
+
+## StakerWallet Gasless Staking Architecture
+StakerWallet contract enables gasless staking via EIP-7702 with a two-signature approach:
+
+### Two-Signature Flow
+1. **EIP-7702 Authorization**: User signs authorization to delegate EOA to StakerWallet contract
+2. **EIP-712 Operation Signature**: User signs the specific stake operation (amount, deadline, nonce)
+
+### Key Differences from SelfBatchExecutor Pattern
+- StakerWallet verifies the operation signature internally
+- Uses EIP-712 typed data for better wallet UX
+- Relayer calls stakeWithAuthorization() on the delegated EOA
+- Contract enforces that signer == address(this) to ensure EOA owner authorization
+
+### Relayer Modes
+The relayer needs to handle both:
+- **Generic mode**: Authorization + arbitrary call data (for SelfBatchExecutor)
+- **Stake mode**: Authorization + operation signature for StakerWallet
+
+**Related files**: packages/contracts/src/StakerWallet.sol, node_modules/@tap-stake/relayer/src/index.ts

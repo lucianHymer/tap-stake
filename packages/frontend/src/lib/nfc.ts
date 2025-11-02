@@ -1,11 +1,16 @@
-import { execHaloCmdWeb } from '@arx-research/libhalo/api/web';
-import { type Hex, type TransactionSerializable, keccak256, serializeTransaction } from 'viem';
+import { execHaloCmdWeb } from "@arx-research/libhalo/api/web";
+import {
+  type Hex,
+  type TransactionSerializable,
+  keccak256,
+  serializeTransaction,
+} from "viem";
 import {
   type Authorization,
   hashAuthorization,
   recoverAuthorizationAddress,
   verifyAuthorization,
-} from 'viem/experimental';
+} from "viem/experimental";
 
 export interface NFCCardData {
   address: `0x${string}`;
@@ -13,12 +18,12 @@ export interface NFCCardData {
 }
 
 interface HaloSignCommand {
-  name: 'sign';
+  name: "sign";
   keyNo: number;
   rpId: string;
   digest?: string;
   message?: string | Hex;
-  format?: 'text' | 'hex';
+  format?: "text" | "hex";
 }
 
 // Simple mobile detection
@@ -29,11 +34,13 @@ const getRpId = () => {
   const hostname = window.location.hostname;
   // WebAuthn doesn't support IP addresses as RP ID
   // Check if hostname is an IP address (IPv4 or IPv6)
-  const isIPAddress = /^(\d{1,3}\.){3}\d{1,3}$|^\[?[0-9a-fA-F:]+\]?$/.test(hostname);
+  const isIPAddress = /^(\d{1,3}\.){3}\d{1,3}$|^\[?[0-9a-fA-F:]+\]?$/.test(
+    hostname,
+  );
 
   if (isIPAddress) {
     throw new Error(
-      `Cannot use NFC with IP address (${hostname}). Use ngrok for mobile testing: npx ngrok http 3001`
+      `Cannot use NFC with IP address (${hostname}). Use ngrok for mobile testing: npx ngrok http 3001`,
     );
   }
 
@@ -41,8 +48,8 @@ const getRpId = () => {
 };
 
 export const getCardData = async (): Promise<NFCCardData> => {
-  console.log('📱 NFC: Starting getCardData...');
-  console.log('📱 NFC: Platform:', {
+  console.log("📱 NFC: Starting getCardData...");
+  console.log("📱 NFC: Platform:", {
     userAgent: navigator.userAgent,
     hostname: window.location.hostname,
     protocol: window.location.protocol,
@@ -54,29 +61,29 @@ export const getCardData = async (): Promise<NFCCardData> => {
     // 2. Android Chrome with NFC enabled
     // Will fail on desktop browsers without HaLo Bridge
     const rpId = getRpId();
-    console.log('📱 NFC: Using rpId:', rpId);
+    console.log("📱 NFC: Using rpId:", rpId);
 
-    console.log('📱 NFC: Calling execHaloCmdWeb with get_pkeys...');
+    console.log("📱 NFC: Calling execHaloCmdWeb with get_pkeys...");
     const result = await execHaloCmdWeb({
-      name: 'get_pkeys',
+      name: "get_pkeys",
       rpId: rpId,
     });
-    console.log('📱 NFC: get_pkeys result:', result);
+    console.log("📱 NFC: get_pkeys result:", result);
 
-    const address = result.etherAddresses?.['1'] as `0x${string}`;
-    const publicKey = result.publicKeys?.['1'];
+    const address = result.etherAddresses?.["1"] as `0x${string}`;
+    const publicKey = result.publicKeys?.["1"];
 
     if (!address || !publicKey) {
-      console.error('📱 NFC: Missing data in result:', {
+      console.error("📱 NFC: Missing data in result:", {
         hasAddress: !!address,
         hasPublicKey: !!publicKey,
         etherAddresses: result.etherAddresses,
         publicKeys: result.publicKeys,
       });
-      throw new Error('Failed to extract card data');
+      throw new Error("Failed to extract card data");
     }
 
-    console.log('📱 NFC: Card data retrieved successfully:', {
+    console.log("📱 NFC: Card data retrieved successfully:", {
       address,
       publicKeyLength: publicKey.length,
     });
@@ -84,42 +91,45 @@ export const getCardData = async (): Promise<NFCCardData> => {
     return { address, publicKey };
   } catch (error) {
     const errorObj = error instanceof Error ? error : new Error(String(error));
-    console.error('📱 NFC: Failed to get card data:', {
+    console.error("📱 NFC: Failed to get card data:", {
       message: errorObj.message,
       name: errorObj.name,
-      stack: errorObj.stack?.split('\n').slice(0, 3).join('\n'),
+      stack: errorObj.stack?.split("\n").slice(0, 3).join("\n"),
     });
 
     // Simple error handling: Mobile users vs Desktop users
     if (
-      errorObj.message?.includes('NotAllowedError') ||
+      errorObj.message?.includes("NotAllowedError") ||
       errorObj.message?.includes("device can't be used") ||
-      errorObj.message?.includes('not supported')
+      errorObj.message?.includes("not supported")
     ) {
       if (isMobile()) {
         // On mobile: recommend Chrome/Safari or refresh
         throw new Error(
-          'NFC_BROWSER_UNSUPPORTED: Use Chrome or Safari on mobile for NFC support. ' +
-            "If you're already using a compatible browser, try refreshing the page."
+          "NFC_BROWSER_UNSUPPORTED: Use Chrome or Safari on mobile for NFC support. " +
+            "If you're already using a compatible browser, try refreshing the page.",
         );
       }
       // On desktop: direct to mobile
       throw new Error(
-        'NFC_DESKTOP_UNSUPPORTED: Please use Chrome or Safari on your mobile device for NFC support.'
+        "NFC_DESKTOP_UNSUPPORTED: Please use Chrome or Safari on your mobile device for NFC support.",
       );
     }
 
     // Generic fallback error
     throw new Error(
-      'NFC_CARD_READ_FAILED: Failed to read NFC card. Please ensure your card is properly positioned and try again.'
+      "NFC_CARD_READ_FAILED: Failed to read NFC card. Please ensure your card is properly positioned and try again.",
     );
   }
 };
 
-export const signWithNFC = async (message: string | Hex, isRawDigest = false): Promise<Hex> => {
+export const signWithNFC = async (
+  message: string | Hex,
+  isRawDigest = false,
+): Promise<Hex> => {
   try {
     const command: HaloSignCommand = {
-      name: 'sign',
+      name: "sign",
       keyNo: 1,
       rpId: getRpId(),
     };
@@ -127,80 +137,82 @@ export const signWithNFC = async (message: string | Hex, isRawDigest = false): P
     if (isRawDigest) {
       // For raw digests (like transaction hashes), use digest parameter
       // Ensure digest is properly formatted as hex string
-      let digestHex = typeof message === 'string' ? message : message;
+      let digestHex = typeof message === "string" ? message : message;
       // Remove 0x prefix if present for libhalo
-      if (digestHex.startsWith('0x')) {
+      if (digestHex.startsWith("0x")) {
         digestHex = digestHex.slice(2);
       }
       // Validate it's exactly 32 bytes (64 hex chars)
       if (digestHex.length !== 64) {
         throw new Error(
-          `Digest must be exactly 32 bytes (64 hex chars), got ${digestHex.length} chars`
+          `Digest must be exactly 32 bytes (64 hex chars), got ${digestHex.length} chars`,
         );
       }
       command.digest = digestHex;
-    } else if (typeof message === 'string' && !message.startsWith('0x')) {
+    } else if (typeof message === "string" && !message.startsWith("0x")) {
       // For text messages, use message with text format
       // libhalo will add Ethereum prefix and hash it
       command.message = message;
-      command.format = 'text';
+      command.format = "text";
     } else {
       // For hex messages, use message with hex format (default)
       command.message = message;
-      command.format = 'hex';
+      command.format = "hex";
     }
 
-    console.log('📱 NFC: Sign Command:', command);
-    console.log('📱 NFC: Executing sign command...');
+    console.log("📱 NFC: Sign Command:", command);
+    console.log("📱 NFC: Executing sign command...");
     const startTime = Date.now();
     const result = await execHaloCmdWeb(command);
     const elapsed = Date.now() - startTime;
     console.log(`📱 NFC: Sign completed in ${elapsed}ms, result:`, result);
-    console.log('NFC Sign Result:', result);
+    console.log("NFC Sign Result:", result);
 
     if (!result.signature) {
-      throw new Error(`No signature returned from card. Result: ${JSON.stringify(result)}`);
+      throw new Error(
+        `No signature returned from card. Result: ${JSON.stringify(result)}`,
+      );
     }
 
     return result.signature.ether as Hex;
   } catch (error) {
-    console.error('NFC signing failed - Full Error:', error);
+    console.error("NFC signing failed - Full Error:", error);
 
     const errorObj = error instanceof Error ? error : new Error(String(error));
     // Create detailed error message
     const errorDetails = {
-      message: errorObj.message || 'Unknown error',
-      type: errorObj.name || 'Error',
-      stack: errorObj.stack?.split('\n').slice(0, 3).join(' | '),
-      command: isRawDigest ? 'digest' : 'message',
+      message: errorObj.message || "Unknown error",
+      type: errorObj.name || "Error",
+      stack: errorObj.stack?.split("\n").slice(0, 3).join(" | "),
+      command: isRawDigest ? "digest" : "message",
       rpId: window.location.hostname,
     };
 
     throw new Error(
-      `NFC Sign Failed:\nType: ${errorDetails.type}\nMessage: ${errorDetails.message}\nCommand: ${errorDetails.command}\nRpId: ${errorDetails.rpId}`
+      `NFC Sign Failed:\nType: ${errorDetails.type}\nMessage: ${errorDetails.message}\nCommand: ${errorDetails.command}\nRpId: ${errorDetails.rpId}`,
     );
   }
 };
 
 export const createNFCAccount = (address: `0x${string}`) => {
   return {
-    type: 'local' as const,
+    type: "local" as const,
     address,
     signMessage: async ({ message }: { message: string | { raw: Hex } }) => {
       // Check if this is an EIP-7702 authorization message
       // EIP-7702 messages start with 0x05 magic byte
       let isEIP7702 = false;
-      let messageToSign;
+      let messageToSign: string | Hex;
 
-      if (typeof message === 'object' && 'raw' in message) {
+      if (typeof message === "object" && "raw" in message) {
         const rawHex = message.raw;
         // Check if this looks like an EIP-7702 message (starts with 0x05)
-        if (rawHex.length > 4 && rawHex.slice(0, 4) === '0x05') {
-          console.log('📱 NFC: Detected EIP-7702 authorization message');
+        if (rawHex.length > 4 && rawHex.slice(0, 4) === "0x05") {
+          console.log("📱 NFC: Detected EIP-7702 authorization message");
           isEIP7702 = true;
           // For EIP-7702, we need to hash the message and sign the raw digest
           const digest = keccak256(message.raw);
-          console.log('📱 NFC: EIP-7702 digest to sign:', digest);
+          console.log("📱 NFC: EIP-7702 digest to sign:", digest);
           messageToSign = digest;
         } else {
           messageToSign = message.raw;
@@ -215,12 +227,12 @@ export const createNFCAccount = (address: `0x${string}`) => {
       return signature;
     },
     signTransaction: async (transaction: TransactionSerializable) => {
-      console.log('NFC signTransaction called with:', {
+      console.log("NFC signTransaction called with:", {
         to: transaction.to,
         from: address,
         value: transaction.value?.toString(),
         data:
-          typeof transaction.data === 'string'
+          typeof transaction.data === "string"
             ? `${transaction.data.slice(0, 10)}...`
             : transaction.data,
         nonce: transaction.nonce,
@@ -229,14 +241,14 @@ export const createNFCAccount = (address: `0x${string}`) => {
       });
 
       const serialized = serializeTransaction(transaction);
-      console.log('📱 NFC: Serialized transaction:', serialized);
+      console.log("📱 NFC: Serialized transaction:", serialized);
 
       const hash = keccak256(serialized);
-      console.log('📱 NFC: Transaction hash to sign:', hash);
+      console.log("📱 NFC: Transaction hash to sign:", hash);
 
       // Pass true for isRawDigest since this is a transaction hash
       const signature = await signWithNFC(hash, true);
-      console.log('📱 NFC: Transaction signature received:', signature);
+      console.log("📱 NFC: Transaction signature received:", signature);
 
       // Parse signature components
       const r = `0x${signature.slice(2, 66)}` as Hex;
@@ -251,22 +263,22 @@ export const createNFCAccount = (address: `0x${string}`) => {
         yParity,
       });
 
-      console.log('📱 NFC: Signed transaction:', signedTx);
+      console.log("📱 NFC: Signed transaction:", signedTx);
       return signedTx;
     },
     signTypedData: async () => {
-      throw new Error('Typed data signing not yet implemented');
+      throw new Error("Typed data signing not yet implemented");
     },
     signAuthorization: async (authorization: Authorization) => {
-      console.log('📱 NFC: signAuthorization called with:', authorization);
+      console.log("📱 NFC: signAuthorization called with:", authorization);
 
       // Use viem's hashAuthorization to get the proper hash
       const hash = hashAuthorization(authorization);
-      console.log('📱 NFC: Authorization hash from viem:', hash);
+      console.log("📱 NFC: Authorization hash from viem:", hash);
 
       // Sign the raw digest with NFC
       const signature = await signWithNFC(hash, true);
-      console.log('📱 NFC: Authorization signature:', signature);
+      console.log("📱 NFC: Authorization signature:", signature);
 
       // Parse signature components
       const r = `0x${signature.slice(2, 66)}` as Hex;
@@ -283,27 +295,30 @@ export const createNFCAccount = (address: `0x${string}`) => {
         v: BigInt(v),
       };
 
-      console.log('📱 NFC: Signed authorization:', result);
+      console.log("📱 NFC: Signed authorization:", result);
 
       // Verify the signature and recover the address
       try {
         const recoveredAddress = await recoverAuthorizationAddress({
           authorization: result,
         });
-        console.log('📱 NFC: Recovered address from authorization:', recoveredAddress);
-        console.log('📱 NFC: Expected address (EOA):', address);
         console.log(
-          '📱 NFC: Address match:',
-          recoveredAddress.toLowerCase() === address.toLowerCase()
+          "📱 NFC: Recovered address from authorization:",
+          recoveredAddress,
+        );
+        console.log("📱 NFC: Expected address (EOA):", address);
+        console.log(
+          "📱 NFC: Address match:",
+          recoveredAddress.toLowerCase() === address.toLowerCase(),
         );
 
         const isValid = await verifyAuthorization({
           authorization: result,
           address: address,
         });
-        console.log('📱 NFC: Authorization verification result:', isValid);
+        console.log("📱 NFC: Authorization verification result:", isValid);
       } catch (error) {
-        console.error('📱 NFC: Failed to verify authorization:', error);
+        console.error("📱 NFC: Failed to verify authorization:", error);
       }
 
       return result;

@@ -49,7 +49,11 @@ contract DeployScript is Script {
             bytes32 salt = bytes32(i + 1);
             string memory uri = string(
                 abi.encodePacked(
-                    "data:application/json,{\"name\":\"", choiceNames[i], "\",\"symbol\":\"", choiceSymbols[i], "\",\"decimals\":18}"
+                    "data:application/json,{\"name\":\"",
+                    choiceNames[i],
+                    "\",\"symbol\":\"",
+                    choiceSymbols[i],
+                    "\",\"decimals\":18}"
                 )
             );
             stakeChoices.registerChoice(salt, choiceNames[i], choiceSymbols[i], uri);
@@ -77,7 +81,7 @@ contract DeployScript is Script {
         console.log("  Token:", address(token));
         console.log("  StakeChoices:", multiToken);
         console.log("  Relayer:", relayerAddress);
-        console.log("  Max stake per tx:", stakerWallet.maxStakePerTx());
+        console.log("  Max amount per tx:", stakerWallet.maxAmountPerTx());
 
         vm.stopBroadcast();
     }

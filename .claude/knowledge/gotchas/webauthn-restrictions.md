@@ -16,3 +16,12 @@ NotAllowedError occurs when:
 For NFC operations with libhalo, this may indicate missing user interaction or incorrect WebAuthn parameters.
 
 **Related files**: packages/frontend/src/lib/nfc.ts
+
+## WebAuthn Requires User Gesture for NFC
+libhalo's execHaloCmdWeb uses WebAuthn under the hood, which requires a user gesture (click, tap, etc) to work. Automatically triggering NFC connection on page load via React Suspense causes a "The operation either timed out or was not allowed" error because there's no user gesture.
+
+**Solution**: Show a "CONNECT NFC" button that users must click before initiating the NFC connection. The button click counts as a user gesture, allowing WebAuthn to work properly.
+
+**Error signature**: "Failed to execute command. Error: The operation either timed out or was not allowed." from NFCOperationError.
+
+**Related files**: packages/frontend/src/lib/nfc.ts, packages/frontend/src/lib/nfcResource.ts, packages/frontend/src/App.tsx, packages/frontend/src/components/NFCPrompt.tsx

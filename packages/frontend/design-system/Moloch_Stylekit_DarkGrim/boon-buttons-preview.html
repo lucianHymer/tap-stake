@@ -1,0 +1,44 @@
+<!doctype html>
+<html data-theme="moloch-dark">
+<head>
+<meta charset="utf-8"/>
+<title>Boon Buttons — Dark Grim</title>
+<link rel="stylesheet" href="moloch-design-tokens.css">
+<link rel="stylesheet" href="moloch-boon-buttons.css">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&family=Jacquard+24&display=swap" rel="stylesheet">
+<style> body{background:#12061F;color:#fff;font:16px/1.5 system-ui;margin:0;padding:24px;} h1{font-family:'Jacquard 24','EB Garamond',serif;}</style>
+</head>
+<body data-theme="moloch-dark">
+  <h1>Boon Selection — States</h1>
+  <div class="boon-grid">
+    <div class="boon" data-enter>
+      <div class="boon__title">Giveth</div>
+      <div class="boon__stats">
+        <div>+ charisma</div>
+        <div>+ intelligence</div>
+      </div>
+    </div>
+    <div class="boon boon--active" data-enter style="animation-delay:.06s">
+      <div class="boon__title">Giveth</div>
+      <div class="boon__stats">
+        <div>+ charisma</div>
+        <div>+ intelligence</div>
+      </div>
+    </div>
+    <div class="boon" data-enter style="animation-delay:.12s">
+      <div class="boon__title" style="color:#9E9E9E">Deep Funding</div>
+      <div class="boon__stats">
+        <div>+ charisma</div>
+        <div>+ intelligence</div>
+      </div>
+    </div>
+    <div class="boon boon--disabled" aria-disabled="true" data-enter style="animation-delay:.18s">
+      <div class="boon__title" style="color:#9E9E9E">Deep Funding</div>
+      <div class="boon__stats">
+        <div>+ charisma</div>
+        <div>+ intelligence</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
