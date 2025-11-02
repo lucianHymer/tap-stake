@@ -6,6 +6,9 @@
 ## 🔌 API
 - @api/relayer-test-mint.md - Test endpoint for minting TestERC20 tokens on Optimism Sepolia
 
+## ⚙️ Config
+- @config/centralized-chain-configuration.md - VITE_CHAIN_ID-driven chain configuration for easy network switching
+
 ## 📦 Dependencies
 - @dependencies/libhalo.md - WebAuthn integration and platform requirements
 - @dependencies/foundry.md - Smart contract development framework installation and setup
@@ -19,11 +22,13 @@
 - @frontend/eip-7702-viem-integration.md - Viem client integration for EIP-7702 delegation features
 - @frontend/moloch-design-system.md - Pure token approach with consolidated CSS file
 - @frontend/eip-7702-relayer-integration.md - Gasless transaction flow via Cloudflare Worker relayer
+- @frontend/stats-page-etherscan.md - Client-side Etherscan API queries for relayer activity and ERC6909 token totals
 
 ## 🎯 Patterns
 - @patterns/framer-motion-animations.md - LazyMotion bundle optimization, spring-based counter animations, and hint animation pattern for teaching affordances
 - @patterns/type-safe-stats.md - Separation of data model and display logic for stats
 - @patterns/abi-organization.md - Separating standard and test-specific ABIs for clean contract interfaces
+- @patterns/stats-display-bars.md - D&D/video-game style character stats with horizontal bar graph visualization
 
 ## 🧪 Testing
 - @testing/eip-7702-nfc-verification.md - Signature verification confirming NFC implementation compatibility with EIP-7702

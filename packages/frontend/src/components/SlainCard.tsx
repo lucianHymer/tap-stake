@@ -1,7 +1,7 @@
 import type React from "react";
 import { formatEther } from "viem";
-import { optimism, optimismSepolia } from "viem/chains";
 import { ASSETS } from "../config/assets";
+import { getExplorerUrl } from "../config/chain";
 import { SwordIcon, getClassIcon } from "../utils/classHelpers";
 import { Button } from "./Button";
 import { GameCard } from "./GameCard";
@@ -21,18 +21,6 @@ export interface SlainCardProps {
   /** Optional backside content for flippable card */
   heroImageBackside?: React.ReactNode;
 }
-
-// Get block explorer URL for address based on chain
-const getExplorerUrl = (
-  address: string,
-  chainId: number = optimismSepolia.id,
-): string => {
-  if (chainId === optimism.id) {
-    return `https://optimistic.etherscan.io/address/${address}`;
-  }
-  // Default to OP Sepolia
-  return `https://sepolia-optimism.etherscan.io/address/${address}`;
-};
 
 // Abbreviate address for display (0x1234...5678)
 const abbreviateAddress = (address: string): string => {
@@ -117,7 +105,7 @@ export const SlainCard: React.FC<SlainCardProps> = ({
           <div className={styles.slayerAddress}>
             <span className={styles.slayerLabel}>Slayer:</span>{" "}
             <a
-              href={getExplorerUrl(connectedAddress, optimismSepolia.id)}
+              href={getExplorerUrl(connectedAddress)}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.addressLink}

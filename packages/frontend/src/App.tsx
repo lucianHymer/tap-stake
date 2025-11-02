@@ -7,6 +7,7 @@ import { AppProvider } from "./contexts/AppContext";
 import { ChoicesPage } from "./pages/ChoicesPage";
 import { ConnectPage } from "./pages/ConnectPage";
 import { SlainPage } from "./pages/SlainPage";
+import { StatsPage } from "./pages/StatsPage";
 import { TestPage as TestSetupPage } from "./pages/TestPage";
 import { WithdrawPage } from "./pages/WithdrawPage";
 import "./App.css";
@@ -64,6 +65,9 @@ function App() {
 
               {/* Test/setup page */}
               <Route path="/test" element={<TestSetupPage />} />
+
+              {/* Public stats page */}
+              <Route path="/stats" element={<StatsPage />} />
 
               {/* Admin and demos */}
               <Route path="/admin" element={<AdminPage />} />

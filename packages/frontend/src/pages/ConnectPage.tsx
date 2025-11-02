@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { http, createPublicClient } from "viem";
 import { type PrivateKeyAccount, privateKeyToAccount } from "viem/accounts";
-import { optimismSepolia } from "viem/chains";
 import { ConnectCard } from "../components/ConnectCard";
 import { PageWrapper } from "../components/PageWrapper";
+import { CHAIN } from "../config/chain";
 import { useAppContext } from "../contexts/AppContext";
 import { createNFCAccount, getCardData } from "../lib/nfc";
 import { checkBalances } from "../utils/balances";
@@ -17,7 +17,7 @@ export function ConnectPage() {
   const [error, setError] = useState<string | null>(null);
 
   const publicClient = createPublicClient({
-    chain: optimismSepolia,
+    chain: CHAIN,
     transport: http(),
   });
 
@@ -66,7 +66,6 @@ export function ConnectPage() {
 
       // Check balances
       console.log("🔗 Connect: Checking balances...");
-      // @ts-expect-error - Optimism chain types differ
       const balances = await checkBalances(publicClient, address);
       actions.setBalances(balances);
 

@@ -1,6 +1,6 @@
 # 📚 Project Knowledge Map
 
-*Last updated: 2025-11-01*
+*Last updated: 2025-11-02*
 
 ## 🏗️ Architecture
 - [NFC Wallet Integration](architecture/nfc-wallet-integration.md) - LibHalo NFC patterns, EOA paymaster support, EIP-7702 NFC implementation with signAuthorization, two-tap demo flow, approve+transfer batching, frontend integration strategy, SelfBatchExecutor pattern, EIP-7702 relayer architecture, StakerWallet implementation with ERC-7201 and EIP-712
@@ -8,12 +8,15 @@
 ## 🔌 API
 - [Relayer Test Mint Endpoint](api/relayer-test-mint.md) - Test endpoint for minting TestERC20 tokens on Optimism Sepolia
 
+## ⚙️ Config
+- [Centralized Chain Configuration](config/centralized-chain-configuration.md) - VITE_CHAIN_ID-driven chain configuration for easy network switching
+
 ## 📦 Dependencies
 - [LibHalo NFC Library](dependencies/libhalo.md) - WebAuthn integration and platform requirements
 - [Foundry](dependencies/foundry.md) - Smart contract development framework installation and setup
 
 ## 🚀 Deployment
-- [EIP-7702 Optimism Sepolia](deployment/eip-7702-optimism-sepolia.md) - Deployment configuration for EIP-7702 contracts on OP Sepolia, deployed contract addresses (SelfBatchExecutor, TestERC20, Stake, StakerWallet)
+- [EIP-7702 Optimism Sepolia](deployment/eip-7702-optimism-sepolia.md) - Deployment configuration for EIP-7702 contracts on OP Sepolia, deployed contract addresses (SelfBatchExecutor, TestERC20, StakerWallet, StakeChoicesERC6909)
 
 ## 🎨 Frontend
 - [Tap-Stake Demon-Slayer Theme](frontend/tap-stake-demon-slayer-theme.md) - Dark themed UI with demon-slaying metaphors
@@ -21,13 +24,13 @@
 - [EIP-7702 Viem Integration](frontend/eip-7702-viem-integration.md) - Viem client integration for EIP-7702 delegation features
 - [Moloch Design System](frontend/moloch-design-system.md) - Pure token approach with consolidated CSS file
 - [EIP-7702 Relayer Integration](frontend/eip-7702-relayer-integration.md) - Gasless transaction flow via Cloudflare Worker relayer
+- [Stats Page with Etherscan](frontend/stats-page-etherscan.md) - Client-side Etherscan API queries for relayer activity and ERC6909 token totals
 
 ## 🎯 Patterns
 - [Framer Motion Animations](patterns/framer-motion-animations.md) - LazyMotion bundle optimization, spring-based counter animations, and hint animation pattern for teaching affordances
 - [Type-Safe Stats](patterns/type-safe-stats.md) - Separation of data model and display logic for stats
-
-## 🎯 Patterns
 - [ABI Organization Pattern](patterns/abi-organization.md) - Separating standard and test-specific ABIs for clean contract interfaces
+- [Stats Display with Horizontal Bars](patterns/stats-display-bars.md) - D&D/video-game style character stats with horizontal bar graph visualization
 
 ## 🧪 Testing
 - [EIP-7702 NFC Verification](testing/eip-7702-nfc-verification.md) - Signature verification confirming NFC implementation compatibility with EIP-7702
