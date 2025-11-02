@@ -1,17 +1,17 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { http, createPublicClient } from 'viem';
-import { type PrivateKeyAccount, privateKeyToAccount } from 'viem/accounts';
-import { optimismSepolia } from 'viem/chains';
-import { ConnectCard } from '../components/ConnectCard';
-import { PageWrapper } from '../components/PageWrapper';
-import { useAppContext } from '../contexts/AppContext';
-import { createNFCAccount, getCardData } from '../lib/nfc';
-import { checkBalances } from '../utils/balances';
-import { calculateTotalHoldings } from '../utils/staking';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { http, createPublicClient } from "viem";
+import { type PrivateKeyAccount, privateKeyToAccount } from "viem/accounts";
+import { optimismSepolia } from "viem/chains";
+import { ConnectCard } from "../components/ConnectCard";
+import { PageWrapper } from "../components/PageWrapper";
+import { useAppContext } from "../contexts/AppContext";
+import { createNFCAccount, getCardData } from "../lib/nfc";
+import { checkBalances } from "../utils/balances";
+import { calculateTotalHoldings } from "../utils/staking";
 
 export function ConnectPage() {
-  const { state, actions } = useAppContext();
+  const { actions } = useAppContext();
   const navigate = useNavigate();
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,11 +33,11 @@ export function ConnectPage() {
       let account: ReturnType<typeof createNFCAccount> | PrivateKeyAccount;
 
       // Check if we have a stored generated wallet in sessionStorage
-      const storedPrivateKey = sessionStorage.getItem('generatedWallet');
+      const storedPrivateKey = sessionStorage.getItem("generatedWallet");
 
       if (storedPrivateKey) {
         // Use stored generated wallet from sessionStorage (test-only mode)
-        console.log('🔗 Connect: Using stored generated wallet');
+        console.log("🔗 Connect: Using stored generated wallet");
         account = privateKeyToAccount(storedPrivateKey as `0x${string}`);
         address = account.address;
 
@@ -49,7 +49,7 @@ export function ConnectPage() {
         });
       } else {
         // Connect NFC - always prompt for tap (NFC accounts don't persist)
-        console.log('🔗 Connect: Reading NFC card...');
+        console.log("🔗 Connect: Reading NFC card...");
         const cardData = await getCardData();
         address = cardData.address;
         account = createNFCAccount(address);
@@ -62,18 +62,21 @@ export function ConnectPage() {
         });
       }
 
-      console.log('🔗 Connect: Connected to:', address);
+      console.log("🔗 Connect: Connected to:", address);
 
       // Check balances
-      console.log('🔗 Connect: Checking balances...');
+      console.log("🔗 Connect: Checking balances...");
       // @ts-expect-error - Optimism chain types differ
       const balances = await checkBalances(publicClient, address);
       actions.setBalances(balances);
 
       // Calculate total holdings (wallet + staked)
-      const totalHoldings = calculateTotalHoldings(balances.walletBalance, balances.existingStakes);
+      const totalHoldings = calculateTotalHoldings(
+        balances.walletBalance,
+        balances.existingStakes,
+      );
 
-      console.log('🔗 Connect: Balances:', {
+      console.log("🔗 Connect: Balances:", {
         wallet: balances.walletBalance.toString(),
         stakes: balances.existingStakes.size,
         total: totalHoldings.toString(),
@@ -81,32 +84,39 @@ export function ConnectPage() {
 
       // Check for zero total balance (wallet + stakes)
       if (totalHoldings === 0n) {
-        console.log('🔗 Connect: Zero balance detected');
-        setError('Your wallet has 0 GTC.');
+        console.log("🔗 Connect: Zero balance detected");
+        setError("Your wallet has 0 GTC.");
         return;
       }
 
       // Navigate based on existing stakes
       if (balances.existingStakes.size > 0) {
-        console.log('🔗 Connect: Has existing stakes, navigating to /slain');
-        navigate('/slain');
+        console.log("🔗 Connect: Has existing stakes, navigating to /slain");
+        navigate("/slain");
       } else {
-        console.log('🔗 Connect: No stakes, navigating to /choices');
-        navigate('/choices');
+        console.log("🔗 Connect: No stakes, navigating to /choices");
+        navigate("/choices");
       }
     } catch (err) {
-      console.error('🔗 Connect: Connection failed:', err);
+      console.error("🔗 Connect: Connection failed:", err);
 
       // Show user-friendly error message below the button
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      let errorMessage = 'Failed to connect. Please try again.';
+      let errorMessage = "Failed to connect. Please try again.";
 
-      if (errorObj.message.includes('WebAuthn') || errorObj.message.includes('NFC')) {
-        errorMessage = 'Card reader not detected. Please tap your card when prompted.';
-      } else if (errorObj.message.includes('timeout')) {
-        errorMessage = 'Connection timed out. Please try again.';
-      } else if (errorObj.message.includes('network') || errorObj.message.includes('fetch')) {
-        errorMessage = 'Network error. Please check your connection.';
+      if (
+        errorObj.message.includes("WebAuthn") ||
+        errorObj.message.includes("NFC")
+      ) {
+        errorMessage =
+          "Card reader not detected. Please tap your card when prompted.";
+      } else if (errorObj.message.includes("timeout")) {
+        errorMessage = "Connection timed out. Please try again.";
+      } else if (
+        errorObj.message.includes("network") ||
+        errorObj.message.includes("fetch")
+      ) {
+        errorMessage = "Network error. Please check your connection.";
       }
 
       setError(errorMessage);
@@ -117,7 +127,11 @@ export function ConnectPage() {
 
   return (
     <PageWrapper>
-      <ConnectCard onConnect={handleConnect} error={error} isConnecting={isConnecting} />
+      <ConnectCard
+        onConnect={handleConnect}
+        error={error}
+        isConnecting={isConnecting}
+      />
     </PageWrapper>
   );
 }

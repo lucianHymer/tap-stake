@@ -1,18 +1,19 @@
-import type React from 'react';
-import { useState } from 'react';
-import { ASSETS } from '../config/assets';
-import { AddressInput } from './AddressInput';
-import { Button } from './Button';
-import { GameCard } from './GameCard';
-import styles from './MolochRisesCard.module.css';
+import type React from "react";
+import { useState } from "react";
+import { ASSETS } from "../config/assets";
+import { SwordIcon } from "../utils/classHelpers";
+import { AddressInput } from "./AddressInput";
+import { Button } from "./Button";
+import { GameCard } from "./GameCard";
+import styles from "./WithdrawCard.module.css";
 
-export interface MolochRisesCardProps {
+export interface WithdrawCardProps {
   /** Callback when Run Away button is clicked */
   onRunAway?: (destinationAddress: string) => void;
   /** Callback when Go Back button is clicked */
   onGoBack?: () => void;
   /** Transaction status for showing simple status in card body */
-  transactionStatus?: 'idle' | 'signing' | 'submitting' | 'success' | 'error';
+  transactionStatus?: "idle" | "signing" | "submitting" | "success" | "error";
   /** Transaction error message */
   transactionError?: string | null;
   /** Amount being withdrawn (for success message) */
@@ -21,20 +22,17 @@ export interface MolochRisesCardProps {
   destinationAddress?: string;
 }
 
-// Icon components
-const SwordIcon = () => (
-  <img src={ASSETS.swordIcon} alt="" style={{ width: '28px', height: '28px', display: 'block' }} />
-);
-
-export const MolochRisesCard: React.FC<MolochRisesCardProps> = ({
+export const WithdrawCard: React.FC<WithdrawCardProps> = ({
   onRunAway,
   onGoBack,
-  transactionStatus = 'idle',
+  transactionStatus = "idle",
   transactionError,
   withdrawAmount,
   destinationAddress: successDestination,
 }) => {
-  const [destinationAddress, setDestinationAddress] = useState<string | null>(null);
+  const [destinationAddress, setDestinationAddress] = useState<string | null>(
+    null,
+  );
 
   const handleRunAway = () => {
     if (destinationAddress && onRunAway) {
@@ -58,7 +56,11 @@ export const MolochRisesCard: React.FC<MolochRisesCardProps> = ({
       heroImageAlt="Moloch demon rising with warriors fleeing"
       primaryAction={
         <div className={styles.controlPanel}>
-          <Button variant="primary" onClick={handleRunAway} disabled={!destinationAddress || transactionStatus !== 'idle'}>
+          <Button
+            variant="primary"
+            onClick={handleRunAway}
+            disabled={!destinationAddress || transactionStatus !== "idle"}
+          >
             Run Away
           </Button>
           <Button
@@ -66,31 +68,41 @@ export const MolochRisesCard: React.FC<MolochRisesCardProps> = ({
             leftIcon={ASSETS.xIcon}
             rightIcon={ASSETS.xIcon}
             onClick={onGoBack}
-            disabled={transactionStatus !== 'idle'}
+            disabled={transactionStatus !== "idle"}
           >
             Go Back
           </Button>
         </div>
       }
     >
-      {transactionStatus !== 'idle' ? (
+      {transactionStatus !== "idle" ? (
         <div className={styles.transactionStatus}>
-          {transactionStatus === 'signing' && <p className={styles.statusText}>Tap your card to sign...</p>}
-          {transactionStatus === 'submitting' && <p className={styles.statusText}>Submitting withdrawal...</p>}
-          {transactionStatus === 'success' && (
+          {transactionStatus === "signing" && (
+            <p className={styles.statusText}>Tap your card to sign...</p>
+          )}
+          {transactionStatus === "submitting" && (
+            <p className={styles.statusText}>Submitting withdrawal...</p>
+          )}
+          {transactionStatus === "success" && (
             <p className={styles.statusText}>
-              Successfully withdrew {withdrawAmount} GTC to {successDestination ? formatAddress(successDestination) : 'your address'}
+              Successfully withdrew {withdrawAmount} GTC to{" "}
+              {successDestination
+                ? formatAddress(successDestination)
+                : "your address"}
             </p>
           )}
-          {transactionStatus === 'error' && (
-            <p className={styles.errorText}>{transactionError || 'Withdrawal failed'}</p>
+          {transactionStatus === "error" && (
+            <p className={styles.errorText}>
+              {transactionError || "Withdrawal failed"}
+            </p>
           )}
         </div>
       ) : (
         <div className={styles.detailsContent}>
           <h2 className={styles.runningHeading}>Running Away</h2>
           <p className={styles.bodyText}>
-            You may choose to run away from the fight against Moloch, taking your 100 GTC with you.
+            You may choose to run away from the fight against Moloch, taking
+            your 100 GTC with you.
           </p>
           <AddressInput
             label="Where should we send your GTC?"

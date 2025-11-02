@@ -1,8 +1,8 @@
-import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
-import { isAddress } from 'viem';
-import { useEnsAddress } from 'wagmi';
-import styles from './AddressInput.module.css';
+import type React from "react";
+import { useCallback, useEffect, useState } from "react";
+import { isAddress } from "viem";
+import { useEnsAddress } from "wagmi";
+import styles from "./AddressInput.module.css";
 
 export interface AddressInputProps {
   /** Callback when a valid address is confirmed */
@@ -15,16 +15,16 @@ export interface AddressInputProps {
 
 export const AddressInput: React.FC<AddressInputProps> = ({
   onAddressChange,
-  placeholder = '0x... or name.eth',
-  label = 'Destination Address',
+  placeholder = "0x... or name.eth",
+  label = "Destination Address",
 }) => {
-  const [inputValue, setInputValue] = useState('');
-  const [debouncedValue, setDebouncedValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
+  const [debouncedValue, setDebouncedValue] = useState("");
   const [validationState, setValidationState] = useState<
-    'neutral' | 'valid' | 'invalid' | 'resolving'
-  >('neutral');
+    "neutral" | "valid" | "invalid" | "resolving"
+  >("neutral");
   const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Debounce the input value
   useEffect(() => {
@@ -37,13 +37,14 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
   // Check if it looks like an ENS name
   // ENS names can start with 0x, so we check for common TLDs instead
-  const looksLikeENS = (value: string) => {
+  const looksLikeENS = useCallback((value: string) => {
     const ensPattern = /\.(eth|xyz|luxe|kred|art|club|id)$/i;
     return ensPattern.test(value);
-  };
+  }, []);
 
   // ENS resolution hook - only active when input looks like ENS
-  const shouldResolveENS = looksLikeENS(debouncedValue) && debouncedValue.length > 0;
+  const shouldResolveENS =
+    looksLikeENS(debouncedValue) && debouncedValue.length > 0;
   const {
     data: ensResolvedAddress,
     isLoading: isResolvingENS,
@@ -58,19 +59,19 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
   // Validation logic
   useEffect(() => {
-    if (debouncedValue.trim() === '') {
-      setValidationState('neutral');
+    if (debouncedValue.trim() === "") {
+      setValidationState("neutral");
       setResolvedAddress(null);
-      setErrorMessage('');
+      setErrorMessage("");
       onAddressChange?.(null);
       return;
     }
 
     // Check if it's a direct Ethereum address
     if (isAddress(debouncedValue)) {
-      setValidationState('valid');
+      setValidationState("valid");
       setResolvedAddress(debouncedValue);
-      setErrorMessage('');
+      setErrorMessage("");
       onAddressChange?.(debouncedValue);
       return;
     }
@@ -78,24 +79,24 @@ export const AddressInput: React.FC<AddressInputProps> = ({
     // Check if it looks like ENS
     if (looksLikeENS(debouncedValue)) {
       if (isResolvingENS) {
-        setValidationState('resolving');
-        setErrorMessage('');
+        setValidationState("resolving");
+        setErrorMessage("");
         return;
       }
 
       if (ensResolvedAddress) {
-        setValidationState('valid');
+        setValidationState("valid");
         setResolvedAddress(ensResolvedAddress);
-        setErrorMessage('');
+        setErrorMessage("");
         onAddressChange?.(ensResolvedAddress, debouncedValue);
         return;
       }
       // ENS resolution completed but no address found
-      setValidationState('invalid');
+      setValidationState("invalid");
       if (ensError) {
         setErrorMessage(`ENS error: ${ensError.message}`);
       } else {
-        setErrorMessage('ENS name not found');
+        setErrorMessage("ENS name not found");
       }
       setResolvedAddress(null);
       onAddressChange?.(null);
@@ -103,21 +104,32 @@ export const AddressInput: React.FC<AddressInputProps> = ({
     }
 
     // Invalid format
-    setValidationState('invalid');
-    setErrorMessage('Invalid address format');
+    setValidationState("invalid");
+    setErrorMessage("Invalid address format");
     setResolvedAddress(null);
     onAddressChange?.(null);
-  }, [debouncedValue, ensResolvedAddress, isResolvingENS, ensError, onAddressChange]);
+  }, [
+    debouncedValue,
+    ensResolvedAddress,
+    isResolvingENS,
+    ensError,
+    onAddressChange,
+    looksLikeENS,
+  ]);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInputValue(e.target.value);
+    },
+    [],
+  );
 
   return (
     <div className={styles.container}>
-      <label className={styles.label}>{label}</label>
+      <label htmlFor="address-input" className={styles.label}>{label}</label>
       <div className={`${styles.inputWrapper} ${styles[validationState]}`}>
         <input
+          id="address-input"
           type="text"
           value={inputValue}
           onChange={handleInputChange}
@@ -125,24 +137,24 @@ export const AddressInput: React.FC<AddressInputProps> = ({
           className={styles.input}
         />
       </div>
-      {validationState === 'resolving' && (
+      {validationState === "resolving" && (
         <div className={styles.message}>Resolving ENS name...</div>
       )}
-      {validationState === 'valid' && resolvedAddress && (
+      {validationState === "valid" && resolvedAddress && (
         <div className={styles.successMessage}>
           {looksLikeENS(inputValue) ? (
             <>
-              Resolved to:{' '}
+              Resolved to:{" "}
               <span className={styles.address}>
                 {resolvedAddress.slice(0, 6)}...{resolvedAddress.slice(-4)}
               </span>
             </>
           ) : (
-            'Valid address'
+            "Valid address"
           )}
         </div>
       )}
-      {validationState === 'invalid' && errorMessage && (
+      {validationState === "invalid" && errorMessage && (
         <div className={styles.errorMessage}>{errorMessage}</div>
       )}
     </div>

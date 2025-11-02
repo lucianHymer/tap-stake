@@ -15,7 +15,8 @@
     var(--semantic-bg-primary) 100%
   );
   border-radius: var(--core-radius-lg);
-  box-shadow: inset 0 0 40px rgba(126, 209, 198, 0.15), inset 0 0 20px rgba(59, 161, 255, 0.12);
+  box-shadow: inset 0 0 40px rgba(126, 209, 198, 0.15), inset 0 0 20px
+    rgba(59, 161, 255, 0.12);
 }
 
 .classInfo {
@@ -111,46 +112,48 @@
   border-radius: var(--core-radius-sm);
   position: relative;
   min-width: 16px; /* Ensure even value of 1 shows */
-  transition: box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
+  transition: box-shadow var(--core-motion-normal)
+    var(--core-motion-easing-in-out);
 
   /* Add subtle inner glow for depth */
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px
+    rgba(0, 0, 0, 0.3);
 }
 
 /* Green bar (Charisma) */
 .bar-green {
   background: var(--core-color-neon-green);
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px rgba(0, 0, 0, 0.3), 0 0 8px
-    rgba(57, 255, 20, 0.5);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px
+    rgba(0, 0, 0, 0.3), 0 0 8px rgba(57, 255, 20, 0.5);
 }
 
 .bar-green:hover {
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px rgba(0, 0, 0, 0.3), 0 0 16px
-    rgba(57, 255, 20, 0.7);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px
+    rgba(0, 0, 0, 0.3), 0 0 16px rgba(57, 255, 20, 0.7);
 }
 
 /* Red bar (Intelligence) */
 .bar-red {
   background: var(--core-color-accent-red);
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px rgba(0, 0, 0, 0.3), 0 0 8px
-    rgba(245, 3, 3, 0.5);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px
+    rgba(0, 0, 0, 0.3), 0 0 8px rgba(245, 3, 3, 0.5);
 }
 
 .bar-red:hover {
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px rgba(0, 0, 0, 0.3), 0 0 16px
-    rgba(245, 3, 3, 0.7);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px
+    rgba(0, 0, 0, 0.3), 0 0 16px rgba(245, 3, 3, 0.7);
 }
 
 /* Purple bar (Wisdom) */
 .bar-purple {
   background: var(--core-color-accent-purple);
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px rgba(0, 0, 0, 0.3), 0 0 8px
-    rgba(166, 18, 240, 0.5);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px
+    rgba(0, 0, 0, 0.3), 0 0 8px rgba(166, 18, 240, 0.5);
 }
 
 .bar-purple:hover {
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px rgba(0, 0, 0, 0.3), 0 0 16px
-    rgba(166, 18, 240, 0.7);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2), inset 0 -2px 3px
+    rgba(0, 0, 0, 0.3), 0 0 16px rgba(166, 18, 240, 0.7);
 }
 
 .statValue {

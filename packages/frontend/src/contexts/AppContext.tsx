@@ -1,4 +1,4 @@
-import { type ReactNode, createContext, useContext, useState } from 'react';
+import { type ReactNode, createContext, useContext, useMemo, useState } from "react";
 
 // Connection state - using `any` for account to support both NFC and generated wallet accounts
 export interface ConnectionState {
@@ -14,7 +14,12 @@ export interface BalanceState {
 }
 
 // Transaction state
-export type TransactionStatus = 'idle' | 'signing' | 'submitting' | 'success' | 'error';
+export type TransactionStatus =
+  | "idle"
+  | "signing"
+  | "submitting"
+  | "success"
+  | "error";
 
 export interface TransactionState {
   status: TransactionStatus;
@@ -50,10 +55,16 @@ export interface AppActions {
   resetAll: () => void;
 }
 
+// Derived/computed values
+export interface DerivedState {
+  totalAmount: number; // min(walletBalance + totalStaked, 100)
+}
+
 // Context type
 interface AppContextType {
   state: AppState;
   actions: AppActions;
+  derived: DerivedState;
 }
 
 // Create context
@@ -72,7 +83,7 @@ const initialState: AppState = {
   },
   selectedChoices: new Set(),
   transaction: {
-    status: 'idle',
+    status: "idle",
     error: null,
     txHash: null,
   },
@@ -81,6 +92,26 @@ const initialState: AppState = {
 // Provider component
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(initialState);
+
+  // Compute derived values
+  const derived: DerivedState = useMemo(() => {
+    // Sum all existing stakes
+    const totalStaked = Array.from(state.balances.existingStakes.values()).reduce(
+      (sum, amount) => sum + amount,
+      0n,
+    );
+
+    // Total holdings = wallet balance + staked balance
+    const totalHoldings = state.balances.walletBalance + totalStaked;
+
+    // Convert to number (assuming tokens have 18 decimals)
+    const totalHoldingsNum = Number(totalHoldings) / 1e18;
+
+    // Cap at 100
+    const totalAmount = Math.min(totalHoldingsNum, 100);
+
+    return { totalAmount };
+  }, [state.balances.walletBalance, state.balances.existingStakes]);
 
   const actions: AppActions = {
     setConnection: (connection) => {
@@ -152,14 +183,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
   };
 
-  return <AppContext.Provider value={{ state, actions }}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={{ state, actions, derived }}>
+      {children}
+    </AppContext.Provider>
+  );
 }
 
 // Hook to use the context
 export function useAppContext(): AppContextType {
   const context = useContext(AppContext);
   if (!context) {
-    throw new Error('useAppContext must be used within AppProvider');
+    throw new Error("useAppContext must be used within AppProvider");
   }
   return context;
 }

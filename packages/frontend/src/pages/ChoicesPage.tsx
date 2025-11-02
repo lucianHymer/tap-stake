@@ -1,16 +1,19 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { http, createPublicClient, parseEther } from 'viem';
-import { optimismSepolia } from 'viem/chains';
-import { ChoicesCard } from '../components/ChoicesCard';
-import { PageWrapper } from '../components/PageWrapper';
-import { CONTRACTS } from '../config/contracts';
-import { useAppContext } from '../contexts/AppContext';
-import { CHOICE_NAMES } from '../utils/balances';
-import { calculateAvailableAmount, calculateOptimisticBalances } from '../utils/staking';
-import { prepareStakingData } from '../utils/staking';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { http, createPublicClient, parseEther } from "viem";
+import { optimismSepolia } from "viem/chains";
+import { ChoicesCard } from "../components/ChoicesCard";
+import { PageWrapper } from "../components/PageWrapper";
+import { CONTRACTS } from "../config/contracts";
+import { useAppContext } from "../contexts/AppContext";
+import { CHOICE_NAMES } from "../utils/balances";
+import {
+  calculateAvailableAmount,
+  calculateOptimisticBalances,
+} from "../utils/staking";
+import { prepareStakingData } from "../utils/staking";
 
-const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:8787';
+const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || "http://localhost:8787";
 
 /**
  * Check if the new stake selections are identical to existing stakes
@@ -19,7 +22,7 @@ const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:8787';
 function stakesUnchanged(
   newChoices: Set<string>,
   existingStakes: Map<string, bigint>,
-  availableAmount: bigint
+  availableAmount: bigint,
 ): boolean {
   // Different number of choices = changed
   if (newChoices.size !== existingStakes.size) return false;
@@ -39,7 +42,7 @@ function stakesUnchanged(
 }
 
 export function ChoicesPage() {
-  const { state, actions } = useAppContext();
+  const { state, actions, derived } = useAppContext();
   const navigate = useNavigate();
 
   const publicClient = createPublicClient({
@@ -49,12 +52,20 @@ export function ChoicesPage() {
 
   // Initialize: Select all 6 choices by default if no existing stakes
   useEffect(() => {
-    if (state.balances.existingStakes.size === 0 && state.selectedChoices.size === 0) {
-      console.log('✨ Choices: No existing stakes, selecting all choices by default');
+    if (
+      state.balances.existingStakes.size === 0 &&
+      state.selectedChoices.size === 0
+    ) {
+      console.log(
+        "✨ Choices: No existing stakes, selecting all choices by default",
+      );
       actions.setSelectedChoices(new Set(CHOICE_NAMES));
-    } else if (state.balances.existingStakes.size > 0 && state.selectedChoices.size === 0) {
+    } else if (
+      state.balances.existingStakes.size > 0 &&
+      state.selectedChoices.size === 0
+    ) {
       // If returning with stakes, pre-select existing stake choices
-      console.log('✨ Choices: Pre-selecting existing stake choices');
+      console.log("✨ Choices: Pre-selecting existing stake choices");
       actions.setSelectedChoices(new Set(state.balances.existingStakes.keys()));
     }
   }, [state.balances.existingStakes.size]);
@@ -63,42 +74,56 @@ export function ChoicesPage() {
   const availableAmount = calculateAvailableAmount(
     state.balances.walletBalance,
     state.balances.existingStakes,
-    parseEther('100')
+    parseEther("100"),
   );
 
-  console.log('📊 ChoicesPage availableAmount:', {
+  console.log("📊 ChoicesPage availableAmount:", {
     wallet: state.balances.walletBalance.toString(),
-    staked: Array.from(state.balances.existingStakes.values()).reduce((sum, amt) => sum + amt, 0n).toString(),
-    total: (state.balances.walletBalance + Array.from(state.balances.existingStakes.values()).reduce((sum, amt) => sum + amt, 0n)).toString(),
+    staked: Array.from(state.balances.existingStakes.values())
+      .reduce((sum, amt) => sum + amt, 0n)
+      .toString(),
+    total: (
+      state.balances.walletBalance +
+      Array.from(state.balances.existingStakes.values()).reduce(
+        (sum, amt) => sum + amt,
+        0n,
+      )
+    ).toString(),
     availableAmount: availableAmount.toString(),
-    cap: parseEther('100').toString(),
+    cap: parseEther("100").toString(),
   });
 
   const handleSlayMoloch = async () => {
     if (state.selectedChoices.size === 0) {
-      actions.setTransactionError('Please select at least one choice');
+      actions.setTransactionError("Please select at least one choice");
       return;
     }
 
     // Skip transaction if stakes are unchanged
-    if (stakesUnchanged(state.selectedChoices, state.balances.existingStakes, availableAmount)) {
-      console.log('⚔️ Choices: Stakes unchanged, skipping transaction');
-      actions.setTransactionStatus('success');
+    if (
+      stakesUnchanged(
+        state.selectedChoices,
+        state.balances.existingStakes,
+        availableAmount,
+      )
+    ) {
+      console.log("⚔️ Choices: Stakes unchanged, skipping transaction");
+      actions.setTransactionStatus("success");
       setTimeout(() => {
         actions.resetTransaction();
-        navigate('/slain');
+        navigate("/slain");
       }, 1000);
       return;
     }
 
-    actions.setTransactionStatus('signing');
+    actions.setTransactionStatus("signing");
     actions.setTransactionError(null);
 
     try {
-      console.log('⚔️ Choices: Starting transaction...');
+      console.log("⚔️ Choices: Starting transaction...");
 
       if (!state.connection.account || !state.connection.connectedAddress) {
-        throw new Error('No account connected');
+        throw new Error("No account connected");
       }
 
       const account = state.connection.account;
@@ -106,32 +131,32 @@ export function ChoicesPage() {
 
       // Get current transaction nonce for EIP-7702 authorization
       const txNonce = await publicClient.getTransactionCount({ address });
-      console.log('⚔️ Choices: Transaction nonce:', txNonce);
+      console.log("⚔️ Choices: Transaction nonce:", txNonce);
 
       // Sign authorization
-      console.log('⚔️ Choices: Requesting authorization signature...');
-      if (!('signAuthorization' in account) || !account.signAuthorization) {
-        throw new Error('Account does not support signAuthorization');
+      console.log("⚔️ Choices: Requesting authorization signature...");
+      if (!("signAuthorization" in account) || !account.signAuthorization) {
+        throw new Error("Account does not support signAuthorization");
       }
 
-      const authorization = await account.signAuthorization!({
+      const authorization = await account.signAuthorization?.({
         address: CONTRACTS.stakerWallet,
         chainId: optimismSepolia.id,
         nonce: txNonce,
       });
 
-      console.log('⚔️ Choices: Authorization signed');
+      console.log("⚔️ Choices: Authorization signed");
 
-      actions.setTransactionStatus('submitting');
+      actions.setTransactionStatus("submitting");
 
       // Prepare staking data
       const stakingData = prepareStakingData(
         state.selectedChoices,
         state.balances.existingStakes,
-        availableAmount
+        availableAmount,
       );
 
-      console.log('⚔️ Choices: Staking data:', stakingData);
+      console.log("⚔️ Choices: Staking data:", stakingData);
 
       // Submit to relayer
       const relayPayload = {
@@ -144,7 +169,7 @@ export function ChoicesPage() {
           yParity: authorization.yParity,
         },
         operation: stakingData.operation,
-        ...(stakingData.operation === 'addStakes'
+        ...(stakingData.operation === "addStakes"
           ? {
               choiceIds: stakingData.choiceIds,
               amounts: stakingData.amounts,
@@ -157,40 +182,40 @@ export function ChoicesPage() {
             }),
       };
 
-      console.log('⚔️ Choices: Submitting to relayer...');
+      console.log("⚔️ Choices: Submitting to relayer...");
       const response = await fetch(`${RELAYER_URL}/relay`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(relayPayload),
       });
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Transaction failed');
+        throw new Error(result.error || "Transaction failed");
       }
 
-      console.log('⚔️ Choices: Transaction submitted!', result.txHash);
+      console.log("⚔️ Choices: Transaction submitted!", result.txHash);
 
       // Wait for confirmation
       const receipt = await publicClient.waitForTransactionReceipt({
         hash: result.txHash,
       });
 
-      console.log('⚔️ Choices: Transaction confirmed!', {
+      console.log("⚔️ Choices: Transaction confirmed!", {
         blockNumber: receipt.blockNumber.toString(),
         gasUsed: receipt.gasUsed.toString(),
       });
 
       // Optimistically update balances based on what we just staked
-      console.log('⚔️ Choices: Calculating optimistic balances...');
+      console.log("⚔️ Choices: Calculating optimistic balances...");
       const optimisticBalances = calculateOptimisticBalances(
         stakingData,
         state.balances.walletBalance,
-        state.balances.existingStakes
+        state.balances.existingStakes,
       );
       actions.setBalances(optimisticBalances);
-      console.log('⚔️ Choices: Balances updated (optimistic):', {
+      console.log("⚔️ Choices: Balances updated (optimistic):", {
         wallet: optimisticBalances.walletBalance.toString(),
         stakes: optimisticBalances.existingStakes.size,
       });
@@ -198,18 +223,19 @@ export function ChoicesPage() {
       // Navigate immediately - no need to wait for chain state
       actions.setTransactionHash(result.txHash);
       actions.resetTransaction();
-      navigate('/slain');
+      navigate("/slain");
     } catch (err) {
-      console.error('⚔️ Choices: Transaction failed:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Transaction failed';
+      console.error("⚔️ Choices: Transaction failed:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Transaction failed";
       actions.setTransactionError(errorMessage);
-      actions.setTransactionStatus('error');
+      actions.setTransactionStatus("error");
     }
   };
 
   const handleRunAway = () => {
-    console.log('⚔️ Choices: Running away to withdraw page');
-    navigate('/withdraw');
+    console.log("⚔️ Choices: Running away to withdraw page");
+    navigate("/withdraw");
   };
 
   // Pass transaction status to ChoicesCard so it can show simple status in grid
@@ -220,6 +246,7 @@ export function ChoicesPage() {
         onRunAway={handleRunAway}
         selectedChoices={state.selectedChoices}
         onToggleChoice={actions.toggleChoice}
+        totalAmount={derived.totalAmount}
         transactionStatus={state.transaction.status}
         transactionError={state.transaction.error}
       />

@@ -1,11 +1,11 @@
-import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion';
-import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import styles from './GameCard.module.css';
+import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import styles from "./GameCard.module.css";
 
 export interface GameCardProps {
   /** Card variant - determines the state/style */
-  variant?: 'connect' | 'default';
+  variant?: "connect" | "default";
   /** Main heading text */
   heading: string;
   /** Icon elements for heading (hearts, etc) */
@@ -33,17 +33,17 @@ export interface GameCardProps {
 }
 
 export const GameCard: React.FC<GameCardProps> = ({
-  variant = 'default',
+  variant = "default",
   heading,
   headingIcons = [],
   subheading,
   subheadingIcon,
   heroImage,
-  heroImageAlt = '',
+  heroImageAlt = "",
   heroImageBackside,
   children,
   primaryAction,
-  className = '',
+  className = "",
   hintKey,
   lastInteractionTime,
 }) => {
@@ -221,7 +221,7 @@ export const GameCard: React.FC<GameCardProps> = ({
               >
                 {/* Glow background element */}
                 <div
-                  className={`${styles.glowBackground} ${showHintGlow ? styles.glowActive : ''}`}
+                  className={`${styles.glowBackground} ${showHintGlow ? styles.glowActive : ""}`}
                 />
                 <m.div
                   className={styles.flipCard}
@@ -229,13 +229,13 @@ export const GameCard: React.FC<GameCardProps> = ({
                     rotateY: isFlipped ? 180 : hintRotation,
                   }}
                   transition={{
-                    type: 'spring',
+                    type: "spring",
                     stiffness: 200,
                     damping: 25,
                     mass: 0.8,
                   }}
                   style={{
-                    transformStyle: 'preserve-3d',
+                    transformStyle: "preserve-3d",
                   }}
                 >
                   <div className={styles.flipCardFront}>
@@ -246,11 +246,15 @@ export const GameCard: React.FC<GameCardProps> = ({
                           src={heroImage}
                           alt={heroImageAlt}
                           className={styles.heroImage}
-                          initial={variant === 'connect' ? false : { x: 50, opacity: 0 }}
+                          initial={
+                            variant === "connect"
+                              ? false
+                              : { x: 50, opacity: 0 }
+                          }
                           animate={{ x: 0, opacity: 1 }}
                           exit={{ x: -50, opacity: 0 }}
                           transition={{
-                            type: 'spring',
+                            type: "spring",
                             stiffness: 300,
                             damping: 30,
                           }}
@@ -269,11 +273,13 @@ export const GameCard: React.FC<GameCardProps> = ({
                     src={heroImage}
                     alt={heroImageAlt}
                     className={styles.heroImage}
-                    initial={variant === 'connect' ? false : { x: 50, opacity: 0 }}
+                    initial={
+                      variant === "connect" ? false : { x: 50, opacity: 0 }
+                    }
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: -50, opacity: 0 }}
                     transition={{
-                      type: 'spring',
+                      type: "spring",
                       stiffness: 300,
                       damping: 30,
                     }}
@@ -287,7 +293,9 @@ export const GameCard: React.FC<GameCardProps> = ({
             {/* Subheading pill - contained within image */}
             <div className={styles.subheading}>
               <p>{subheading}</p>
-              {subheadingIcon && <div className={styles.subheadingIcon}>{subheadingIcon}</div>}
+              {subheadingIcon && (
+                <div className={styles.subheadingIcon}>{subheadingIcon}</div>
+              )}
             </div>
           </div>
         </div>

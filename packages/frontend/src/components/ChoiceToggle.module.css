@@ -50,8 +50,9 @@
   box-sizing: border-box;
 
   /* Transitions */
-  transition: border-color var(--core-motion-normal) var(--core-motion-easing-in-out), box-shadow
-    var(--core-motion-normal) var(--core-motion-easing-in-out);
+  transition: border-color var(--core-motion-normal)
+    var(--core-motion-easing-in-out), box-shadow var(--core-motion-normal)
+    var(--core-motion-easing-in-out);
 }
 
 /* Name - main text */

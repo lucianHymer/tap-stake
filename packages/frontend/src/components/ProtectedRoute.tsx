@@ -1,6 +1,6 @@
-import { type ReactNode, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../contexts/AppContext';
+import { type ReactNode, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../contexts/AppContext";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -17,8 +17,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   useEffect(() => {
     // If no connection, redirect to connect page
     if (!state.connection.connectedAddress || !state.connection.account) {
-      console.log('🛡️ ProtectedRoute: No connection found, redirecting to /');
-      navigate('/');
+      console.log("🛡️ ProtectedRoute: No connection found, redirecting to /");
+      navigate("/");
     }
   }, [state.connection.connectedAddress, state.connection.account, navigate]);
 

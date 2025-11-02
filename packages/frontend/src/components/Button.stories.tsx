@@ -1,8 +1,8 @@
-import { ASSETS } from '../config/assets';
-import { Button } from './Button';
+import { ASSETS } from "../config/assets";
+import { Button } from "./Button";
 
 export default {
-  title: 'Components/Button',
+  title: "Components/Button",
   component: Button,
 };
 
@@ -38,7 +38,12 @@ export const CancelCustomText = () => (
  * Disabled cancel button
  */
 export const CancelDisabled = () => (
-  <Button variant="cancel" leftIcon={ASSETS.xIcon} rightIcon={ASSETS.xIcon} disabled>
+  <Button
+    variant="cancel"
+    leftIcon={ASSETS.xIcon}
+    rightIcon={ASSETS.xIcon}
+    disabled
+  >
     Cancel
   </Button>
 );

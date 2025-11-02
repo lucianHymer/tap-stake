@@ -35,11 +35,11 @@
   user-select: none;
 
   /* Transitions for smooth state changes */
-  transition:
-    background var(--core-motion-normal) var(--core-motion-easing-in-out),
-    color var(--core-motion-normal) var(--core-motion-easing-in-out),
-    outline-color var(--core-motion-normal) var(--core-motion-easing-in-out),
-    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
+  transition: background var(--core-motion-normal)
+    var(--core-motion-easing-in-out), color var(--core-motion-normal)
+    var(--core-motion-easing-in-out), outline-color var(--core-motion-normal)
+    var(--core-motion-easing-in-out), box-shadow var(--core-motion-normal)
+    var(--core-motion-easing-in-out);
 }
 
 /* Outline button variant styling */

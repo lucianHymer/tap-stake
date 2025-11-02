@@ -1,8 +1,8 @@
 // Server-side logging utility for debugging NFC operations from mobile devices
 // This sends all console logs to the dev server for visibility
 
-const LOG_ENDPOINT = '/api/log';
-const LOG_LEVELS = ['log', 'warn', 'error', 'info', 'debug'] as const;
+const LOG_ENDPOINT = "/api/log";
+const LOG_LEVELS = ["log", "warn", "error", "info", "debug"] as const;
 type LogLevel = (typeof LOG_LEVELS)[number];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,17 +16,21 @@ const originalConsole: Partial<Record<LogLevel, ConsoleMethod>> = {};
 function formatArgs(args: any[]): string {
   return args
     .map((arg) => {
-      if (typeof arg === 'object') {
+      if (typeof arg === "object") {
         try {
           // Handle BigInt serialization
-          return JSON.stringify(arg, (_, v) => (typeof v === 'bigint' ? `${v.toString()}n` : v), 2);
+          return JSON.stringify(
+            arg,
+            (_, v) => (typeof v === "bigint" ? `${v.toString()}n` : v),
+            2,
+          );
         } catch {
           return String(arg);
         }
       }
       return String(arg);
     })
-    .join(' ');
+    .join(" ");
 }
 
 // Send log to server
@@ -37,9 +41,9 @@ async function sendLogToServer(level: LogLevel, args: any[]) {
     const timestamp = new Date().toISOString();
 
     await fetch(LOG_ENDPOINT, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         level,
@@ -62,7 +66,9 @@ export function initializeServerLogging() {
     return;
   }
 
-  console.log('🔌 Server logging initialized - all console output will be sent to dev server');
+  console.log(
+    "🔌 Server logging initialized - all console output will be sent to dev server",
+  );
 
   // Intercept console methods
   LOG_LEVELS.forEach((level) => {
@@ -79,17 +85,17 @@ export function initializeServerLogging() {
   });
 
   // Also catch uncaught errors
-  window.addEventListener('error', (event) => {
-    sendLogToServer('error', [
-      'Uncaught Error:',
+  window.addEventListener("error", (event) => {
+    sendLogToServer("error", [
+      "Uncaught Error:",
       event.message,
       `at ${event.filename}:${event.lineno}:${event.colno}`,
-      event.error?.stack || '',
+      event.error?.stack || "",
     ]);
   });
 
-  window.addEventListener('unhandledrejection', (event) => {
-    sendLogToServer('error', ['Unhandled Promise Rejection:', event.reason]);
+  window.addEventListener("unhandledrejection", (event) => {
+    sendLogToServer("error", ["Unhandled Promise Rejection:", event.reason]);
   });
 }
 

@@ -1,4 +1,4 @@
-import { CHOICE_ID_MAPPING } from './balances';
+import { CHOICE_ID_MAPPING } from "./balances";
 
 /**
  * Prepare staking data for relayer submission
@@ -7,9 +7,9 @@ import { CHOICE_ID_MAPPING } from './balances';
 export function prepareStakingData(
   selectedChoices: Set<string>,
   existingStakes: Map<string, bigint>,
-  availableAmount: bigint
+  availableAmount: bigint,
 ): {
-  operation: 'addStakes' | 'updateStakes';
+  operation: "addStakes" | "updateStakes";
   choiceIds?: string[];
   amounts?: string[];
   oldChoiceIds?: string[];
@@ -19,40 +19,49 @@ export function prepareStakingData(
 } {
   const selectedCount = selectedChoices.size;
   if (selectedCount === 0) {
-    throw new Error('No choices selected');
+    throw new Error("No choices selected");
   }
 
   // Calculate amount per choice (evenly distributed)
   const amountPerChoice = availableAmount / BigInt(selectedCount);
-  console.log('📊 prepareStakingData:', {
+  console.log("📊 prepareStakingData:", {
     availableAmount: availableAmount.toString(),
     selectedCount,
     amountPerChoice: amountPerChoice.toString(),
     totalToStake: (amountPerChoice * BigInt(selectedCount)).toString(),
-    dust: (availableAmount - amountPerChoice * BigInt(selectedCount)).toString(),
+    dust: (
+      availableAmount -
+      amountPerChoice * BigInt(selectedCount)
+    ).toString(),
   });
   const hasExistingStakes = existingStakes.size > 0;
 
   if (!hasExistingStakes) {
     // First time staking - use addStakes
-    console.log('📊 Preparing addStakes operation');
+    console.log("📊 Preparing addStakes operation");
     return {
-      operation: 'addStakes',
+      operation: "addStakes",
       choiceIds: Array.from(selectedChoices).map((c) => CHOICE_ID_MAPPING[c]),
       amounts: Array(selectedCount).fill(amountPerChoice.toString()),
     };
   }
 
   // Update existing stakes - use updateStakes
-  console.log('📊 Preparing updateStakes operation');
-  const oldChoiceIds = Array.from(existingStakes.keys()).map((c) => CHOICE_ID_MAPPING[c]);
-  const oldAmounts = Array.from(existingStakes.values()).map((a) => a.toString());
+  console.log("📊 Preparing updateStakes operation");
+  const oldChoiceIds = Array.from(existingStakes.keys()).map(
+    (c) => CHOICE_ID_MAPPING[c],
+  );
+  const oldAmounts = Array.from(existingStakes.values()).map((a) =>
+    a.toString(),
+  );
 
-  const newChoiceIds = Array.from(selectedChoices).map((c) => CHOICE_ID_MAPPING[c]);
+  const newChoiceIds = Array.from(selectedChoices).map(
+    (c) => CHOICE_ID_MAPPING[c],
+  );
   const newAmounts = Array(selectedCount).fill(amountPerChoice.toString());
 
   return {
-    operation: 'updateStakes',
+    operation: "updateStakes",
     oldChoiceIds,
     oldAmounts,
     newChoiceIds,
@@ -65,9 +74,12 @@ export function prepareStakingData(
  */
 export function calculateTotalHoldings(
   walletBalance: bigint,
-  existingStakes: Map<string, bigint>
+  existingStakes: Map<string, bigint>,
 ): bigint {
-  const totalStaked = Array.from(existingStakes.values()).reduce((sum, amount) => sum + amount, 0n);
+  const totalStaked = Array.from(existingStakes.values()).reduce(
+    (sum, amount) => sum + amount,
+    0n,
+  );
   return walletBalance + totalStaked;
 }
 
@@ -78,7 +90,7 @@ export function calculateTotalHoldings(
 export function calculateAvailableAmount(
   walletBalance: bigint,
   existingStakes: Map<string, bigint>,
-  maxAmount: bigint
+  maxAmount: bigint,
 ): bigint {
   const total = calculateTotalHoldings(walletBalance, existingStakes);
   return total > maxAmount ? maxAmount : total;
@@ -91,7 +103,7 @@ export function calculateAvailableAmount(
 export function calculateOptimisticBalances(
   stakingData: ReturnType<typeof prepareStakingData>,
   currentWalletBalance: bigint,
-  currentStakes: Map<string, bigint>
+  currentStakes: Map<string, bigint>,
 ): { walletBalance: bigint; existingStakes: Map<string, bigint> } {
   // Reverse the CHOICE_ID_MAPPING to map back from IDs to names
   const ID_TO_CHOICE_NAME: Record<string, string> = {};
@@ -99,15 +111,21 @@ export function calculateOptimisticBalances(
     ID_TO_CHOICE_NAME[id] = name;
   }
 
-  if (stakingData.operation === 'addStakes') {
+  if (stakingData.operation === "addStakes") {
     // First time staking: deduct from wallet, add to stakes
-    const totalStaked = stakingData.amounts!.reduce((sum, amt) => sum + BigInt(amt), 0n);
+    const amounts = stakingData.amounts ?? [];
+    const choiceIds = stakingData.choiceIds ?? [];
+
+    const totalStaked = amounts.reduce(
+      (sum, amt) => sum + BigInt(amt),
+      0n,
+    );
     const newWalletBalance = currentWalletBalance - totalStaked;
 
     const newStakes = new Map(currentStakes);
-    stakingData.choiceIds!.forEach((choiceId, i) => {
+    choiceIds.forEach((choiceId, i) => {
       const choiceName = ID_TO_CHOICE_NAME[choiceId];
-      const amount = BigInt(stakingData.amounts![i]);
+      const amount = BigInt(amounts[i]);
       newStakes.set(choiceName, (newStakes.get(choiceName) || 0n) + amount);
     });
 
@@ -115,31 +133,38 @@ export function calculateOptimisticBalances(
       walletBalance: newWalletBalance,
       existingStakes: newStakes,
     };
-  } else {
-    // updateStakes: unstakes all, then stakes new amounts
-    // Calculate total available and dust remainder
-    const totalAvailable = currentWalletBalance + Array.from(currentStakes.values()).reduce((sum, amt) => sum + amt, 0n);
-    const totalStaked = stakingData.newAmounts!.reduce((sum, amt) => sum + BigInt(amt), 0n);
-    const dustRemainder = totalAvailable - totalStaked;
-
-    console.log('📊 calculateOptimisticBalances (updateStakes):', {
-      currentWallet: currentWalletBalance.toString(),
-      currentStakes: Array.from(currentStakes.values()).map(v => v.toString()),
-      totalAvailable: totalAvailable.toString(),
-      totalStaked: totalStaked.toString(),
-      dustRemainder: dustRemainder.toString(),
-    });
-
-    const newStakes = new Map<string, bigint>();
-    stakingData.newChoiceIds!.forEach((choiceId, i) => {
-      const choiceName = ID_TO_CHOICE_NAME[choiceId];
-      const amount = BigInt(stakingData.newAmounts![i]);
-      newStakes.set(choiceName, amount);
-    });
-
-    return {
-      walletBalance: dustRemainder,
-      existingStakes: newStakes,
-    };
   }
+  // updateStakes: unstakes all, then stakes new amounts
+  // Calculate total available and dust remainder
+  const newAmounts = stakingData.newAmounts ?? [];
+  const newChoiceIds = stakingData.newChoiceIds ?? [];
+
+  const totalAvailable =
+    currentWalletBalance +
+    Array.from(currentStakes.values()).reduce((sum, amt) => sum + amt, 0n);
+  const totalStaked = newAmounts.reduce(
+    (sum, amt) => sum + BigInt(amt),
+    0n,
+  );
+  const dustRemainder = totalAvailable - totalStaked;
+
+  console.log("📊 calculateOptimisticBalances (updateStakes):", {
+    currentWallet: currentWalletBalance.toString(),
+    currentStakes: Array.from(currentStakes.values()).map((v) => v.toString()),
+    totalAvailable: totalAvailable.toString(),
+    totalStaked: totalStaked.toString(),
+    dustRemainder: dustRemainder.toString(),
+  });
+
+  const newStakes = new Map<string, bigint>();
+  newChoiceIds.forEach((choiceId, i) => {
+    const choiceName = ID_TO_CHOICE_NAME[choiceId];
+    const amount = BigInt(newAmounts[i]);
+    newStakes.set(choiceName, amount);
+  });
+
+  return {
+    walletBalance: dustRemainder,
+    existingStakes: newStakes,
+  };
 }

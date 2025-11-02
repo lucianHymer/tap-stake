@@ -36,7 +36,7 @@ vi.mock('viem/experimental', async () => {
 
 // Test environment configuration
 const mockEnv: Env = {
-  PRIVATE_KEY: '0x' + '1'.repeat(64),
+  PRIVATE_KEY: `0x${'1'.repeat(64)}`,
   RPC_URL: 'https://sepolia.optimism.io',
   CHAIN_ID: '11155420',
   ALLOWED_CONTRACT_ADDRESS: '0xSTAKERWALLET',
@@ -52,8 +52,8 @@ const createValidAuth = () => ({
   address: '0xSTAKERWALLET' as Address,
   chainId: 11155420,
   nonce: 0,
-  r: ('0x' + '2'.repeat(64)) as Hex,
-  s: ('0x' + '3'.repeat(64)) as Hex,
+  r: `0x${'2'.repeat(64)}` as Hex,
+  s: `0x${'3'.repeat(64)}` as Hex,
   yParity: 0,
 });
 

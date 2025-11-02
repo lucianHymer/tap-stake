@@ -1,8 +1,8 @@
-import type React from 'react';
-import { ASSETS } from '../config/assets';
-import { Button } from './Button';
-import styles from './ConnectCard.module.css';
-import { GameCard } from './GameCard';
+import type React from "react";
+import { ASSETS } from "../config/assets";
+import { Button } from "./Button";
+import styles from "./ConnectCard.module.css";
+import { GameCard } from "./GameCard";
 
 export interface ConnectCardProps {
   /** Callback when connect button is clicked */
@@ -15,10 +15,18 @@ export interface ConnectCardProps {
 
 // Icon components
 const HeartIcon = () => (
-  <img src={ASSETS.heartIcon} alt="" style={{ width: '28px', height: '28px', display: 'block' }} />
+  <img
+    src={ASSETS.heartIcon}
+    alt=""
+    style={{ width: "28px", height: "28px", display: "block" }}
+  />
 );
 
-export const ConnectCard: React.FC<ConnectCardProps> = ({ onConnect, error, isConnecting }) => {
+export const ConnectCard: React.FC<ConnectCardProps> = ({
+  onConnect,
+  error,
+  isConnecting,
+}) => {
   return (
     <GameCard
       variant="connect"
@@ -44,15 +52,15 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({ onConnect, error, isCo
       ) : (
         <div className={styles.detailText}>
           <p>
-            You have been given 100 GTC to allocate in the fight against{' '}
+            You have been given 100 GTC to allocate in the fight against{" "}
             <span className={styles.molochText}>Moloch</span>.
           </p>
+          <p>Once connected, choose your allocation—your GTC splits evenly.</p>
           <p>
-            Once connected, choose your allocation—your GTC splits evenly.
-          </p>
-          <p>
-            When prompted, hold your <span className={styles.burnerText}>Burner</span> card flat against the top of
-            your phone. Safely ignore any prompts about an NFC Tag URL.
+            When prompted, hold your{" "}
+            <span className={styles.burnerText}>Burner</span> card flat against
+            the top of your phone. Safely ignore any prompts about an NFC Tag
+            URL.
           </p>
         </div>
       )}

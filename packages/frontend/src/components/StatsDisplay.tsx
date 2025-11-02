@@ -1,7 +1,14 @@
-import { LazyMotion, animate, domAnimation, m, useMotionValue, useTransform } from 'framer-motion';
-import type React from 'react';
-import { useEffect } from 'react';
-import styles from './StatsDisplay.module.css';
+import {
+  LazyMotion,
+  animate,
+  domAnimation,
+  m,
+  useMotionValue,
+  useTransform,
+} from "framer-motion";
+import type React from "react";
+import { useEffect } from "react";
+import styles from "./StatsDisplay.module.css";
 
 export interface StatsDisplayProps {
   /** Stats object with charisma, intelligence, wisdom */
@@ -21,7 +28,7 @@ export interface StatsDisplayProps {
 interface StatBarProps {
   label: string;
   value: number;
-  color: 'green' | 'red' | 'purple';
+  color: "green" | "red" | "purple";
   maxValue: number;
 }
 
@@ -46,7 +53,9 @@ const StatBar: React.FC<StatBarProps> = ({ label, value, color, maxValue }) => {
 
   return (
     <div className={styles.statRow}>
-      <div className={`${styles.statLabel} ${styles[`label-${color}`]}`}>{label}</div>
+      <div className={`${styles.statLabel} ${styles[`label-${color}`]}`}>
+        {label}
+      </div>
       <div className={styles.barContainer}>
         <m.div
           className={`${styles.bar} ${styles[`bar-${color}`]}`}
@@ -62,31 +71,31 @@ const StatBar: React.FC<StatBarProps> = ({ label, value, color, maxValue }) => {
 // Class-specific content - easy to edit per class
 const CLASS_CONTENT: Record<string, string> = {
   Wizard:
-    'bends reality itself to shatter the arcane chains of dis-coordination, summoning coordination spells from the void.',
+    "bends reality itself to shatter the arcane chains of dis-coordination, summoning coordination spells from the void.",
   Paladin:
-    'strikes with righteous fury and unbreakable will, forging a blazing path where cooperation reigns supreme.',
-  Bard: 'unleashes sonic waves of inspiration that melt hearts and minds into thunderous unity.',
-  Monk: 'channels disciplined inner power outward, harmonizing chaos into perfect coordinated destruction.',
-  Seer: 'tears through the veil of fate itself, wielding foresight as a weapon to guide the righteous toward inevitable victory.',
+    "strikes with righteous fury and unbreakable will, forging a blazing path where cooperation reigns supreme.",
+  Bard: "unleashes sonic waves of inspiration that melt hearts and minds into thunderous unity.",
+  Monk: "channels disciplined inner power outward, harmonizing chaos into perfect coordinated destruction.",
+  Seer: "tears through the veil of fate itself, wielding foresight as a weapon to guide the righteous toward inevitable victory.",
   Artificer:
-    'wields ingenious creation and destruction in equal measure, forging reality-warping tools that bind hearts as one.',
+    "wields ingenious creation and destruction in equal measure, forging reality-warping tools that bind hearts as one.",
 };
 
 export const StatsDisplay: React.FC<StatsDisplayProps> = ({
   stats,
-  className = '',
-  characterClass = 'Slayer',
+  className = "",
+  characterClass = "Slayer",
   primaryStats,
 }) => {
   // Handle "Decide" state differently
-  if (characterClass === 'Decide') {
+  if (characterClass === "Decide") {
     return (
       <LazyMotion features={domAnimation}>
         <div className={`${styles.statsDisplay} ${className}`}>
           <div className={styles.classInfo}>
             <p className={styles.description}>
-              You have 100 GTC to spread amongst these choices. It'll be spread evenly. Your choices
-              will determine your stats and class.
+              You have 100 GTC to spread amongst these choices. It'll be spread
+              evenly. Your choices will determine your stats and class.
             </p>
           </div>
         </div>
@@ -99,27 +108,27 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
 
   // Sort stats by value (highest first)
   const sortedStats = [
-    { label: 'Charisma', value: stats.charisma, color: 'green' as const },
-    { label: 'Intelligence', value: stats.intelligence, color: 'red' as const },
-    { label: 'Wisdom', value: stats.wisdom, color: 'purple' as const },
+    { label: "Charisma", value: stats.charisma, color: "green" as const },
+    { label: "Intelligence", value: stats.intelligence, color: "red" as const },
+    { label: "Wisdom", value: stats.wisdom, color: "purple" as const },
   ].sort((a, b) => b.value - a.value);
 
   // Get class-specific content or fall back to generic message
   const classContent =
     CLASS_CONTENT[characterClass] ||
-    'channels coordination magic through chosen weapons to slay Moloch.';
+    "channels coordination magic through chosen weapons to slay Moloch.";
 
   return (
     <LazyMotion features={domAnimation}>
       <div className={`${styles.statsDisplay} ${className}`}>
         <div className={styles.classInfo}>
           <p className={styles.description}>
-            The <span className={styles.className}>{characterClass}</span>{' '}
+            The <span className={styles.className}>{characterClass}</span>{" "}
             {primaryStats && (
               <span className={styles.statPair}>
                 ({primaryStats[0]} + {primaryStats[1]})
               </span>
-            )}{' '}
+            )}{" "}
             {classContent}
           </p>
         </div>

@@ -29,11 +29,11 @@
   user-select: none;
 
   /* Transitions for smooth state changes */
-  transition:
-    background var(--core-motion-normal) var(--core-motion-easing-in-out),
-    color var(--core-motion-normal) var(--core-motion-easing-in-out),
-    outline-color var(--core-motion-normal) var(--core-motion-easing-in-out),
-    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
+  transition: background var(--core-motion-normal)
+    var(--core-motion-easing-in-out), color var(--core-motion-normal)
+    var(--core-motion-easing-in-out), outline-color var(--core-motion-normal)
+    var(--core-motion-easing-in-out), box-shadow var(--core-motion-normal)
+    var(--core-motion-easing-in-out);
 }
 
 /* Outline button variant styling */
@@ -115,7 +115,7 @@
 }
 
 .blockchainLink:hover {
-  color: var(--core-color-brand-primary, #F50303);
+  color: var(--core-color-brand-primary, #f50303);
   text-decoration: underline;
 }
 
@@ -131,7 +131,7 @@
   font-family: var(--core-type-font-family-display, "Jacquard 12", sans-serif);
   font-size: 20px;
   font-weight: 700;
-  color: var(--core-color-brand-primary, #F50303);
+  color: var(--core-color-brand-primary, #f50303);
   letter-spacing: 0.5px;
 }
 

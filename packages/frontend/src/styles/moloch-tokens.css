@@ -12,9 +12,10 @@
   --core-color-accent-red: #f50303;
   --core-color-accent-purple: #a612f0;
   --core-type-font-family-display: "Jacquard 24", "EB Garamond", serif;
-  --core-type-font-family-serif: "EB Garamond", Garamond, "Times New Roman", serif;
-  --core-type-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  --core-type-font-family-serif: "EB Garamond", Garamond, "Times New Roman",
+    serif;
+  --core-type-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Courier New", monospace;
   --core-type-size-xs: 12px;
   --core-type-size-sm: 14px;
   --core-type-size-md: 16px;
@@ -47,8 +48,10 @@
   --core-shadow-elev-0: none;
   --core-shadow-elev-1: 0 4px 12px rgba(0, 0, 0, 0.25);
   --core-shadow-elev-2: 0 8px 24px rgba(0, 0, 0, 0.35);
-  --core-shadow-glow-red: 0 0 0 2px rgba(245, 3, 3, 0.4), 0 0 24px rgba(245, 3, 3, 0.35);
-  --core-shadow-glow-green: 0 0 0 2px rgba(57, 255, 20, 0.4), 0 0 24px rgba(57, 255, 20, 0.35);
+  --core-shadow-glow-red: 0 0 0 2px rgba(245, 3, 3, 0.4), 0 0 24px
+    rgba(245, 3, 3, 0.35);
+  --core-shadow-glow-green: 0 0 0 2px rgba(57, 255, 20, 0.4), 0 0 24px
+    rgba(57, 255, 20, 0.35);
   --core-motion-fast: 120ms;
   --core-motion-normal: 200ms;
   --core-motion-slow: 320ms;
@@ -79,8 +82,8 @@
   --component-boon-button-default-gap: 8px;
   --component-boon-button-default-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   --component-boon-button-hover-border: #ffd900;
-  --component-boon-button-hover-glow: 0 0 0 2px rgba(255, 217, 0, 0.35), 0 0 24px
-    rgba(255, 217, 0, 0.25);
+  --component-boon-button-hover-glow: 0 0 0 2px rgba(255, 217, 0, 0.35), 0 0
+    24px rgba(255, 217, 0, 0.25);
   --component-boon-button-active-text: #ffd900;
   --component-boon-button-active-border: #ffd900;
   --component-boon-button-active-bg: linear-gradient(
@@ -88,8 +91,8 @@
     rgba(255, 217, 0, 0.12) 0%,
     rgba(18, 6, 31, 1) 70%
   );
-  --component-boon-button-active-glow: 0 0 0 2px rgba(255, 217, 0, 0.5), 0 0 36px
-    rgba(255, 217, 0, 0.32);
+  --component-boon-button-active-glow: 0 0 0 2px rgba(255, 217, 0, 0.5), 0 0
+    36px rgba(255, 217, 0, 0.32);
   --component-boon-button-disabled-text: rgba(255, 255, 255, 0.4);
   --component-boon-button-disabled-subtext: rgba(255, 255, 255, 0.25);
   --component-boon-button-disabled-border: rgba(255, 255, 255, 0.16);
@@ -122,7 +125,8 @@
   --component-input-border-default: rgba(255, 255, 255, 0.14);
   --component-input-border-focus: #39ff14;
   --component-input-radius: 12px;
-  --component-input-shadow-focus: 0 0 0 2px rgba(57, 255, 20, 0.4), 0 0 24px rgba(57, 255, 20, 0.35);
+  --component-input-shadow-focus: 0 0 0 2px rgba(57, 255, 20, 0.4), 0 0 24px
+    rgba(57, 255, 20, 0.35);
   --iconography-style-stroke: 2px;
   --iconography-style-size-sm: 16px;
   --iconography-style-size-md: 20px;

@@ -2,6 +2,7 @@ import {
   http,
   type Address,
   type Hex,
+  type PublicClient,
   createPublicClient,
   createWalletClient,
   encodeFunctionData,
@@ -156,7 +157,7 @@ function validateNonZeroAmounts(amounts: bigint[]): boolean {
 
 // Helper to verify minimum holdings (wallet balance + staked balances)
 async function verifyMinimumHoldings(
-  publicClient: any,
+  publicClient: PublicClient,
   signerAddress: Address,
   tokenAddress: Address,
   stakeChoicesAddress: Address,
@@ -751,8 +752,21 @@ export default {
 
       try {
         if (body.operation === 'addStakes') {
-          const choiceIds = validateChoiceIds(body.choiceIds!);
-          const amounts = parseAmounts(body.amounts!);
+          if (!body.choiceIds || !body.amounts) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Missing required fields',
+                details: 'choiceIds and amounts are required for addStakes operation',
+              }),
+              {
+                status: 400,
+                headers: corsHeaders,
+              }
+            );
+          }
+          const choiceIds = validateChoiceIds(body.choiceIds);
+          const amounts = parseAmounts(body.amounts);
 
           // Validate non-zero amounts
           if (!validateNonZeroAmounts(amounts)) {
@@ -798,10 +812,23 @@ export default {
             totalAmount: totalAmount.toString(),
           };
         } else if (body.operation === 'updateStakes') {
+          if (!body.newChoiceIds || !body.newAmounts) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Missing required fields',
+                details: 'newChoiceIds and newAmounts are required for updateStakes operation',
+              }),
+              {
+                status: 400,
+                headers: corsHeaders,
+              }
+            );
+          }
           const oldChoiceIds = body.oldChoiceIds ? validateChoiceIds(body.oldChoiceIds) : [];
           const oldAmounts = body.oldAmounts ? parseAmounts(body.oldAmounts) : [];
-          const newChoiceIds = validateChoiceIds(body.newChoiceIds!);
-          const newAmounts = parseAmounts(body.newAmounts!);
+          const newChoiceIds = validateChoiceIds(body.newChoiceIds);
+          const newAmounts = parseAmounts(body.newAmounts);
 
           // Validate non-zero amounts for old stakes if provided
           if (oldAmounts.length > 0 && !validateNonZeroAmounts(oldAmounts)) {
@@ -900,8 +927,21 @@ export default {
             availableBalance: walletBalance.toString(),
           };
         } else if (body.operation === 'unstakeAllAndWithdraw') {
-          const choiceIds = validateChoiceIds(body.choiceIds!);
-          const amounts = parseAmounts(body.amounts!);
+          if (!body.choiceIds || !body.amounts || !body.recipient) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Missing required fields',
+                details: 'choiceIds, amounts, and recipient are required for unstakeAllAndWithdraw operation',
+              }),
+              {
+                status: 400,
+                headers: corsHeaders,
+              }
+            );
+          }
+          const choiceIds = validateChoiceIds(body.choiceIds);
+          const amounts = parseAmounts(body.amounts);
           const recipient = body.recipient as Address;
 
           // Validate non-zero amounts
