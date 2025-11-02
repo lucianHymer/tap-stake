@@ -22,7 +22,7 @@ import artificerChoiceImg from "/assets/GG-POC-SlayMoloch_Artificer.png";
 import bardSlainImg from "/assets/GG-POC-SlayMoloch_Bard-Slayed.png";
 import bardChoiceImg from "/assets/GG-POC-SlayMoloch_Bard.png";
 import monkChoiceImg from "/assets/GG-POC-SlayMoloch_Monk.png";
-import monkSlainImg from "/assets/GG-POC-SlayMoloch_Paladin-Slayed.png";
+import monkSlainImg from "/assets/GG-POC-SlayMoloch_Monk-Slayed.png";
 import paladinSlainImg from "/assets/GG-POC-SlayMoloch_Paladin-Slayed.png";
 import paladinChoiceImg from "/assets/GG-POC-SlayMoloch_Paladin.png";
 import seerSlainImg from "/assets/GG-POC-SlayMoloch_Seer-02.png";
