@@ -1,35 +1,50 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { http, createPublicClient } from 'viem';
+import { http, createPublicClient, formatEther } from 'viem';
 import { optimismSepolia } from 'viem/chains';
 import { MolochRisesCard } from '../components/MolochRisesCard';
 import { PageWrapper } from '../components/PageWrapper';
 import { CONTRACTS } from '../config/contracts';
 import { useAppContext } from '../contexts/AppContext';
 import { CHOICE_ID_MAPPING } from '../utils/balances';
-import styles from './WithdrawPage.module.css';
 
 const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:8787';
+
+type TransactionStatus = 'idle' | 'signing' | 'submitting' | 'success' | 'error';
 
 export function WithdrawPage() {
   const { state, actions } = useAppContext();
   const navigate = useNavigate();
-  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [transactionStatus, setTransactionStatus] = useState<TransactionStatus>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [successDestination, setSuccessDestination] = useState<string | null>(null);
 
   const publicClient = createPublicClient({
     chain: optimismSepolia,
     transport: http(),
   });
 
+  // Calculate total amount being withdrawn (wallet + staked)
+  const totalWithdrawAmount = useMemo(() => {
+    const totalStaked = Array.from(state.balances.existingStakes.values()).reduce(
+      (sum, amount) => sum + amount,
+      0n
+    );
+    const total = state.balances.walletBalance + totalStaked;
+    // Round up to nearest whole number
+    return Math.ceil(Number(formatEther(total))).toString();
+  }, [state.balances.walletBalance, state.balances.existingStakes]);
+
   const handleRunAway = async (destinationAddress: string) => {
     if (!destinationAddress) {
       setError('Please enter a destination address');
+      setTransactionStatus('error');
       return;
     }
 
-    setIsWithdrawing(true);
+    setTransactionStatus('signing');
     setError(null);
+    setSuccessDestination(destinationAddress);
 
     try {
       console.log('🏃 Withdraw: Starting withdrawal to:', destinationAddress);
@@ -58,6 +73,8 @@ export function WithdrawPage() {
       });
 
       console.log('🏃 Withdraw: Authorization signed');
+
+      setTransactionStatus('submitting');
 
       // Prepare withdrawal data based on stakes
       const hasStakes = state.balances.existingStakes.size > 0;
@@ -123,21 +140,22 @@ export function WithdrawPage() {
         blockNumber: receipt.blockNumber.toString(),
       });
 
-      // Clear state and navigate back to start
-      console.log('🏃 Withdraw: Clearing state and returning to start');
-      actions.resetAll();
+      // Show success
+      setTransactionStatus('success');
 
-      // Clear sessionStorage for generated wallets
-      sessionStorage.removeItem('generatedWallet');
+      // Wait a moment to show success message, then clear and navigate
+      setTimeout(() => {
+        console.log('🏃 Withdraw: Clearing state and returning to start');
+        actions.resetAll();
 
-      // Navigate to test page
-      navigate('/test');
+        // Navigate to test page
+        navigate('/test');
+      }, 2000);
     } catch (err) {
       console.error('🏃 Withdraw: Withdrawal failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Withdrawal failed';
       setError(errorMessage);
-    } finally {
-      setIsWithdrawing(false);
+      setTransactionStatus('error');
     }
   };
 
@@ -146,28 +164,16 @@ export function WithdrawPage() {
     navigate('/choices');
   };
 
-  // Show loading state in card if withdrawing
-  if (isWithdrawing) {
-    return (
-      <PageWrapper>
-        <div className={styles.loadingContent}>
-          <div className={styles.loadingIcon}>🏃</div>
-          <h2 className={styles.loadingHeading}>Running away...</h2>
-          <p className={styles.loadingText}>Please wait while we process your withdrawal</p>
-        </div>
-      </PageWrapper>
-    );
-  }
-
   return (
     <PageWrapper>
-      <MolochRisesCard onRunAway={handleRunAway} onGoBack={handleGoBack} />
-
-      {error && (
-        <div className={styles.errorMessage}>
-          <strong>Withdrawal Failed:</strong> {error}
-        </div>
-      )}
+      <MolochRisesCard
+        onRunAway={handleRunAway}
+        onGoBack={handleGoBack}
+        transactionStatus={transactionStatus}
+        transactionError={error}
+        withdrawAmount={totalWithdrawAmount}
+        destinationAddress={successDestination || undefined}
+      />
     </PageWrapper>
   );
 }

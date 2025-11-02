@@ -6,6 +6,7 @@ import { optimismSepolia } from 'viem/chains';
 import { Button } from '../components/Button';
 import { GameCard } from '../components/GameCard';
 import { PageWrapper } from '../components/PageWrapper';
+import { ASSETS } from '../config/assets';
 import { useAppContext } from '../contexts/AppContext';
 import { createNFCAccount, getCardData } from '../lib/nfc';
 import { checkBalances } from '../utils/balances';
@@ -28,13 +29,16 @@ export function TestPage() {
     setLoading(true);
     setError(null);
     try {
-      console.log('🎴 Test: Starting burner card flow...');
+      console.log('🎴 Test: Starting burner card mint flow...');
 
-      // 1. Connect NFC card
+      // Clear any stored generated wallet since we're using NFC
+      sessionStorage.removeItem('generatedWallet');
+      actions.resetAll();
+
+      // 1. Connect NFC card (just for minting)
       console.log('🎴 Test: Reading NFC card...');
       const cardData = await getCardData();
       const address = cardData.address;
-      const account = createNFCAccount(address);
 
       console.log('🎴 Test: Connected to:', address);
 
@@ -52,7 +56,7 @@ export function TestPage() {
         total: formatEther(totalHoldings),
       });
 
-      // 3. Top up to 100 GTC if needed (ONLY for test page users)
+      // 3. Top up to 100 GTC if needed
       const target = parseEther('100');
       if (totalHoldings < target) {
         const mintAmount = target - totalHoldings;
@@ -76,27 +80,26 @@ export function TestPage() {
         console.log('🎴 Test: Already has 100+ GTC, no top-up needed');
       }
 
-      // 4. Store in app state and navigate
-      actions.setConnection({
-        connectedAddress: address,
-        account,
-        isGeneratedWallet: false,
-      });
-
-      // Also update balances in state (after potential top-up)
-      // @ts-expect-error - Optimism chain types differ
-      const updatedBalances = await checkBalances(publicClient, address);
-      actions.setBalances(updatedBalances);
-
-      console.log('🎴 Test: Navigating to connect page...');
+      console.log('🎴 Test: Tokens minted! Redirecting to connect page...');
       navigate('/');
     } catch (err) {
-      console.error('🎴 Test: Burner card flow failed:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to connect burner card';
+      console.error('🎴 Test: Burner card mint failed:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to mint to burner card';
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoToConnect = () => {
+    navigate('/');
+  };
+
+  const handleClearSession = () => {
+    sessionStorage.removeItem('generatedWallet');
+    actions.resetAll();
+    setError(null);
+    console.log('🔑 Test: Stored wallet cleared');
   };
 
   const handleNoCard = async () => {
@@ -131,22 +134,7 @@ export function TestPage() {
         throw new Error(`Mint failed: ${await mintResponse.text()}`);
       }
 
-      console.log('🔑 Test: Minted 100 GTC');
-
-      // 3. Store in app state and navigate
-      actions.setConnection({
-        connectedAddress: address,
-        account,
-        isGeneratedWallet: true,
-      });
-
-      // Set initial balance (no existing stakes for new wallet)
-      actions.setBalances({
-        walletBalance: mintAmount,
-        existingStakes: new Map(),
-      });
-
-      console.log('🔑 Test: Navigating to connect page...');
+      console.log('🔑 Test: Minted 100 GTC, navigating to connect page...');
       navigate('/');
     } catch (err) {
       console.error('🔑 Test: Generated wallet flow failed:', err);
@@ -159,42 +147,45 @@ export function TestPage() {
 
   return (
     <PageWrapper>
-      <GameCard
-        variant="default"
-        heading="TAP STAKE"
-        subheading="Test Setup"
-        heroImage="/assets/burnerTap.png"
-        heroImageAlt="Burner card tap"
-        primaryAction={
-          <div className={styles.actions}>
+      <div className={styles.compact}>
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>Burner Card</h3>
+          <div className={styles.buttonRow}>
             <Button variant="outline" onClick={handleBurnerCard} disabled={loading}>
-              I have a burner card
+              Mint 100 Test GTC to Burner
             </Button>
-            <Button variant="outline" onClick={handleNoCard} disabled={loading}>
-              I don't have a burner
-            </Button>
-          </div>
-        }
-      >
-        <div className={styles.content}>
-          <p className={styles.subtitle}>Choose your path to slay Moloch:</p>
-
-          {loading && <p className={styles.loading}>Preparing for battle...</p>}
-
-          {error && (
-            <div className={styles.error}>
-              <strong>Failed:</strong> {error}
-            </div>
-          )}
-
-          <div className={styles.note}>
-            <p>
-              <strong>Note:</strong> This is the test page for setting up new accounts. If you're
-              returning, go directly to the <a href="#/">main page</a>.
-            </p>
           </div>
         </div>
-      </GameCard>
+
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>Auto-Generated Wallet</h3>
+          <div className={styles.buttonRow}>
+            <Button variant="outline" onClick={handleNoCard} disabled={loading}>
+              Generate Wallet with 100 GTC
+            </Button>
+            <Button variant="outline" onClick={handleClearSession} disabled={loading}>
+              Clear Session
+            </Button>
+          </div>
+        </div>
+
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>Exit Test Page</h3>
+          <div className={styles.buttonRow}>
+            <Button variant="outline" onClick={handleGoToConnect} disabled={loading}>
+              Go to Connect
+            </Button>
+          </div>
+        </div>
+
+        {loading && <p className={styles.loading}>Preparing...</p>}
+
+        {error && (
+          <div className={styles.error}>
+            <strong>Failed:</strong> {error}
+          </div>
+        )}
+      </div>
     </PageWrapper>
   );
 }

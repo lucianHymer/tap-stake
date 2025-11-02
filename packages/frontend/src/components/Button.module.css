@@ -111,7 +111,7 @@
   border-radius: 100px;
 
   /* Spacing - from Figma spec */
-  padding: var(--core-spacing-3) var(--core-spacing-6);
+  padding: var(--core-spacing-1) var(--core-spacing-6);
   gap: 10px;
 
   /* Typography */

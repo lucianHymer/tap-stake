@@ -7,8 +7,6 @@ import styles from './SlainCard.module.css';
 export interface SlainCardProps {
   /** The selected class (Artificer, Bard, Monk, Paladin, Seer, Wizard) */
   selectedClass?: string;
-  /** Callback when Share to Twitter button is clicked */
-  onShareTwitter?: () => void;
   /** Callback when Start Over button is clicked */
   onStartOver?: () => void;
 }
@@ -181,10 +179,10 @@ const getClassImages = (className: string) => {
 
 export const SlainCard: React.FC<SlainCardProps> = ({
   selectedClass = 'Artificer',
-  onShareTwitter,
   onStartOver,
 }) => {
   const classImages = getClassImages(selectedClass);
+  const whitepaperUrl = import.meta.env.VITE_WHITEPAPER_URL || 'https://www.google.com';
 
   return (
     <GameCard
@@ -197,9 +195,14 @@ export const SlainCard: React.FC<SlainCardProps> = ({
       heroImageAlt={`${selectedClass} victorious over slain Moloch`}
       primaryAction={
         <div className={styles.controlPanel}>
-          <Button variant="outline" onClick={onShareTwitter}>
-            Share to Twitter
-          </Button>
+          <a
+            href={whitepaperUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${styles.whitepaperButton} ${styles.outlineButton}`}
+          >
+            View Whitepaper
+          </a>
           <Button
             variant="cancel"
             leftIcon={ASSETS.xIcon}

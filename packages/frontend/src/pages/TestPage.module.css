@@ -1,35 +1,48 @@
 @import "../styles/moloch-tokens.css";
 
-/* Content wrapper inside GameCard */
-.content {
+/* Compact container */
+.compact {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   width: 100%;
-  text-align: center;
-}
-
-/* Actions wrapper in control panel */
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  padding: 0 16px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
   box-sizing: border-box;
 }
 
-.subtitle {
-  font-size: 16px;
+/* Section wrapper */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
   color: var(--core-color-text-secondary, #cccccc);
   margin: 0;
-  font-weight: 400;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Horizontal button row */
+.buttonRow {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .loading {
-  font-size: 16px;
+  font-size: 14px;
   color: var(--component-text-warning, #ffaa00);
-  margin: 16px 0;
+  margin: 0;
+  text-align: center;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -44,40 +57,17 @@
 }
 
 .error {
-  padding: 16px;
-  margin: 16px 0;
+  padding: 12px;
+  margin: 0;
   border: 1px solid var(--component-border-error, #ff4444);
   border-radius: 8px;
   background: rgba(255, 68, 68, 0.1);
   color: var(--component-text-error, #ff4444);
-  text-align: left;
+  text-align: center;
+  font-size: 14px;
 }
 
 .error strong {
-  display: block;
-  margin-bottom: 8px;
-}
-
-.note {
-  margin-top: 48px;
-  padding: 16px;
-  border: 1px solid var(--core-color-border-tertiary, #3a3a3a);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  font-size: 14px;
-  color: var(--core-color-text-tertiary, #999999);
-  text-align: left;
-}
-
-.note p {
-  margin: 0;
-}
-
-.note a {
-  color: var(--component-text-link, #00ffff);
-  text-decoration: none;
-}
-
-.note a:hover {
-  text-decoration: underline;
+  display: inline;
+  margin-right: 4px;
 }

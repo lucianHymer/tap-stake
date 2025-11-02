@@ -7,6 +7,10 @@ import { GameCard } from './GameCard';
 export interface ConnectCardProps {
   /** Callback when connect button is clicked */
   onConnect?: () => void;
+  /** Error message to display */
+  error?: string | null;
+  /** Whether connection is in progress */
+  isConnecting?: boolean;
 }
 
 // Icon components
@@ -14,7 +18,7 @@ const HeartIcon = () => (
   <img src={ASSETS.heartIcon} alt="" style={{ width: '28px', height: '28px', display: 'block' }} />
 );
 
-export const ConnectCard: React.FC<ConnectCardProps> = ({ onConnect }) => {
+export const ConnectCard: React.FC<ConnectCardProps> = ({ onConnect, error, isConnecting }) => {
   return (
     <GameCard
       variant="connect"
@@ -29,20 +33,29 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({ onConnect }) => {
         </Button>
       }
     >
-      <div className={styles.detailText}>
-        <p>
-          You have been given 100 GTC to allocate in the fight against{' '}
-          <span className={styles.molochText}>Moloch</span>.
-        </p>
-        <p>
-          Once connected, you will choose how to allocate your GTC. It will be split evenly among
-          your choices.
-        </p>
-        <p>
-          Tap your <span className={styles.burnerText}>Burner</span> card at the top of your phone
-          when prompted.
-        </p>
-      </div>
+      {isConnecting ? (
+        <div className={styles.statusText}>
+          <p>Tap your card when prompted...</p>
+        </div>
+      ) : error ? (
+        <div className={styles.errorText}>
+          <p>{error}</p>
+        </div>
+      ) : (
+        <div className={styles.detailText}>
+          <p>
+            You have been given 100 GTC to allocate in the fight against{' '}
+            <span className={styles.molochText}>Moloch</span>.
+          </p>
+          <p>
+            Once connected, choose your allocation—your GTC splits evenly.
+          </p>
+          <p>
+            When prompted, hold your <span className={styles.burnerText}>Burner</span> card flat against the top of
+            your phone. Safely ignore any prompts about an NFC Tag URL.
+          </p>
+        </div>
+      )}
     </GameCard>
   );
 };

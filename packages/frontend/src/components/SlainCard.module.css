@@ -12,7 +12,55 @@
   align-items: center;
   justify-content: center;
   gap: var(--core-spacing-base);
-  width: 100%;
+}
+
+/* Whitepaper button - styled as link with outline button appearance */
+.whitepaperButton {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+
+  padding: var(--core-spacing-3) var(--core-spacing-9);
+
+  /* Typography */
+  font-size: var(--core-type-size-xl);
+  font-weight: var(--core-type-weight-bold);
+  line-height: var(--core-type-line-height-tight);
+  font-family: var(--core-type-font-family-serif);
+
+  /* Interactions */
+  cursor: pointer;
+  user-select: none;
+
+  /* Transitions for smooth state changes */
+  transition:
+    background var(--core-motion-normal) var(--core-motion-easing-in-out),
+    color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    outline-color var(--core-motion-normal) var(--core-motion-easing-in-out),
+    box-shadow var(--core-motion-normal) var(--core-motion-easing-in-out);
+}
+
+/* Outline button variant styling */
+.outlineButton {
+  background: var(--core-color-bg-purple);
+  color: var(--component-button-outline-text-default);
+  border: 3px solid transparent;
+  border-radius: var(--component-button-outline-radius);
+  outline: 3px solid var(--core-color-white);
+  outline-offset: -3px;
+  box-shadow: var(--core-shadow-elev-0);
+}
+
+.outlineButton:hover {
+  outline-color: var(--semantic-accent-glyph);
+  color: var(--semantic-accent-glyph);
+  box-shadow: var(--core-shadow-glow-green);
+}
+
+.outlineButton:active {
+  outline-color: var(--core-color-white);
 }
 
 /* Details content container */

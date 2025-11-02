@@ -8,6 +8,7 @@ export interface ButtonProps
   children: React.ReactNode;
   leftIcon?: string;
   rightIcon?: string;
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -16,11 +17,13 @@ export const Button: React.FC<ButtonProps> = ({
   leftIcon,
   rightIcon,
   className,
+  ref,
   ...props
 }) => {
   return (
     <LazyMotion features={domAnimation}>
       <m.button
+        ref={ref}
         className={`${styles.button} ${styles[variant]} ${className || ''}`}
         whileTap={{ scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}

@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { ASSETS } from '../config/assets';
 import { Button } from './Button';
 import { ChoiceToggle, type StatName } from './ChoiceToggle';
@@ -21,6 +21,10 @@ export interface ChoicesCardProps {
   selectedChoices: Set<string>;
   /** Toggle callback from AppContext */
   onToggleChoice: (choiceId: string) => void;
+  /** Transaction status for showing simple status in grid */
+  transactionStatus?: 'idle' | 'signing' | 'submitting' | 'success' | 'error';
+  /** Transaction error message */
+  transactionError?: string | null;
 }
 
 // Icon components
@@ -163,8 +167,8 @@ interface Choice {
 }
 
 const CHOICES: Choice[] = [
-  { id: 'giveth', name: 'Giveth', stats: { major: 'charisma', minor: 'intelligence' } },
   { id: 'karma', name: 'Karma', stats: { major: 'wisdom', minor: 'intelligence' } },
+  { id: 'giveth', name: 'Giveth', stats: { major: 'charisma', minor: 'intelligence' } },
   { id: 'gardens', name: 'Gardens', stats: { major: 'charisma', minor: 'wisdom' } },
   { id: 'deepfunding', name: 'Deep Funding', stats: { major: 'intelligence', minor: 'wisdom' } },
   { id: 'privote', name: 'Privote', stats: { major: 'intelligence', minor: 'wisdom' } },
@@ -210,6 +214,8 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
   onRunAway,
   selectedChoices,
   onToggleChoice,
+  transactionStatus = 'idle',
+  transactionError,
 }) => {
   // Total amount to distribute among selected choices
   const [totalAmount] = useState<number>(100);
@@ -336,6 +342,22 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
     setLastInteractionTime(Date.now());
   }, [selectedChoices]);
 
+  // Remove auto-focus on mount/navigation while keeping keyboard navigation working
+  // Use layout effect to run synchronously before paint
+  useLayoutEffect(() => {
+    // Blur whatever element has focus when page loads/navigates here
+    const blurInitialFocus = () => {
+      if (document.activeElement instanceof HTMLElement && document.activeElement !== document.body) {
+        document.activeElement.blur();
+      }
+    };
+
+    blurInitialFocus();
+    // Also check after a tiny delay in case focus happens asynchronously
+    const timeout = setTimeout(blurInitialFocus, 0);
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
     <GameCard
       variant="default"
@@ -374,19 +396,30 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
         </div>
       }
     >
-      <div className={styles.choicesGrid}>
-        {CHOICES.map((choice) => (
-          <ChoiceToggle
-            key={choice.id}
-            name={choice.name}
-            stats={choice.stats}
-            amount={getDisplayAmount(choice.id)}
-            active={selectedChoices.has(choice.id)}
-            onClick={() => onToggleChoice(choice.id)}
-            animationStyle="pulse"
-          />
-        ))}
-      </div>
+      {transactionStatus !== 'idle' ? (
+        <div className={styles.transactionStatus}>
+          {transactionStatus === 'signing' && <p className={styles.statusText}>Tap your card to sign...</p>}
+          {transactionStatus === 'submitting' && <p className={styles.statusText}>Submitting transaction...</p>}
+          {transactionStatus === 'success' && <p className={styles.statusText}>Success!</p>}
+          {transactionStatus === 'error' && (
+            <p className={styles.errorText}>{transactionError || 'Transaction failed'}</p>
+          )}
+        </div>
+      ) : (
+        <div className={styles.choicesGrid}>
+          {CHOICES.map((choice) => (
+            <ChoiceToggle
+              key={choice.id}
+              name={choice.name}
+              stats={choice.stats}
+              amount={getDisplayAmount(choice.id)}
+              active={selectedChoices.has(choice.id)}
+              onClick={() => onToggleChoice(choice.id)}
+              animationStyle="pulse"
+            />
+          ))}
+        </div>
+      )}
     </GameCard>
   );
 };

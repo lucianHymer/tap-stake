@@ -24,6 +24,13 @@ export function prepareStakingData(
 
   // Calculate amount per choice (evenly distributed)
   const amountPerChoice = availableAmount / BigInt(selectedCount);
+  console.log('📊 prepareStakingData:', {
+    availableAmount: availableAmount.toString(),
+    selectedCount,
+    amountPerChoice: amountPerChoice.toString(),
+    totalToStake: (amountPerChoice * BigInt(selectedCount)).toString(),
+    dust: (availableAmount - amountPerChoice * BigInt(selectedCount)).toString(),
+  });
   const hasExistingStakes = existingStakes.size > 0;
 
   if (!hasExistingStakes) {
@@ -109,7 +116,20 @@ export function calculateOptimisticBalances(
       existingStakes: newStakes,
     };
   } else {
-    // updateStakes: replace all stakes with new ones, wallet becomes 0
+    // updateStakes: unstakes all, then stakes new amounts
+    // Calculate total available and dust remainder
+    const totalAvailable = currentWalletBalance + Array.from(currentStakes.values()).reduce((sum, amt) => sum + amt, 0n);
+    const totalStaked = stakingData.newAmounts!.reduce((sum, amt) => sum + BigInt(amt), 0n);
+    const dustRemainder = totalAvailable - totalStaked;
+
+    console.log('📊 calculateOptimisticBalances (updateStakes):', {
+      currentWallet: currentWalletBalance.toString(),
+      currentStakes: Array.from(currentStakes.values()).map(v => v.toString()),
+      totalAvailable: totalAvailable.toString(),
+      totalStaked: totalStaked.toString(),
+      dustRemainder: dustRemainder.toString(),
+    });
+
     const newStakes = new Map<string, bigint>();
     stakingData.newChoiceIds!.forEach((choiceId, i) => {
       const choiceName = ID_TO_CHOICE_NAME[choiceId];
@@ -118,7 +138,7 @@ export function calculateOptimisticBalances(
     });
 
     return {
-      walletBalance: 0n,
+      walletBalance: dustRemainder,
       existingStakes: newStakes,
     };
   }

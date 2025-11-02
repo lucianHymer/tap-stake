@@ -50,3 +50,25 @@
   margin: 0;
   max-width: 354px;
 }
+
+/* Transaction status - simple and low-key */
+.transactionStatus {
+  padding: var(--core-spacing-2);
+  text-align: center;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusText {
+  color: var(--core-color-text-muted);
+  font-size: var(--core-font-size-sm);
+  margin: 0;
+}
+
+.errorText {
+  color: var(--component-error-text-default);
+  font-size: var(--core-font-size-sm);
+  margin: 0;
+}

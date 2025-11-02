@@ -95,9 +95,6 @@ function App() {
 
               {/* Admin and demos */}
               <Route path="/admin" element={<AdminPage />} />
-              <Route path="/button-demo" element={<ButtonDemo />} />
-              <Route path="/toggle-demo" element={<ToggleButtonDemo />} />
-              <Route path="/nfc-demo" element={<HomePage />} />
             </Routes>
           </HashRouter>
         </AppProvider>

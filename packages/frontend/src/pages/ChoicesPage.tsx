@@ -4,7 +4,6 @@ import { http, createPublicClient, parseEther } from 'viem';
 import { optimismSepolia } from 'viem/chains';
 import { ChoicesCard } from '../components/ChoicesCard';
 import { PageWrapper } from '../components/PageWrapper';
-import { TransactionStatus } from '../components/TransactionStatus';
 import { CONTRACTS } from '../config/contracts';
 import { useAppContext } from '../contexts/AppContext';
 import { CHOICE_NAMES } from '../utils/balances';
@@ -12,6 +11,32 @@ import { calculateAvailableAmount, calculateOptimisticBalances } from '../utils/
 import { prepareStakingData } from '../utils/staking';
 
 const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:8787';
+
+/**
+ * Check if the new stake selections are identical to existing stakes
+ * Returns true if nothing would change (skip transaction)
+ */
+function stakesUnchanged(
+  newChoices: Set<string>,
+  existingStakes: Map<string, bigint>,
+  availableAmount: bigint
+): boolean {
+  // Different number of choices = changed
+  if (newChoices.size !== existingStakes.size) return false;
+
+  // Check if all choices match
+  for (const choice of newChoices) {
+    if (!existingStakes.has(choice)) return false;
+  }
+
+  // Check if amounts would be the same (evenly distributed)
+  const expectedAmount = availableAmount / BigInt(newChoices.size);
+  for (const amount of existingStakes.values()) {
+    if (amount !== expectedAmount) return false;
+  }
+
+  return true; // Everything matches!
+}
 
 export function ChoicesPage() {
   const { state, actions } = useAppContext();
@@ -41,9 +66,28 @@ export function ChoicesPage() {
     parseEther('100')
   );
 
+  console.log('📊 ChoicesPage availableAmount:', {
+    wallet: state.balances.walletBalance.toString(),
+    staked: Array.from(state.balances.existingStakes.values()).reduce((sum, amt) => sum + amt, 0n).toString(),
+    total: (state.balances.walletBalance + Array.from(state.balances.existingStakes.values()).reduce((sum, amt) => sum + amt, 0n)).toString(),
+    availableAmount: availableAmount.toString(),
+    cap: parseEther('100').toString(),
+  });
+
   const handleSlayMoloch = async () => {
     if (state.selectedChoices.size === 0) {
       actions.setTransactionError('Please select at least one choice');
+      return;
+    }
+
+    // Skip transaction if stakes are unchanged
+    if (stakesUnchanged(state.selectedChoices, state.balances.existingStakes, availableAmount)) {
+      console.log('⚔️ Choices: Stakes unchanged, skipping transaction');
+      actions.setTransactionStatus('success');
+      setTimeout(() => {
+        actions.resetTransaction();
+        navigate('/slain');
+      }, 1000);
       return;
     }
 
@@ -168,22 +212,7 @@ export function ChoicesPage() {
     navigate('/withdraw');
   };
 
-  const handleCloseTransactionStatus = () => {
-    actions.resetTransaction();
-  };
-
-  // If transaction is in progress, show transaction status instead of choices
-  if (state.transaction.status !== 'idle') {
-    return (
-      <TransactionStatus
-        status={state.transaction.status}
-        error={state.transaction.error}
-        onClose={handleCloseTransactionStatus}
-      />
-    );
-  }
-
-  // Normal choices card with controlled state
+  // Pass transaction status to ChoicesCard so it can show simple status in grid
   return (
     <PageWrapper>
       <ChoicesCard
@@ -191,6 +220,8 @@ export function ChoicesPage() {
         onRunAway={handleRunAway}
         selectedChoices={state.selectedChoices}
         onToggleChoice={actions.toggleChoice}
+        transactionStatus={state.transaction.status}
+        transactionError={state.transaction.error}
       />
     </PageWrapper>
   );

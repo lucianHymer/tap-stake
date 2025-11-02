@@ -55,3 +55,36 @@
   object-fit: cover;
   object-position: 50% 50%;
 }
+
+/* Status and error text */
+.statusText {
+  text-align: center;
+  padding: var(--core-spacing-2);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusText p {
+  color: var(--core-color-text-muted);
+  font-size: var(--core-font-size-sm);
+  margin: 0;
+  font-family: var(--core-type-font-family-serif, "EB Garamond", serif);
+}
+
+.errorText {
+  text-align: center;
+  padding: var(--core-spacing-2);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.errorText p {
+  color: var(--component-error-text-default);
+  font-size: var(--core-font-size-sm);
+  margin: 0;
+  font-family: var(--core-type-font-family-serif, "EB Garamond", serif);
+}

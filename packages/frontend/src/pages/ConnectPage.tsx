@@ -8,7 +8,7 @@ import { PageWrapper } from '../components/PageWrapper';
 import { useAppContext } from '../contexts/AppContext';
 import { createNFCAccount, getCardData } from '../lib/nfc';
 import { checkBalances } from '../utils/balances';
-import styles from './ConnectPage.module.css';
+import { calculateTotalHoldings } from '../utils/staking';
 
 export function ConnectPage() {
   const { state, actions } = useAppContext();
@@ -26,6 +26,9 @@ export function ConnectPage() {
     setError(null);
 
     try {
+      // Reset all state from previous connection
+      actions.resetAll();
+
       let address: `0x${string}`;
       let account: ReturnType<typeof createNFCAccount> | PrivateKeyAccount;
 
@@ -33,7 +36,7 @@ export function ConnectPage() {
       const storedPrivateKey = sessionStorage.getItem('generatedWallet');
 
       if (storedPrivateKey) {
-        // Use stored generated wallet from sessionStorage
+        // Use stored generated wallet from sessionStorage (test-only mode)
         console.log('🔗 Connect: Using stored generated wallet');
         account = privateKeyToAccount(storedPrivateKey as `0x${string}`);
         address = account.address;
@@ -44,13 +47,8 @@ export function ConnectPage() {
           account,
           isGeneratedWallet: true,
         });
-      } else if (state.connection.connectedAddress && state.connection.account) {
-        // Use existing connection from AppContext (from TestPage)
-        console.log('🔗 Connect: Using existing connection from AppContext');
-        address = state.connection.connectedAddress;
-        account = state.connection.account;
       } else {
-        // Connect NFC (for users who go directly to / without visiting /test)
+        // Connect NFC - always prompt for tap (NFC accounts don't persist)
         console.log('🔗 Connect: Reading NFC card...');
         const cardData = await getCardData();
         address = cardData.address;
@@ -72,10 +70,21 @@ export function ConnectPage() {
       const balances = await checkBalances(publicClient, address);
       actions.setBalances(balances);
 
+      // Calculate total holdings (wallet + staked)
+      const totalHoldings = calculateTotalHoldings(balances.walletBalance, balances.existingStakes);
+
       console.log('🔗 Connect: Balances:', {
         wallet: balances.walletBalance.toString(),
         stakes: balances.existingStakes.size,
+        total: totalHoldings.toString(),
       });
+
+      // Check for zero total balance (wallet + stakes)
+      if (totalHoldings === 0n) {
+        console.log('🔗 Connect: Zero balance detected');
+        setError('Your wallet has 0 GTC.');
+        return;
+      }
 
       // Navigate based on existing stakes
       if (balances.existingStakes.size > 0) {
@@ -108,25 +117,7 @@ export function ConnectPage() {
 
   return (
     <PageWrapper>
-      <ConnectCard onConnect={handleConnect} />
-
-      {/* Status overlay - shown during connection */}
-      {isConnecting && (
-        <div className={styles.statusOverlay}>
-          <div className={styles.statusContent}>
-            <div className={styles.statusIcon}>⚔️</div>
-            <h3 className={styles.statusHeading}>Communing with the spirits...</h3>
-            <p className={styles.statusText}>Tap your card when prompted</p>
-          </div>
-        </div>
-      )}
-
-      {/* Error message - shown below the card */}
-      {error && !isConnecting && (
-        <div className={styles.errorMessage}>
-          <strong>Connection Failed:</strong> {error}
-        </div>
-      )}
+      <ConnectCard onConnect={handleConnect} error={error} isConnecting={isConnecting} />
     </PageWrapper>
   );
 }
