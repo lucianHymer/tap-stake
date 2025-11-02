@@ -1,88 +1,153 @@
-# Tap-Stake NFC Wallet
+# Tap-Stake 🔥
 
-A proof-of-concept application that uses NFC card wallets (via libhalo) to sign messages and transactions on Optimism.
+A gasless staking application where users tap NFC cards to stake tokens without paying gas fees. Built with EIP-7702 delegation and deployed on Optimism.
 
-## Quick Start
+## What is this?
 
-### Prerequisites
-- Node.js 18+
-- NFC-enabled device (Android phone or desktop with NFC reader)
-- Chrome browser with Web NFC API support
-- Initialized HaLo NFC card with ECDSA keys
+Tap-Stake demonstrates gasless blockchain interactions using NFC card wallets. Users can stake tokens across multiple choices, manage their positions, and withdraw—all without needing ETH for gas. A relayer sponsors transactions using EIP-7702's temporary code delegation.
 
-### Installation & Running
+**Theme:** Demon-slayer aesthetic where staking defeats Moloch, the demon of discoordination.
 
-```bash
-# From the root directory
-npm install
-npm run dev
-```
+## Key Features
 
-The app will be available at `http://localhost:5173`
+- **NFC Wallet Support**: Sign transactions by tapping NFC cards (via LibHalo)
+- **Gasless Transactions**: Relayer pays all gas fees using EIP-7702 delegation
+- **Multi-Choice Staking**: Stake across 6 different choices using ERC6909 multi-token standard
+- **Flexible Operations**: Add stakes, update allocations, withdraw, or unstake-and-withdraw in one tap
+- **Stats Dashboard**: View relayer activity and total staked amounts via Etherscan API
+- **Dark Theme**: Moloch design system with demon-slaying UI
 
 ## Project Structure
 
 ```
 tap-stake/
 ├── packages/
-│   ├── frontend/         # React frontend app
-│   │   ├── src/
-│   │   │   ├── lib/
-│   │   │   │   └── nfc.ts     # NFC interface layer
-│   │   │   ├── App.tsx        # Main app component
-│   │   │   └── App.css        # Styling
-│   │   └── package.json
-│   └── contracts/        # Foundry smart contracts (Phase 2)
-│       └── README.md     # Contract setup instructions
-└── package.json          # Root workspace config
+│   ├── contracts/          # Solidity contracts (Foundry)
+│   │   ├── StakerWallet.sol          # EIP-7702 gasless staking
+│   │   ├── StakeChoicesERC6909.sol   # Multi-token staking
+│   │   └── TestERC20.sol             # Test token
+│   ├── frontend/           # React app (Vite + TypeScript)
+│   │   ├── src/pages/
+│   │   │   ├── ChoicesPage.tsx       # Stake allocation
+│   │   │   ├── WithdrawPage.tsx      # Withdraw tokens
+│   │   │   ├── StatsPage.tsx         # View statistics
+│   │   │   └── ConnectPage.tsx       # NFC connection
+│   │   └── src/lib/nfc.ts            # NFC integration
+│   └── relayer/            # Cloudflare Worker
+│       └── src/index.ts              # Gasless transaction relayer
 ```
 
-## Features (Phase 1 - MVP)
+## Quick Start
 
-- ✅ Read NFC card address
-- ✅ Sign messages with NFC card
-- ✅ Verify signatures
-- ✅ Display signed messages and addresses
-- ✅ Error handling for NFC failures
+### Prerequisites
+- Node.js 18+
+- NFC-enabled device (Android phone or desktop with NFC reader + HaLo Bridge)
+- Initialized HaLo NFC card
 
-## How to Use
+### Run Locally
 
-1. **Open the app** in Chrome on an NFC-enabled device
-2. **Click "Read NFC Card"** and tap your initialized HaLo card
-3. **Click "Sign Message"** and tap your card again to sign
-4. **View the signature** and verification result
+```bash
+# Install dependencies
+npm install
 
-## Technical Details
+# Start frontend
+npm run dev
+```
 
-- **libhalo**: Handles NFC card communication
-- **viem**: Ethereum library for signature handling
-- **React + TypeScript**: Frontend framework
-- **Vite**: Build tool for fast development
+Visit `http://localhost:5173`
 
-## Next Steps (Phase 2)
+### Deployed Contracts (Optimism Sepolia)
 
-- EIP-7702 support for gasless transactions
-- Smart contract deployment for delegation
-- Paymaster integration for sponsored transactions
+| Contract | Address |
+|----------|---------|
+| TestERC20 | `0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756` |
+| StakeChoicesERC6909 | `0xb0a727f57841910752F0f1ef96871Cc28C086012` |
+| StakerWallet | `0x0568033352086AD7Bc23B218D8b9ff6733BA4448` |
+
+See [DEPLOYED_ADDRESSES.md](packages/contracts/DEPLOYED_ADDRESSES.md) for full details.
+
+## How It Works
+
+1. **Connect**: Tap NFC card to connect your wallet
+2. **Choose Stakes**: Allocate tokens across 6 choices (charisma, intelligence, wisdom, etc.)
+3. **Sign**: Tap card to sign EIP-7702 authorization and operation signature
+4. **Relay**: Relayer submits transaction and pays gas
+5. **Done**: Stakes updated without spending any ETH
+
+### Technical Flow
+
+```
+User NFC Card → Signs Authorization (EIP-7702)
+                     ↓
+              Signs Operation (EIP-712)
+                     ↓
+              Sends to Relayer
+                     ↓
+         Relayer Verifies & Submits
+                     ↓
+          Transaction Executes Gaslessly
+```
+
+## Tech Stack
+
+**Frontend:**
+- React 19 + TypeScript
+- Viem 2.37 for Ethereum interactions
+- LibHalo for NFC card communication
+- Framer Motion for animations
+- Moloch design tokens
+
+**Contracts:**
+- Solidity 0.8.30
+- Foundry for development
+- EIP-7702 for delegation
+- ERC6909 for multi-token staking
+- EIP-712 for typed signatures
+
+**Relayer:**
+- Cloudflare Workers
+- Viem for transaction submission
+- CORS-enabled for browser requests
 
 ## Development
 
-To work on the frontend:
-
+### Build Tokens
 ```bash
 cd packages/frontend
-npm run dev  # Hot reload enabled
+npm run build:tokens
 ```
 
-To set up contracts (requires Foundry):
-
+### Run Tests (Contracts)
 ```bash
 cd packages/contracts
-forge init --no-commit .
+forge test
 ```
 
-## Troubleshooting
+### Run Tests (Relayer)
+```bash
+cd packages/relayer
+npm test
+```
 
-- **NFC not working**: Ensure Chrome has NFC permissions and your device supports Web NFC API
-- **Card not reading**: Check that your HaLo card is properly initialized with ECDSA keys
-- **Signature verification failing**: Ensure the card's key slot 1 is configured correctly
+### Deploy Contracts
+```bash
+cd packages/contracts
+forge script script/Deploy.s.sol --rpc-url optimism_sepolia --broadcast --verify
+```
+
+## Documentation
+
+- [Architecture Overview](.claude/knowledge/KNOWLEDGE_MAP_CLAUDE.md)
+- [EIP-7702 Integration](.claude/knowledge/architecture/nfc-wallet-integration.md)
+- [Mainnet Deployment Guide](MAINNET_DEPLOYMENT.md)
+- [Design System](packages/frontend/design-system/)
+
+## Contributing
+
+This project uses:
+- **Biome** for linting and formatting (`npm run check:write`)
+- **Git hooks** for pre-commit checks (`npm run install-hooks`)
+
+## License
+
+MIT
