@@ -107,8 +107,10 @@ export function ConnectPage() {
         errorObj.message.includes("WebAuthn") ||
         errorObj.message.includes("NFC")
       ) {
-        errorMessage =
-          "Card reader not detected. Please tap your card when prompted.";
+        errorMessage = `NFC cards are only supported on mobile Chrome or Safari.
+          Desktop use is not supported.
+          If already using the correct browser, try refreshing.
+          You must use the Chrome/Safari app directly, not—for example—through the Telegram internal browser.`;
       } else if (errorObj.message.includes("timeout")) {
         errorMessage = "Connection timed out. Please try again.";
       } else if (

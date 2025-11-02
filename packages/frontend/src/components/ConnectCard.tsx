@@ -1,5 +1,7 @@
 import type React from "react";
+import { Link } from "react-router-dom";
 import { ASSETS } from "../config/assets";
+import { CHAIN_ID } from "../config/chain";
 import { Button } from "./Button";
 import styles from "./ConnectCard.module.css";
 import { GameCard } from "./GameCard";
@@ -48,6 +50,25 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({
       ) : error ? (
         <div className={styles.errorText}>
           <p>{error}</p>
+          {/* Show testnet-only helper links on Optimism Sepolia */}
+          {CHAIN_ID === 11155420 && (
+            <>
+              {/* Link for NFC connection errors */}
+              {(error.includes("NFC") || error.includes("WebAuthn")) && (
+                <p className={styles.testnetLink}>
+                  <Link to="/test">
+                    Go to the test page to generate a test hot wallet (this works on both desktop and mobile)
+                  </Link>
+                </p>
+              )}
+              {/* Link for zero balance errors */}
+              {error.includes("0 GTC") && (
+                <p className={styles.testnetLink}>
+                  <Link to="/test">Mint test GTC to your burner here</Link>
+                </p>
+              )}
+            </>
+          )}
         </div>
       ) : (
         <div className={styles.detailText}>

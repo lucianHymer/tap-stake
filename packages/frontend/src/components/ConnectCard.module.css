@@ -78,6 +78,8 @@
   padding: var(--core-spacing-2);
   min-height: 100px;
   display: flex;
+  flex-direction: column;
+  gap: 16px;
   align-items: center;
   justify-content: center;
 }
@@ -87,4 +89,20 @@
   font-size: var(--core-type-size-sm);
   margin: 0;
   font-family: var(--core-type-font-family-serif);
+}
+
+.testnetLink {
+  margin-top: 8px;
+}
+
+.testnetLink a {
+  color: var(--core-color-accent-yellow);
+  text-decoration: underline;
+  font-family: var(--core-type-font-family-serif);
+  font-size: 18px;
+  transition: color var(--core-motion-fast) var(--core-motion-easing-in-out);
+}
+
+.testnetLink a:hover {
+  color: var(--core-color-neon-green);
 }
