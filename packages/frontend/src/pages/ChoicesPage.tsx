@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { http, createPublicClient, parseEther } from "viem";
-import { optimismSepolia } from "viem/chains";
 import { ChoicesCard } from "../components/ChoicesCard";
 import { PageWrapper } from "../components/PageWrapper";
+import { CHAIN } from "../config/chain";
 import { CONTRACTS } from "../config/contracts";
 import { useAppContext } from "../contexts/AppContext";
 import { CHOICE_NAMES } from "../utils/balances";
@@ -46,7 +46,7 @@ export function ChoicesPage() {
   const navigate = useNavigate();
 
   const publicClient = createPublicClient({
-    chain: optimismSepolia,
+    chain: CHAIN,
     transport: http(),
   });
 
@@ -141,7 +141,7 @@ export function ChoicesPage() {
 
       const authorization = await account.signAuthorization?.({
         address: CONTRACTS.stakerWallet,
-        chainId: optimismSepolia.id,
+        chainId: CHAIN.id,
         nonce: txNonce,
       });
 

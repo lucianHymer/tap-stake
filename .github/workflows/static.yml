@@ -41,6 +41,8 @@ jobs:
       - name: Build
         env:
           VITE_RELAYER_URL: ${{ vars.VITE_RELAYER_URL }}
+          # Chain ID: 11155420 = Optimism Sepolia (testnet), 10 = Optimism Mainnet
+          VITE_CHAIN_ID: "11155420"
         run: npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v5

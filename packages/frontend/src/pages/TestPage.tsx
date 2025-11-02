@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { http, createPublicClient, formatEther, parseEther } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { optimismSepolia } from "viem/chains";
 import { Button } from "../components/Button";
 import { PageWrapper } from "../components/PageWrapper";
+import { CHAIN } from "../config/chain";
 import { useAppContext } from "../contexts/AppContext";
 import { getCardData } from "../lib/nfc";
 import { checkBalances } from "../utils/balances";
@@ -19,7 +19,7 @@ export function TestPage() {
   const [error, setError] = useState<string | null>(null);
 
   const publicClient = createPublicClient({
-    chain: optimismSepolia,
+    chain: CHAIN,
     transport: http(),
   });
 
@@ -43,7 +43,6 @@ export function TestPage() {
       // 2. Check current holdings (wallet + all stakes)
       console.log("🎴 Test: Checking balances...");
       const { walletBalance, existingStakes } = await checkBalances(
-        // @ts-expect-error - Optimism chain adds deposit transaction type not in base viem types
         publicClient,
         address,
       );

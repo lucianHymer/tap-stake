@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { http, createPublicClient, formatEther } from "viem";
-import { optimismSepolia } from "viem/chains";
 import { PageWrapper } from "../components/PageWrapper";
 import { WithdrawCard } from "../components/WithdrawCard";
+import { CHAIN } from "../config/chain";
 import { CONTRACTS } from "../config/contracts";
 import { useAppContext } from "../contexts/AppContext";
 import { CHOICE_ID_MAPPING } from "../utils/balances";
@@ -28,7 +28,7 @@ export function WithdrawPage() {
   );
 
   const publicClient = createPublicClient({
-    chain: optimismSepolia,
+    chain: CHAIN,
     transport: http(),
   });
 
@@ -75,7 +75,7 @@ export function WithdrawPage() {
 
       const authorization = await account.signAuthorization?.({
         address: CONTRACTS.stakerWallet,
-        chainId: optimismSepolia.id,
+        chainId: CHAIN.id,
         nonce: txNonce,
       });
 

@@ -1,12 +1,13 @@
-import { mainnet, optimismSepolia } from "viem/chains";
+import { mainnet } from "viem/chains";
 import { http, createConfig } from "wagmi";
 import { injected } from "wagmi/connectors";
+import { CHAIN } from "./chain";
 
 export const wagmiConfig = createConfig({
-  chains: [optimismSepolia, mainnet],
+  chains: [CHAIN, mainnet],
   connectors: [injected()],
   transports: {
-    [optimismSepolia.id]: http(),
+    [CHAIN.id]: http(),
     [mainnet.id]: http(), // Required for ENS resolution
   },
 });
