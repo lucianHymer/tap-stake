@@ -147,6 +147,7 @@
   border-radius: var(--core-radius-sm);
   padding: 1.5rem;
   color: var(--semantic-text-primary);
+  font-size: var(--core-type-size-md);
   text-align: center;
   box-shadow: var(--core-shadow-glow-red);
 }
