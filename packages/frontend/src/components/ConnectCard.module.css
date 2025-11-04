@@ -86,7 +86,7 @@
 
 .errorText p {
   color: var(--semantic-status-error);
-  font-size: var(--core-type-size-sm);
+  font-size: var(--core-type-size-md);
   margin: 0;
   font-family: var(--core-type-font-family-serif);
 }

@@ -64,7 +64,7 @@
   background: rgba(245, 3, 3, 0.1);
   color: var(--semantic-status-error);
   text-align: center;
-  font-size: 14px;
+  font-size: var(--core-type-size-md);
 }
 
 .error strong {
