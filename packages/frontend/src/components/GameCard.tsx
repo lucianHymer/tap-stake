@@ -107,7 +107,7 @@ export const GameCard: React.FC<GameCardProps> = ({
     hintTimeoutRef.current = null;
 
     // Trigger the hint animation by rotating to 35deg with glow
-    setHintRotation(35);
+    setHintRotation(20);
     setShowHintGlow(true);
 
     // Return to 0 after a brief moment (spring will handle the animation)
