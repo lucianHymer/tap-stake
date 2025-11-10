@@ -180,7 +180,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
           <Button
             variant="primary"
             onClick={handleSlayMoloch}
-            disabled={selectedChoices.size === 0}
+            disabled={selectedChoices.size === 0 || transactionStatus === "signing" || transactionStatus === "submitting"}
           >
             Slay Moloch.
           </Button>
@@ -189,6 +189,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
             leftIcon={ASSETS.xIcon}
             rightIcon={ASSETS.xIcon}
             onClick={handleRunAway}
+            disabled={transactionStatus === "signing" || transactionStatus === "submitting"}
           >
             Run Away
           </Button>
