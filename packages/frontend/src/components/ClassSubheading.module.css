@@ -1,0 +1,62 @@
+/**
+ * ClassSubheading Component Styles
+ * Shows all 6 class icons with the current class name in the center
+ */
+
+@import "../styles/moloch-tokens.css";
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 8px;
+}
+
+/* Icon groups - fixed positioning from edges */
+.iconGroup {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Individual icon wrapper */
+.icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: white;
+  opacity: 0.4;
+}
+
+/* Highlighted/selected icon - use actual yellow color */
+.icon.active {
+  color: var(--core-color-accent-yellow);
+  opacity: 1;
+}
+
+/* Icon SVG and image styling */
+.icon svg,
+.icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Class name in center */
+.className {
+  width: 106px;
+  font-family: var(--core-type-font-family-display);
+  font-size: 31.25px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--semantic-text-primary);
+  white-space: nowrap;
+  margin: 0;
+  text-align: center;
+  flex: 0 1 auto;
+}

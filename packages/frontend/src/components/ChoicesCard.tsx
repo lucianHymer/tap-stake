@@ -5,7 +5,6 @@ import {
   CHOICES,
   SwordIcon,
   calculateClass,
-  getClassIcon,
   getClassImages,
 } from "../utils/classHelpers";
 import { Button } from "./Button";
@@ -13,6 +12,7 @@ import { ChoiceToggle } from "./ChoiceToggle";
 import styles from "./ChoicesCard.module.css";
 import { GameCard } from "./GameCard";
 import { StatsDisplay } from "./StatsDisplay";
+import { ClassSubheading } from "./ClassSubheading";
 
 export interface ChoicesCardProps {
   /** Callback when Slay Moloch button is clicked */
@@ -162,8 +162,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
       variant="default"
       heading="Choose your weapons..."
       headingIcons={[<SwordIcon key="sword" />]}
-      subheading={selectedClass}
-      subheadingIcon={getClassIcon(selectedClass)}
+      subheading={<ClassSubheading className={selectedClass} />}
       heroImage={classImages.choice}
       heroImageAlt={`${selectedClass} choosing weapons`}
       hintKey={selectedClass}
