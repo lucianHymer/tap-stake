@@ -192,11 +192,11 @@
 /* Subheading pill - more contained than image */
 .subheading {
   display: flex;
-  gap: 16px;
+  gap: 8px;
   align-items: center;
   justify-content: center;
   padding: 5px 64px;
-  width: 70%;
+  width: 330px;
   margin: 0 auto;
   background: var(--core-color-grey-700);
   border-radius: 99px;

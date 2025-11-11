@@ -10,9 +10,9 @@ export interface GameCardProps {
   heading: string;
   /** Icon elements for heading (hearts, etc) */
   headingIcons?: React.ReactNode[];
-  /** Subheading text */
-  subheading: string;
-  /** Icon element for subheading */
+  /** Subheading - can be a string or React node for custom content */
+  subheading: string | React.ReactNode;
+  /** Icon element for subheading (deprecated - use React node in subheading instead) */
   subheadingIcon?: React.ReactNode;
   /** Hero/main image URL */
   heroImage: string;
@@ -292,9 +292,15 @@ export const GameCard: React.FC<GameCardProps> = ({
           <div className={styles.subheadingContainer}>
             {/* Subheading pill - contained within image */}
             <div className={styles.subheading}>
-              <p>{subheading}</p>
-              {subheadingIcon && (
-                <div className={styles.subheadingIcon}>{subheadingIcon}</div>
+              {typeof subheading === "string" ? (
+                <>
+                  <p>{subheading}</p>
+                  {subheadingIcon && (
+                    <div className={styles.subheadingIcon}>{subheadingIcon}</div>
+                  )}
+                </>
+              ) : (
+                subheading
               )}
             </div>
           </div>

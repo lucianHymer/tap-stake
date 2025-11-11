@@ -94,8 +94,12 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
         <div className={`${styles.statsDisplay} ${className}`}>
           <div className={styles.classInfo}>
             <p className={styles.description}>
-              You have 100 GTC to spread amongst these choices. It'll be spread
-              evenly. Your choices will determine your stats and class.
+              You have 100 GTC to spread amongst these choices. Your choices will determine your stats. Your top stats
+              determine your class.
+            </p>
+            <br />
+            <p className={styles.description}>
+              Return here to see class descriptions.
             </p>
           </div>
         </div>

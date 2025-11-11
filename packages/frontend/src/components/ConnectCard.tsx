@@ -38,7 +38,7 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({
       heroImage={ASSETS.burnerTap}
       heroImageAlt="Tap your burner card"
       primaryAction={
-        <Button variant="outline" onClick={onConnect}>
+        <Button variant="outline" onClick={onConnect} disabled={isConnecting}>
           Connect
         </Button>
       }
