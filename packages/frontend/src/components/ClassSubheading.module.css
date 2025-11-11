@@ -28,15 +28,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
   color: white;
-  opacity: 0.4;
+  cursor: pointer;
+  /* Remove CSS transitions - handled by Framer Motion */
 }
 
 /* Highlighted/selected icon - use actual yellow color */
 .icon.active {
   color: var(--core-color-accent-yellow);
-  opacity: 1;
+  /* Opacity handled by Framer Motion */
 }
 
 /* Icon SVG and image styling */
