@@ -1,5 +1,11 @@
 import type React from "react";
 import {
+  LazyMotion,
+  domAnimation,
+  m,
+  AnimatePresence,
+} from "framer-motion";
+import {
   WandIcon,
   SpellIcon,
   PlantIcon,
@@ -33,37 +39,106 @@ export const ClassSubheading: React.FC<ClassSubheadingProps> = ({ className }) =
   const displayName = className === "Decide" ? "Undecided" : className;
 
   return (
-    <div className={styles.container}>
-      {/* Left group of icons */}
-      <div className={styles.iconGroup}>
-        {leftIcons.map((item) => (
-          <div
-            key={item.name}
-            className={`${styles.icon} ${
-              className === item.name ? styles.active : ""
-            }`}
-          >
-            {item.icon}
-          </div>
-        ))}
-      </div>
+    <LazyMotion features={domAnimation}>
+      <div className={styles.container}>
+        {/* Left group of icons */}
+        <div className={styles.iconGroup}>
+          {leftIcons.map((item) => {
+            const isActive = className === item.name;
+            return (
+              <m.div
+                key={item.name}
+                className={`${styles.icon} ${isActive ? styles.active : ""}`}
+                animate={{
+                  scale: isActive ? 1.2 : 1,
+                  opacity: isActive ? 1 : 0.4,
+                  rotate: isActive ? [0, -5, 5, 0] : 0,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 25,
+                  mass: 0.5,
+                  rotate: {
+                    duration: 0.4,
+                    ease: "easeInOut",
+                  }
+                }}
+                whileHover={!isActive ? {
+                  scale: 1.1,
+                  opacity: 0.7,
+                  rotate: [-2, 2, -2, 2, 0],
+                  transition: {
+                    duration: 0.3,
+                    rotate: {
+                      duration: 0.4,
+                      ease: "easeInOut"
+                    }
+                  }
+                } : {}}
+              >
+                {item.icon}
+              </m.div>
+            );
+          })}
+        </div>
 
-      {/* Class name in center */}
-      <p className={styles.className}>{displayName}</p>
-
-      {/* Right group of icons */}
-      <div className={styles.iconGroup}>
-        {rightIcons.map((item) => (
-          <div
-            key={item.name}
-            className={`${styles.icon} ${
-              className === item.name ? styles.active : ""
-            }`}
+        {/* Class name in center with fade transition */}
+        <AnimatePresence mode="wait">
+          <m.p
+            key={displayName}
+            className={styles.className}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
           >
-            {item.icon}
-          </div>
-        ))}
+            {displayName}
+          </m.p>
+        </AnimatePresence>
+
+        {/* Right group of icons */}
+        <div className={styles.iconGroup}>
+          {rightIcons.map((item) => {
+            const isActive = className === item.name;
+            return (
+              <m.div
+                key={item.name}
+                className={`${styles.icon} ${isActive ? styles.active : ""}`}
+                animate={{
+                  scale: isActive ? 1.2 : 1,
+                  opacity: isActive ? 1 : 0.4,
+                  rotate: isActive ? [0, -5, 5, 0] : 0,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 25,
+                  mass: 0.5,
+                  rotate: {
+                    duration: 0.4,
+                    ease: "easeInOut",
+                  }
+                }}
+                whileHover={!isActive ? {
+                  scale: 1.1,
+                  opacity: 0.7,
+                  rotate: [-2, 2, -2, 2, 0],
+                  transition: {
+                    duration: 0.3,
+                    rotate: {
+                      duration: 0.4,
+                      ease: "easeInOut"
+                    }
+                  }
+                } : {}}
+              >
+                {item.icon}
+              </m.div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </LazyMotion>
   );
 };
