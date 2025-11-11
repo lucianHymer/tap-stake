@@ -6,7 +6,6 @@ import { PageWrapper } from "../components/PageWrapper";
 import { CHAIN } from "../config/chain";
 import { CONTRACTS } from "../config/contracts";
 import { useAppContext } from "../contexts/AppContext";
-import { CHOICE_NAMES } from "../utils/balances";
 import {
   calculateAvailableAmount,
   calculateOptimisticBalances,
@@ -50,16 +49,16 @@ export function ChoicesPage() {
     transport: http(),
   });
 
-  // Initialize: Select all 6 choices by default if no existing stakes
+  // Initialize: Start with nothing selected if no existing stakes, otherwise pre-select existing
   useEffect(() => {
     if (
       state.balances.existingStakes.size === 0 &&
       state.selectedChoices.size === 0
     ) {
       console.log(
-        "✨ Choices: No existing stakes, selecting all choices by default",
+        "✨ Choices: No existing stakes, starting with undecided view",
       );
-      actions.setSelectedChoices(new Set(CHOICE_NAMES));
+      // Don't select anything - start with undecided view
     } else if (
       state.balances.existingStakes.size > 0 &&
       state.selectedChoices.size === 0
