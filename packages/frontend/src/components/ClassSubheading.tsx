@@ -50,7 +50,6 @@ export const ClassSubheading: React.FC<ClassSubheadingProps> = ({ className }) =
                 key={item.name}
                 className={`${styles.icon} ${isActive ? styles.active : ""}`}
                 animate={{
-                  scale: isActive ? 1.2 : 1,
                   opacity: isActive ? 1 : 0.4,
                   rotate: isActive ? [0, -5, 5, 0] : 0,
                 }}
@@ -65,7 +64,6 @@ export const ClassSubheading: React.FC<ClassSubheadingProps> = ({ className }) =
                   }
                 }}
                 whileHover={!isActive ? {
-                  scale: 1.1,
                   opacity: 0.7,
                   rotate: [-2, 2, -2, 2, 0],
                   transition: {
@@ -106,7 +104,6 @@ export const ClassSubheading: React.FC<ClassSubheadingProps> = ({ className }) =
                 key={item.name}
                 className={`${styles.icon} ${isActive ? styles.active : ""}`}
                 animate={{
-                  scale: isActive ? 1.2 : 1,
                   opacity: isActive ? 1 : 0.4,
                   rotate: isActive ? [0, -5, 5, 0] : 0,
                 }}
@@ -121,7 +118,6 @@ export const ClassSubheading: React.FC<ClassSubheadingProps> = ({ className }) =
                   }
                 }}
                 whileHover={!isActive ? {
-                  scale: 1.1,
                   opacity: 0.7,
                   rotate: [-2, 2, -2, 2, 0],
                   transition: {
