@@ -81,7 +81,7 @@ const promptForPasscode = async (): Promise<string | null> => {
   return passcode;
 };
 
-export const getCardData = async (): Promise<NFCCardData> => {
+export const getCardData = async (onBeforeTap?: () => void): Promise<NFCCardData> => {
   console.log("📱 NFC: Starting getCardData...");
   console.log("📱 NFC: Platform:", {
     userAgent: navigator.userAgent,
@@ -99,6 +99,10 @@ export const getCardData = async (): Promise<NFCCardData> => {
 
     // Get slot 8 using get_key_info command
     console.log("📱 NFC: Getting slot 8 with get_key_info command...");
+
+    // Call the callback right before the actual NFC prompt
+    onBeforeTap?.();
+
     const slot8Result = await execHaloCmdWeb({
       name: "get_key_info",
       keyNo: 8,

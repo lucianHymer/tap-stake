@@ -51,10 +51,10 @@ export function ConnectPage() {
         // Connect NFC - always prompt for tap (NFC accounts don't persist)
         console.log("🔗 Connect: Reading NFC card...");
 
-        // Update status to show tap message right before initiating NFC
-        setConnectStatus("waiting_for_tap");
-
-        const cardData = await getCardData();
+        const cardData = await getCardData(() => {
+          // This callback is called right before the NFC prompt appears
+          setConnectStatus("waiting_for_tap");
+        });
         address = cardData.address;
         account = createNFCAccount(address);
 

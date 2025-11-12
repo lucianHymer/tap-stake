@@ -11,6 +11,25 @@ LibHalo enables NFC card wallets through a callback-based architecture:
 
 **Related files**: viem_account.ts, index.ts, Burner.tsx
 
+## NFC Key Slot 8 Password Protection
+Key slot 8 on HaLo cards requires password protection with default passcode "0000":
+
+### Implementation Requirements
+1. **Parameters**: Must provide three parameters together: keyNo, password, and publicKeyHex
+2. **Error handling**:
+   - ERROR_CODE_WRONG_PWD for incorrect password
+   - ERROR_CODE_INVALID_DATA when missing password
+3. **Failed authentication tracking**: keySlotFailedAuthCtr tracks failed attempts
+4. **Password format**: UTF-8 string, 6-32 bytes
+
+### Authentication Flow
+1. First try default "0000" passcode
+2. If default fails, prompt user for custom passcode
+3. Store successful passcode in localStorage for future use
+4. Unlike slot 1, slot 8 requires password even for basic operations
+
+**Related files**: packages/frontend/src/lib/nfc.ts
+
 ## EOA Paymaster Support on Optimism (2024-2025)
 Multiple approaches for EOA gas sponsorship without smart wallets:
 1. **Circle Paymaster**: Now supports EOAs directly on 7 chains including Optimism, using USDC for gas
