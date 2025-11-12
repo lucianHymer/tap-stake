@@ -201,7 +201,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
             <p className={styles.statusText}>Preparing...</p>
           )}
           {transactionStatus === "signing" && (
-            <p className={styles.statusText}>Tap your card now...</p>
+            <p className={styles.statusText}>Tap your card when prompted...</p>
           )}
           {transactionStatus === "submitting" && (
             <p className={styles.statusText}>Submitting transaction...</p>

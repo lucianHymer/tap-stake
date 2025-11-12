@@ -51,7 +51,7 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({
         </div>
       ) : connectStatus === "waiting_for_tap" ? (
         <div className={styles.statusText}>
-          <p>Tap your card now...</p>
+          <p>Tap your card when prompted...</p>
         </div>
       ) : error ? (
         <div className={styles.errorText}>

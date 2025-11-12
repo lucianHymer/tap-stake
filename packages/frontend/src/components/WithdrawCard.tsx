@@ -81,7 +81,7 @@ export const WithdrawCard: React.FC<WithdrawCardProps> = ({
             <p className={styles.statusText}>Preparing...</p>
           )}
           {transactionStatus === "signing" && (
-            <p className={styles.statusText}>Tap your card now...</p>
+            <p className={styles.statusText}>Tap your card when prompted...</p>
           )}
           {transactionStatus === "submitting" && (
             <p className={styles.statusText}>Submitting withdrawal...</p>
