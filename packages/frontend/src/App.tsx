@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { WagmiProvider } from "wagmi";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { CHAIN_ID } from "./config/chain";
 import { wagmiConfig } from "./config/wagmi";
 import { AppProvider } from "./contexts/AppContext";
 import { ChoicesPage } from "./pages/ChoicesPage";
@@ -64,17 +65,22 @@ function App() {
                 }
               />
 
-              {/* Test/setup page */}
-              <Route path="/test" element={<TestSetupPage />} />
+              {/* Testnet-only routes */}
+              {CHAIN_ID === 11155420 && (
+                <>
+                  {/* Test/setup page for testnet token minting */}
+                  <Route path="/test" element={<TestSetupPage />} />
+
+                  {/* Slot 8 test page */}
+                  <Route path="/slot8" element={<Slot8Test />} />
+                </>
+              )}
 
               {/* Public stats page */}
               <Route path="/stats" element={<StatsPage />} />
 
               {/* Admin and demos */}
               <Route path="/admin" element={<AdminPage />} />
-
-              {/* Slot 8 test page */}
-              <Route path="/slot8" element={<Slot8Test />} />
             </Routes>
           </HashRouter>
         </AppProvider>

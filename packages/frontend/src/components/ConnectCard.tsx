@@ -70,7 +70,7 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({
               {/* Link for zero balance errors */}
               {error.includes("0 GTC") && (
                 <p className={styles.testnetLink}>
-                  <Link to="/test">Mint test GTC to your burner here</Link>
+                  <Link to="/test">Get testnet GTC for your burner</Link>
                 </p>
               )}
             </>
