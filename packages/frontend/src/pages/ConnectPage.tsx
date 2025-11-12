@@ -13,7 +13,7 @@ import { calculateTotalHoldings } from "../utils/staking";
 export function ConnectPage() {
   const { actions } = useAppContext();
   const navigate = useNavigate();
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectStatus, setConnectStatus] = useState<"idle" | "processing" | "waiting_for_tap">("idle");
   const [error, setError] = useState<string | null>(null);
 
   const publicClient = createPublicClient({
@@ -22,7 +22,7 @@ export function ConnectPage() {
   });
 
   const handleConnect = async () => {
-    setIsConnecting(true);
+    setConnectStatus("processing");
     setError(null);
 
     try {
@@ -50,6 +50,10 @@ export function ConnectPage() {
       } else {
         // Connect NFC - always prompt for tap (NFC accounts don't persist)
         console.log("🔗 Connect: Reading NFC card...");
+
+        // Update status to show tap message right before initiating NFC
+        setConnectStatus("waiting_for_tap");
+
         const cardData = await getCardData();
         address = cardData.address;
         account = createNFCAccount(address);
@@ -122,7 +126,7 @@ export function ConnectPage() {
 
       setError(errorMessage);
     } finally {
-      setIsConnecting(false);
+      setConnectStatus("idle");
     }
   };
 
@@ -131,7 +135,7 @@ export function ConnectPage() {
       <ConnectCard
         onConnect={handleConnect}
         error={error}
-        isConnecting={isConnecting}
+        connectStatus={connectStatus}
       />
     </PageWrapper>
   );

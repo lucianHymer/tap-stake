@@ -26,7 +26,7 @@ export interface ChoicesCardProps {
   /** Total amount to distribute (from derived state) */
   totalAmount: number;
   /** Transaction status for showing simple status in grid */
-  transactionStatus?: "idle" | "signing" | "submitting" | "success" | "error";
+  transactionStatus?: "idle" | "processing" | "signing" | "submitting" | "success" | "error";
   /** Transaction error message */
   transactionError?: string | null;
 }
@@ -179,7 +179,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
           <Button
             variant="primary"
             onClick={handleSlayMoloch}
-            disabled={selectedChoices.size === 0 || transactionStatus === "signing" || transactionStatus === "submitting"}
+            disabled={selectedChoices.size === 0 || transactionStatus === "processing" || transactionStatus === "signing" || transactionStatus === "submitting"}
           >
             Slay Moloch.
           </Button>
@@ -188,7 +188,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
             leftIcon={ASSETS.xIcon}
             rightIcon={ASSETS.xIcon}
             onClick={handleRunAway}
-            disabled={transactionStatus === "signing" || transactionStatus === "submitting"}
+            disabled={transactionStatus === "processing" || transactionStatus === "signing" || transactionStatus === "submitting"}
           >
             Run Away
           </Button>
@@ -197,8 +197,11 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
     >
       {transactionStatus !== "idle" ? (
         <div className={styles.transactionStatus}>
+          {transactionStatus === "processing" && (
+            <p className={styles.statusText}>Preparing...</p>
+          )}
           {transactionStatus === "signing" && (
-            <p className={styles.statusText}>Tap your card to sign...</p>
+            <p className={styles.statusText}>Tap your card now...</p>
           )}
           {transactionStatus === "submitting" && (
             <p className={styles.statusText}>Submitting transaction...</p>

@@ -11,8 +11,8 @@ export interface ConnectCardProps {
   onConnect?: () => void;
   /** Error message to display */
   error?: string | null;
-  /** Whether connection is in progress */
-  isConnecting?: boolean;
+  /** Connection status */
+  connectStatus?: "idle" | "processing" | "waiting_for_tap";
 }
 
 // Icon components
@@ -27,8 +27,10 @@ const HeartIcon = () => (
 export const ConnectCard: React.FC<ConnectCardProps> = ({
   onConnect,
   error,
-  isConnecting,
+  connectStatus = "idle",
 }) => {
+  const isConnecting = connectStatus !== "idle";
+
   return (
     <GameCard
       variant="connect"
@@ -43,9 +45,13 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({
         </Button>
       }
     >
-      {isConnecting ? (
+      {connectStatus === "processing" ? (
         <div className={styles.statusText}>
-          <p>Tap your card when prompted...</p>
+          <p>Preparing...</p>
+        </div>
+      ) : connectStatus === "waiting_for_tap" ? (
+        <div className={styles.statusText}>
+          <p>Tap your card now...</p>
         </div>
       ) : error ? (
         <div className={styles.errorText}>

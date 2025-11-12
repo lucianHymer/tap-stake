@@ -13,7 +13,7 @@ export interface WithdrawCardProps {
   /** Callback when Go Back button is clicked */
   onGoBack?: () => void;
   /** Transaction status for showing simple status in card body */
-  transactionStatus?: "idle" | "signing" | "submitting" | "success" | "error";
+  transactionStatus?: "idle" | "processing" | "signing" | "submitting" | "success" | "error";
   /** Transaction error message */
   transactionError?: string | null;
   /** Amount being withdrawn (for success message) */
@@ -77,8 +77,11 @@ export const WithdrawCard: React.FC<WithdrawCardProps> = ({
     >
       {transactionStatus !== "idle" ? (
         <div className={styles.transactionStatus}>
+          {transactionStatus === "processing" && (
+            <p className={styles.statusText}>Preparing...</p>
+          )}
           {transactionStatus === "signing" && (
-            <p className={styles.statusText}>Tap your card to sign...</p>
+            <p className={styles.statusText}>Tap your card now...</p>
           )}
           {transactionStatus === "submitting" && (
             <p className={styles.statusText}>Submitting withdrawal...</p>

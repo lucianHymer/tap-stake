@@ -10,6 +10,7 @@ import { SlainPage } from "./pages/SlainPage";
 import { StatsPage } from "./pages/StatsPage";
 import { TestPage as TestSetupPage } from "./pages/TestPage";
 import { WithdrawPage } from "./pages/WithdrawPage";
+import Slot8Test from "./pages/Slot8Test";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -71,6 +72,9 @@ function App() {
 
               {/* Admin and demos */}
               <Route path="/admin" element={<AdminPage />} />
+
+              {/* Slot 8 test page */}
+              <Route path="/slot8" element={<Slot8Test />} />
             </Routes>
           </HashRouter>
         </AppProvider>
