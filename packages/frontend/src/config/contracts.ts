@@ -4,11 +4,14 @@ import type { Address } from "viem";
  * Chain-specific contract addresses
  * Update these after deploying to each network
  */
-const CONTRACTS_BY_CHAIN: Record<number, {
-  stakeToken: Address;
-  stakeChoicesToken: Address;
-  stakerWallet: Address;
-}> = {
+const CONTRACTS_BY_CHAIN: Record<
+  number,
+  {
+    stakeToken: Address;
+    stakeChoicesToken: Address;
+    stakerWallet: Address;
+  }
+> = {
   // Optimism Sepolia (testnet)
   11155420: {
     stakeToken: "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756" as Address, // TestERC20 on Sepolia
@@ -18,9 +21,9 @@ const CONTRACTS_BY_CHAIN: Record<number, {
   // Optimism Mainnet
   10: {
     stakeToken: "0x1EBa7a6a72c894026Cd654AC5CDCF83A46445B08" as Address, // GTC token on Optimism
-    stakeChoicesToken: "0x0000000000000000000000000000000000000000" as Address, // UPDATE AFTER DEPLOYMENT
-    stakerWallet: "0x0000000000000000000000000000000000000000" as Address, // UPDATE AFTER DEPLOYMENT
-  }
+    stakeChoicesToken: "0x67f18cDa427b2BB5128A5C33a7D70F13C6FFeed4" as Address,
+    stakerWallet: "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756" as Address,
+  },
 };
 
 // Get the current chain ID from environment

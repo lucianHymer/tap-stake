@@ -1,60 +1,88 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {Script, console} from "forge-std/Script.sol";
 import {StakerWallet} from "../src/StakerWallet.sol";
+import {StakeChoicesFactory} from "../src/StakeChoicesFactory.sol";
 import {StakeChoicesERC6909} from "../src/StakeChoicesERC6909.sol";
+import {TestERC20} from "../src/TestERC20.sol";
 
-/**
- * @title DeployMainnet
- * @notice Deployment script for Optimism Mainnet
- * @dev Deploys only production contracts (no test tokens)
- */
-contract DeployMainnet is Script {
-    // GTC token on Optimism Mainnet
-    address constant GTC_TOKEN = 0x1EBa7a6a72c894026Cd654AC5CDCF83A46445B08;
-
-    // Production configuration
-    uint256 constant MINIMUM_HOLDINGS = 90 ether; // 90 GTC minimum
-    uint256 constant MAX_STAKE_PER_TX = 100 ether; // 100 GTC max per transaction
-
-    function run() public {
+contract DeployScript is Script {
+    function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address deployer = vm.addr(deployerPrivateKey);
-
-        console2.log("Deploying to Optimism Mainnet with account:", deployer);
-        console2.log("Using GTC token at:", GTC_TOKEN);
+        address deployerAddress = vm.addr(deployerPrivateKey);
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // Deploy StakeChoicesERC6909
-        StakeChoicesERC6909 stakeChoices = new StakeChoicesERC6909();
-        console2.log("StakeChoicesERC6909 deployed at:", address(stakeChoices));
+        console.log("Deployer address:", deployerAddress);
 
-        // Deploy StakerWallet with production configuration
+        address tokenAddress = 0x1EBA7a6a72c894026Cd654AC5CDCF83A46445B08;
+        console.log("Using existing GTC contract at:", tokenAddress);
+
+        // Deploy StakeChoicesFactory
+        StakeChoicesFactory factory = new StakeChoicesFactory();
+        console.log("StakeChoicesFactory deployed at:", address(factory));
+        console.log("  Implementation at:", factory.implementation());
+
+        // Deploy first multi-toke
+        address multiToken = factory.deployToken(tokenAddress, "Staked GTC");
+        console.log("Stakend GTC StakeChoicesERC6909 multiToken deployed at:", multiToken);
+
+        // Register 6 choices
+        StakeChoicesERC6909 stakeChoices = StakeChoicesERC6909(multiToken);
+        string[6] memory choiceNames = [
+            "Staked GTC - Karma",
+            "Staked GTC - Giveth",
+            "Staked GTC - Gardens",
+            "Staked GTC - Deep Funding",
+            "Staked GTC - Privote",
+            "Staked GTC - Silvi"
+        ];
+        string[6] memory choiceSymbols = [
+            unicode"🥩GTC-Karma",
+            unicode"🥩GTC-Giveth",
+            unicode"🥩GTC-Gardens",
+            unicode"🥩GTC-DeepFunding",
+            unicode"🥩GTC-Privote",
+            unicode"🥩GTC-Silvi"
+        ];
+
+        for (uint256 i = 0; i < 6; i++) {
+            bytes32 salt = bytes32(i + 1);
+            string memory uri = string(
+                abi.encodePacked(
+                    "data:application/json,{\"name\":\"",
+                    choiceNames[i],
+                    "\",\"symbol\":\"",
+                    choiceSymbols[i],
+                    "\",\"decimals\":18}"
+                )
+            );
+            stakeChoices.registerChoice(salt, choiceNames[i], choiceSymbols[i], uri);
+            uint256 choiceId = stakeChoices.computeId(deployerAddress, salt);
+            console.log("Registered choice", i + 1);
+            console.log("  Name:", choiceNames[i]);
+            console.log("  Salt:", uint256(salt));
+            console.log("  Choice ID:", choiceId);
+        }
+
+        // Check if RELAYER_ADDRESS is set, otherwise revert
+        address relayerAddress = vm.envAddress("RELAYER_ADDRESS");
+        require(relayerAddress != address(0), "RELAYER_ADDRESS must be set");
+        console.log("Using relayer address:", relayerAddress);
+
         StakerWallet stakerWallet = new StakerWallet(
-            address(stakeChoices),
-            GTC_TOKEN,
-            MINIMUM_HOLDINGS,
-            MAX_STAKE_PER_TX,
-            deployer // Set deployer as initial relayer
+            tokenAddress,
+            multiToken,
+            relayerAddress,
+            100 ether // MAX_STAKE_PER_TX
         );
-        console2.log("StakerWallet deployed at:", address(stakerWallet));
-
-        // Set StakerWallet as approved spender on StakeChoicesERC6909
-        stakeChoices.setApprovedSpender(address(stakerWallet), true);
-        console2.log("StakerWallet approved as spender on StakeChoicesERC6909");
+        console.log("StakerWallet deployed at:", address(stakerWallet));
+        console.log("  Token:", tokenAddress);
+        console.log("  StakeChoices:", multiToken);
+        console.log("  Relayer:", relayerAddress);
+        console.log("  Max amount per tx:", stakerWallet.maxAmountPerTx());
 
         vm.stopBroadcast();
-
-        // Output deployment summary
-        console2.log("\n=== MAINNET DEPLOYMENT COMPLETE ===");
-        console2.log("GTC Token:", GTC_TOKEN);
-        console2.log("StakeChoicesERC6909:", address(stakeChoices));
-        console2.log("StakerWallet:", address(stakerWallet));
-        console2.log("Relayer:", deployer);
-        console2.log("\nUpdate these addresses in:");
-        console2.log("- packages/frontend/src/config/contracts.ts");
-        console2.log("- packages/relayer/wrangler.toml");
     }
 }
