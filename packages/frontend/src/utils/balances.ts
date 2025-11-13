@@ -69,7 +69,7 @@ export async function checkBalances(
 
   // Check wallet balance (ERC20)
   const walletBalance = await publicClient.readContract({
-    address: CONTRACTS.testToken,
+    address: CONTRACTS.stakeToken,
     abi: ERC20_ABI,
     functionName: "balanceOf",
     args: [address],

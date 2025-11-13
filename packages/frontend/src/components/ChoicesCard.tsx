@@ -26,9 +26,11 @@ export interface ChoicesCardProps {
   /** Total amount to distribute (from derived state) */
   totalAmount: number;
   /** Transaction status for showing simple status in grid */
-  transactionStatus?: "idle" | "signing" | "submitting" | "success" | "error";
+  transactionStatus?: "idle" | "processing" | "signing" | "submitting" | "success" | "error";
   /** Transaction error message */
   transactionError?: string | null;
+  /** Callback to reset transaction status after error */
+  onReset?: () => void;
 }
 
 export const ChoicesCard: React.FC<ChoicesCardProps> = ({
@@ -39,6 +41,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
   totalAmount,
   transactionStatus = "idle",
   transactionError,
+  onReset,
 }) => {
 
   // Calculate amount per choice (evenly distributed)
@@ -179,7 +182,7 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
           <Button
             variant="primary"
             onClick={handleSlayMoloch}
-            disabled={selectedChoices.size === 0 || transactionStatus === "signing" || transactionStatus === "submitting"}
+            disabled={selectedChoices.size === 0 || transactionStatus === "processing" || transactionStatus === "signing" || transactionStatus === "submitting"}
           >
             Slay Moloch.
           </Button>
@@ -187,18 +190,21 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
             variant="cancel"
             leftIcon={ASSETS.xIcon}
             rightIcon={ASSETS.xIcon}
-            onClick={handleRunAway}
-            disabled={transactionStatus === "signing" || transactionStatus === "submitting"}
+            onClick={transactionStatus === "error" ? onReset : handleRunAway}
+            disabled={transactionStatus === "processing" || transactionStatus === "signing" || transactionStatus === "submitting"}
           >
-            Run Away
+            {transactionStatus === "error" ? "Reset" : "Run Away"}
           </Button>
         </div>
       }
     >
       {transactionStatus !== "idle" ? (
         <div className={styles.transactionStatus}>
+          {transactionStatus === "processing" && (
+            <p className={styles.statusText}>Preparing...</p>
+          )}
           {transactionStatus === "signing" && (
-            <p className={styles.statusText}>Tap your card to sign...</p>
+            <p className={styles.statusText}>Tap your card when prompted...</p>
           )}
           {transactionStatus === "submitting" && (
             <p className={styles.statusText}>Submitting transaction...</p>
@@ -207,9 +213,28 @@ export const ChoicesCard: React.FC<ChoicesCardProps> = ({
             <p className={styles.statusText}>Success!</p>
           )}
           {transactionStatus === "error" && (
-            <p className={styles.errorText}>
-              {transactionError || "Transaction failed"}
-            </p>
+            <>
+              <p className={styles.errorText}>
+                {transactionError || "Transaction failed"}
+              </p>
+              {/* Show helpful info for passcode-related errors */}
+              {(transactionError?.toLowerCase().includes("passcode") ||
+                transactionError?.toLowerCase().includes("authenticate")) && (
+                <div className={styles.helpText}>
+                  <p className={styles.linkText}>
+                    If you haven't initialized your card yet, visit{" "}
+                    <a
+                      href="https://boot.burner.pro"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      boot.burner.pro
+                    </a>{" "}
+                    to set it up first.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       ) : (

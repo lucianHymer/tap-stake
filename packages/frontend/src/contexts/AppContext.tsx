@@ -16,6 +16,7 @@ export interface BalanceState {
 // Transaction state
 export type TransactionStatus =
   | "idle"
+  | "processing"
   | "signing"
   | "submitting"
   | "success"

@@ -8,7 +8,7 @@ import {
   encodeFunctionData,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { optimismSepolia } from 'viem/chains';
+import { optimismSepolia, optimism } from 'viem/chains';
 import { recoverAuthorizationAddress } from 'viem/experimental';
 
 export interface Env {
@@ -146,7 +146,10 @@ function getChainConfig(chainId: number): typeof optimismSepolia {
   // For now just support OP Sepolia, can add more chains later
   if (chainId === 11155420) {
     return optimismSepolia;
+  } else if (chainId === 10) {
+    return optimism;
   }
+
   throw new Error(`Unsupported chain ID: ${chainId}`);
 }
 

@@ -1,14 +1,40 @@
 import type { Address } from "viem";
 
 /**
- * Deployed contract addresses on Optimism Sepolia
- * Last updated: October 31, 2025
+ * Chain-specific contract addresses
+ * Update these after deploying to each network
  */
-export const CONTRACTS = {
-  testToken: "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756" as Address,
-  stakeChoicesToken: "0xb0a727f57841910752F0f1ef96871Cc28C086012" as Address,
-  stakerWallet: "0x0568033352086AD7Bc23B218D8b9ff6733BA4448" as Address,
-} as const;
+const CONTRACTS_BY_CHAIN: Record<
+  number,
+  {
+    stakeToken: Address;
+    stakeChoicesToken: Address;
+    stakerWallet: Address;
+  }
+> = {
+  // Optimism Sepolia (testnet)
+  11155420: {
+    stakeToken: "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756" as Address, // TestERC20 on Sepolia
+    stakeChoicesToken: "0xb0a727f57841910752F0f1ef96871Cc28C086012" as Address,
+    stakerWallet: "0x0568033352086AD7Bc23B218D8b9ff6733BA4448" as Address,
+  },
+  // Optimism Mainnet
+  10: {
+    stakeToken: "0x1eba7a6a72c894026cd654ac5cdcf83a46445b08" as Address, // GTC token on Optimism
+    stakeChoicesToken: "0x67f18cDa427b2BB5128A5C33a7D70F13C6FFeed4" as Address,
+    stakerWallet: "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756" as Address,
+  },
+};
+
+// Get the current chain ID from environment
+const CHAIN_ID = Number(import.meta.env.VITE_CHAIN_ID) || 11155420;
+
+// Export the contracts for the current chain
+export const CONTRACTS = CONTRACTS_BY_CHAIN[CHAIN_ID];
+
+if (!CONTRACTS) {
+  throw new Error(`No contracts configured for chain ID ${CHAIN_ID}`);
+}
 
 /**
  * StakerWallet ABI

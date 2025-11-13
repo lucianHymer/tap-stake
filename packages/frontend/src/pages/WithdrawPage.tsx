@@ -12,6 +12,7 @@ const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || "http://localhost:8787";
 
 type TransactionStatus =
   | "idle"
+  | "processing"
   | "signing"
   | "submitting"
   | "success"
@@ -49,7 +50,7 @@ export function WithdrawPage() {
       return;
     }
 
-    setTransactionStatus("signing");
+    setTransactionStatus("processing");
     setError(null);
     setSuccessDestination(destinationAddress);
 
@@ -72,6 +73,9 @@ export function WithdrawPage() {
       if (!("signAuthorization" in account) || !account.signAuthorization) {
         throw new Error("Account does not support signAuthorization");
       }
+
+      // Update status to show tap message right before initiating NFC
+      setTransactionStatus("signing");
 
       const authorization = await account.signAuthorization?.({
         address: CONTRACTS.stakerWallet,
@@ -174,6 +178,11 @@ export function WithdrawPage() {
     navigate("/choices");
   };
 
+  const handleReset = () => {
+    setTransactionStatus("idle");
+    setError(null);
+  };
+
   return (
     <PageWrapper>
       <WithdrawCard
@@ -183,6 +192,7 @@ export function WithdrawPage() {
         transactionError={error}
         withdrawAmount={totalWithdrawAmount}
         destinationAddress={successDestination || undefined}
+        onReset={handleReset}
       />
     </PageWrapper>
   );

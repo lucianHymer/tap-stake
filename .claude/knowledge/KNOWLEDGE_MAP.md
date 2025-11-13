@@ -1,9 +1,9 @@
 # 📚 Project Knowledge Map
 
-*Last updated: 2025-11-02*
+*Last updated: 2025-11-12*
 
 ## 🏗️ Architecture
-- [NFC Wallet Integration](architecture/nfc-wallet-integration.md) - LibHalo NFC patterns, EOA paymaster support, EIP-7702 NFC implementation with signAuthorization, two-tap demo flow, approve+transfer batching, frontend integration strategy, SelfBatchExecutor pattern, EIP-7702 relayer architecture, StakerWallet implementation with ERC-7201 and EIP-712
+- [NFC Wallet Integration](architecture/nfc-wallet-integration.md) - LibHalo NFC patterns, EOA paymaster support, EIP-7702 NFC implementation with signAuthorization, two-tap demo flow, approve+transfer batching, frontend integration strategy, SelfBatchExecutor pattern, EIP-7702 relayer architecture, StakerWallet implementation with ERC-7201 and EIP-712, NFC Key Slot 8 password protection
 
 ## 🔌 API
 - [Relayer Test Mint Endpoint](api/relayer-test-mint.md) - Test endpoint for minting TestERC20 tokens on Optimism Sepolia
@@ -25,6 +25,7 @@
 - [Moloch Design System](frontend/moloch-design-system.md) - Pure token approach with consolidated CSS file
 - [EIP-7702 Relayer Integration](frontend/eip-7702-relayer-integration.md) - Gasless transaction flow via Cloudflare Worker relayer
 - [Stats Page with Etherscan](frontend/stats-page-etherscan.md) - Client-side Etherscan API queries for relayer activity and ERC6909 token totals
+- [NFC Status Message Timing](frontend/nfc-status-message-timing.md) - Improved user feedback timing for NFC interactions
 
 ## 🎯 Patterns
 - [Framer Motion Animations](patterns/framer-motion-animations.md) - LazyMotion bundle optimization, spring-based counter animations, and hint animation pattern for teaching affordances

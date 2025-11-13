@@ -115,7 +115,7 @@ export function ChoicesPage() {
       return;
     }
 
-    actions.setTransactionStatus("signing");
+    actions.setTransactionStatus("processing");
     actions.setTransactionError(null);
 
     try {
@@ -137,6 +137,9 @@ export function ChoicesPage() {
       if (!("signAuthorization" in account) || !account.signAuthorization) {
         throw new Error("Account does not support signAuthorization");
       }
+
+      // Update status to show tap message right before initiating NFC
+      actions.setTransactionStatus("signing");
 
       const authorization = await account.signAuthorization?.({
         address: CONTRACTS.stakerWallet,
@@ -248,6 +251,7 @@ export function ChoicesPage() {
         totalAmount={derived.totalAmount}
         transactionStatus={state.transaction.status}
         transactionError={state.transaction.error}
+        onReset={actions.resetTransaction}
       />
     </PageWrapper>
   );

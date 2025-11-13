@@ -11,8 +11,8 @@ export interface ConnectCardProps {
   onConnect?: () => void;
   /** Error message to display */
   error?: string | null;
-  /** Whether connection is in progress */
-  isConnecting?: boolean;
+  /** Connection status */
+  connectStatus?: "idle" | "processing" | "waiting_for_tap";
 }
 
 // Icon components
@@ -27,8 +27,10 @@ const HeartIcon = () => (
 export const ConnectCard: React.FC<ConnectCardProps> = ({
   onConnect,
   error,
-  isConnecting,
+  connectStatus = "idle",
 }) => {
+  const isConnecting = connectStatus !== "idle";
+
   return (
     <GameCard
       variant="connect"
@@ -43,13 +45,34 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({
         </Button>
       }
     >
-      {isConnecting ? (
+      {connectStatus === "processing" ? (
+        <div className={styles.statusText}>
+          <p>Preparing...</p>
+        </div>
+      ) : connectStatus === "waiting_for_tap" ? (
         <div className={styles.statusText}>
           <p>Tap your card when prompted...</p>
         </div>
       ) : error ? (
         <div className={styles.errorText}>
           <p>{error}</p>
+          {/* Show helpful info for passcode-related errors */}
+          {(error.toLowerCase().includes("passcode") ||
+            error.toLowerCase().includes("authenticate")) && (
+            <div className={styles.helpText}>
+              <p>
+                If you haven't initialized your card yet, visit{" "}
+                <a
+                  href="https://boot.burner.pro"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  boot.burner.pro
+                </a>{" "}
+                to set it up first.
+              </p>
+            </div>
+          )}
           {/* Show testnet-only helper links on Optimism Sepolia */}
           {CHAIN_ID === 11155420 && (
             <>
@@ -64,7 +87,7 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({
               {/* Link for zero balance errors */}
               {error.includes("0 GTC") && (
                 <p className={styles.testnetLink}>
-                  <Link to="/test">Mint test GTC to your burner here</Link>
+                  <Link to="/test">Get testnet GTC for your burner</Link>
                 </p>
               )}
             </>
