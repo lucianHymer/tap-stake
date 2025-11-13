@@ -59,19 +59,17 @@ export const ConnectCard: React.FC<ConnectCardProps> = ({
           {/* Show helpful info for passcode-related errors */}
           {(error.toLowerCase().includes("passcode") ||
             error.toLowerCase().includes("authenticate")) && (
-            <div className={styles.helpText}>
-              <p>
-                If you haven't initialized your card yet, visit{" "}
-                <a
-                  href="https://boot.burner.pro"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  boot.burner.pro
-                </a>{" "}
-                to set it up first.
-              </p>
-            </div>
+            <p>
+              If you haven't initialized your card yet, visit{" "}
+              <a
+                href="https://boot.burner.pro"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                boot.burner.pro
+              </a>{" "}
+              to set it up first.
+            </p>
           )}
           {/* Show testnet-only helper links on Optimism Sepolia */}
           {CHAIN_ID === 11155420 && (

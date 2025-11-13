@@ -67,8 +67,21 @@
   margin: 0;
 }
 
-.errorText {
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.errorContainer p {
   color: var(--semantic-status-error);
-  font-size: var(--core-type-size-md);
+  font-size: var(--core-type-size-lg);
   margin: 0;
+  font-family: var(--core-type-font-family-serif);
+}
+
+.errorContainer a {
+  color: white;
 }

@@ -86,9 +86,13 @@
 
 .errorText p {
   color: var(--semantic-status-error);
-  font-size: var(--core-type-size-md);
+  font-size: var(--core-type-size-lg);
   margin: 0;
   font-family: var(--core-type-font-family-serif);
+}
+
+.errorText a {
+  color: white;
 }
 
 .testnetLink {

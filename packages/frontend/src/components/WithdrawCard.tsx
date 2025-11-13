@@ -98,28 +98,26 @@ export const WithdrawCard: React.FC<WithdrawCardProps> = ({
             </p>
           )}
           {transactionStatus === "error" && (
-            <>
-              <p className={styles.errorText}>
+            <div className={styles.errorContainer}>
+              <p>
                 {transactionError || "Withdrawal failed"}
               </p>
               {/* Show helpful info for passcode-related errors */}
               {(transactionError?.toLowerCase().includes("passcode") ||
                 transactionError?.toLowerCase().includes("authenticate")) && (
-                <div className={styles.helpText}>
-                  <p className={styles.linkText}>
-                    If you haven't initialized your card yet, visit{" "}
-                    <a
-                      href="https://boot.burner.pro"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      boot.burner.pro
-                    </a>{" "}
-                    to set it up first.
-                  </p>
-                </div>
+                <p>
+                  If you haven't initialized your card yet, visit{" "}
+                  <a
+                    href="https://boot.burner.pro"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    boot.burner.pro
+                  </a>{" "}
+                  to set it up first.
+                </p>
               )}
-            </>
+            </div>
           )}
         </div>
       ) : (
