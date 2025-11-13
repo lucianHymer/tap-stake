@@ -178,6 +178,11 @@ export function WithdrawPage() {
     navigate("/choices");
   };
 
+  const handleReset = () => {
+    setTransactionStatus("idle");
+    setError(null);
+  };
+
   return (
     <PageWrapper>
       <WithdrawCard
@@ -187,6 +192,7 @@ export function WithdrawPage() {
         transactionError={error}
         withdrawAmount={totalWithdrawAmount}
         destinationAddress={successDestination || undefined}
+        onReset={handleReset}
       />
     </PageWrapper>
   );

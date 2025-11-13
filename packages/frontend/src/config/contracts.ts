@@ -20,7 +20,7 @@ const CONTRACTS_BY_CHAIN: Record<
   },
   // Optimism Mainnet
   10: {
-    stakeToken: "0x1EBa7a6a72c894026Cd654AC5CDCF83A46445B08" as Address, // GTC token on Optimism
+    stakeToken: "0x1eba7a6a72c894026cd654ac5cdcf83a46445b08" as Address, // GTC token on Optimism
     stakeChoicesToken: "0x67f18cDa427b2BB5128A5C33a7D70F13C6FFeed4" as Address,
     stakerWallet: "0xAA2B1999C772cF2B4E5478e4b5C54aE8447ef756" as Address,
   },

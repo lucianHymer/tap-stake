@@ -20,6 +20,8 @@ export interface WithdrawCardProps {
   withdrawAmount?: string;
   /** Destination address (for success message) */
   destinationAddress?: string;
+  /** Callback to reset transaction status after error */
+  onReset?: () => void;
 }
 
 export const WithdrawCard: React.FC<WithdrawCardProps> = ({
@@ -29,6 +31,7 @@ export const WithdrawCard: React.FC<WithdrawCardProps> = ({
   transactionError,
   withdrawAmount,
   destinationAddress: successDestination,
+  onReset,
 }) => {
   const [destinationAddress, setDestinationAddress] = useState<string | null>(
     null,
@@ -67,10 +70,10 @@ export const WithdrawCard: React.FC<WithdrawCardProps> = ({
             variant="cancel"
             leftIcon={ASSETS.xIcon}
             rightIcon={ASSETS.xIcon}
-            onClick={onGoBack}
-            disabled={transactionStatus !== "idle"}
+            onClick={transactionStatus === "error" ? onReset : onGoBack}
+            disabled={transactionStatus !== "idle" && transactionStatus !== "error"}
           >
-            Go Back
+            {transactionStatus === "error" ? "Reset" : "Go Back"}
           </Button>
         </div>
       }
@@ -95,9 +98,28 @@ export const WithdrawCard: React.FC<WithdrawCardProps> = ({
             </p>
           )}
           {transactionStatus === "error" && (
-            <p className={styles.errorText}>
-              {transactionError || "Withdrawal failed"}
-            </p>
+            <>
+              <p className={styles.errorText}>
+                {transactionError || "Withdrawal failed"}
+              </p>
+              {/* Show helpful info for passcode-related errors */}
+              {(transactionError?.toLowerCase().includes("passcode") ||
+                transactionError?.toLowerCase().includes("authenticate")) && (
+                <div className={styles.helpText}>
+                  <p className={styles.linkText}>
+                    If you haven't initialized your card yet, visit{" "}
+                    <a
+                      href="https://boot.burner.pro"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      boot.burner.pro
+                    </a>{" "}
+                    to set it up first.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       ) : (

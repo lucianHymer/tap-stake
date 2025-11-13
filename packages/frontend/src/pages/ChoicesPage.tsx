@@ -251,6 +251,7 @@ export function ChoicesPage() {
         totalAmount={derived.totalAmount}
         transactionStatus={state.transaction.status}
         transactionError={state.transaction.error}
+        onReset={actions.resetTransaction}
       />
     </PageWrapper>
   );

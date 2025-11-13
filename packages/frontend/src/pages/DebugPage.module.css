@@ -1,0 +1,203 @@
+@import "../styles/moloch-tokens.css";
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+}
+
+.card {
+  background: var(--core-color-surface-secondary);
+  border: 1px solid var(--core-color-border-primary);
+  border-radius: var(--core-radius-lg);
+  padding: 32px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.title {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0 0 8px 0;
+  color: var(--core-color-text-primary);
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--core-color-text-secondary);
+  text-align: center;
+  margin: 0 0 32px 0;
+}
+
+.scanButton {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 600;
+  background: var(--core-color-accent-primary);
+  color: white;
+  border: none;
+  border-radius: var(--core-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 24px;
+}
+
+.scanButton:hover:not(:disabled) {
+  background: var(--core-color-accent-red);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 3, 3, 0.3);
+}
+
+.scanButton:disabled {
+  background: var(--core-color-surface-tertiary);
+  color: var(--core-color-text-tertiary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.statusMessage {
+  text-align: center;
+  padding: 24px;
+  background: var(--core-color-surface-tertiary);
+  border-radius: var(--core-radius-md);
+  margin-bottom: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--core-color-border-secondary);
+  border-top-color: var(--core-color-accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+.hint {
+  font-size: 14px;
+  color: var(--core-color-text-tertiary);
+  margin-top: 8px;
+}
+
+.result {
+  background: var(--core-color-surface-success);
+  border: 1px solid var(--core-color-neon-green);
+  border-radius: var(--core-radius-md);
+  padding: 24px;
+  margin-bottom: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+.result h3 {
+  margin: 0 0 12px 0;
+  color: var(--core-color-neon-green);
+  font-size: 18px;
+}
+
+.address {
+  display: block;
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 14px;
+  background: var(--core-color-surface-primary);
+  padding: 12px;
+  border-radius: var(--core-radius-sm);
+  word-break: break-all;
+  color: var(--core-color-text-primary);
+  margin-bottom: 16px;
+}
+
+.copyButton {
+  padding: 8px 16px;
+  font-size: 14px;
+  background: var(--core-color-neon-green);
+  color: var(--core-color-surface-primary);
+  border: none;
+  border-radius: var(--core-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.copyButton:hover {
+  background: var(--core-color-accent-green);
+  transform: translateY(-1px);
+}
+
+.error {
+  background: var(--core-color-surface-error);
+  border: 1px solid var(--core-color-accent-red);
+  border-radius: var(--core-radius-md);
+  padding: 24px;
+  margin-bottom: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+.error h3 {
+  margin: 0 0 12px 0;
+  color: var(--core-color-accent-red);
+  font-size: 18px;
+}
+
+.error p {
+  margin: 0 0 8px 0;
+  color: var(--core-color-text-primary);
+}
+
+.errorHint {
+  font-size: 14px;
+  color: var(--core-color-text-secondary);
+  font-style: italic;
+  margin-top: 12px !important;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--core-color-border-secondary);
+}
+
+.footer p {
+  color: var(--core-color-text-secondary);
+  font-size: 14px;
+}
+
+.link {
+  color: var(--core-color-accent-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.link:hover {
+  color: var(--core-color-accent-red);
+  border-bottom-color: var(--core-color-accent-red);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -76,7 +76,8 @@ const savePasscode = (publicKey: string, passcode: string): void => {
 
 const promptForPasscode = async (): Promise<string | null> => {
   const passcode = window.prompt(
-    "This NFC card requires a passcode. Please enter your 4-6 digit passcode:",
+    "Please enter your Burner card passcode:\n\n" +
+    "Cards can be initialized at boot.burner.pro"
   );
   return passcode;
 };
@@ -228,84 +229,87 @@ export const signWithNFC = async (
     command.format = "hex";
   }
 
-  // Try different passcodes in order
-  const passcodesToTry: string[] = [];
-
-  // Try stored passcode for this specific public key
+  // Check if we have a stored passcode for this specific public key
   const storedPasscode = getStoredPasscode(slot8PublicKey);
-  if (storedPasscode) {
-    passcodesToTry.push(storedPasscode);
-  }
-  passcodesToTry.push("0000"); // Then try default
 
-  let lastError: Error | null = null;
+  let passcodeToUse: string | null = storedPasscode;
 
-  for (const passcode of passcodesToTry) {
-    try {
-      command.password = passcode;
-      console.log(`📱 NFC: Trying slot 8 with passcode: ${passcode === "0000" ? "default" : "stored for this card"}`);
+  // If no stored passcode, prompt immediately
+  if (!passcodeToUse) {
+    console.log("📱 NFC: No stored passcode, prompting user...");
+    passcodeToUse = await promptForPasscode();
 
-      const startTime = Date.now();
-      const result = await execHaloCmdWeb(command);
-      const elapsed = Date.now() - startTime;
-      console.log(`📱 NFC: Sign completed in ${elapsed}ms`);
-
-      if (!result.signature) {
-        throw new Error(`No signature returned from card`);
-      }
-
-      // Success! Save the passcode for this specific card if it's not already saved
-      if (passcode !== storedPasscode) {
-        savePasscode(slot8PublicKey, passcode);
-      }
-
-      return result.signature.ether as Hex;
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-      console.log(`📱 NFC: Failed with passcode ${passcode === "0000" ? "default" : "stored"}:`, lastError.message);
-
-      // Check if it's a wrong password error
-      if (
-        lastError.message.includes("ERROR_CODE_WRONG_PWD") ||
-        lastError.message.includes("wrong password") ||
-        lastError.message.includes("Wrong password")
-      ) {
-        continue; // Try next passcode
-      } else {
-        // Some other error - don't try more passcodes
-        throw lastError;
-      }
+    if (!passcodeToUse) {
+      throw new Error("Passcode required for Burner card");
     }
   }
 
-  // All passcodes failed, prompt user
-  console.log("📱 NFC: All stored passcodes failed, prompting user...");
-
-  const userPasscode = await promptForPasscode();
-  if (!userPasscode) {
-    throw new Error("Passcode required for this NFC card");
-  }
-
   try {
-    command.password = userPasscode;
-    console.log("📱 NFC: Trying with user-provided passcode...");
+    command.password = passcodeToUse;
+    console.log(`📱 NFC: Trying slot 8 with ${storedPasscode ? "stored" : "user-provided"} passcode`);
 
+    const startTime = Date.now();
     const result = await execHaloCmdWeb(command);
+    const elapsed = Date.now() - startTime;
+    console.log(`📱 NFC: Sign completed in ${elapsed}ms`);
 
     if (!result.signature) {
       throw new Error(`No signature returned from card`);
     }
 
-    // Success! Save the new passcode for this specific card
-    savePasscode(slot8PublicKey, userPasscode);
-    console.log("📱 NFC: User passcode worked, saved for this card");
+    // Success! Save the passcode for this specific card if it's new
+    if (!storedPasscode && passcodeToUse) {
+      savePasscode(slot8PublicKey, passcodeToUse);
+      console.log("📱 NFC: New passcode saved for this card");
+    }
 
     return result.signature.ether as Hex;
   } catch (error) {
-    console.error("NFC signing failed with user passcode:", error);
-    throw new Error(
-      `NFC Sign Failed: Unable to authenticate with slot 8. Please check your passcode.`,
-    );
+    const errorObj = error instanceof Error ? error : new Error(String(error));
+    console.error("📱 NFC: Signing failed:", errorObj.message);
+
+    // Check if it's a wrong password error
+    if (
+      errorObj.message.includes("ERROR_CODE_WRONG_PWD") ||
+      errorObj.message.includes("wrong password") ||
+      errorObj.message.includes("Wrong password")
+    ) {
+      // If stored passcode failed, prompt for new one
+      if (storedPasscode) {
+        console.log("📱 NFC: Stored passcode failed, prompting for new one...");
+        const newPasscode = await promptForPasscode();
+
+        if (!newPasscode) {
+          throw new Error("Passcode required for Burner card");
+        }
+
+        try {
+          command.password = newPasscode;
+          console.log("📱 NFC: Trying with new user-provided passcode...");
+
+          const result = await execHaloCmdWeb(command);
+
+          if (!result.signature) {
+            throw new Error(`No signature returned from card`);
+          }
+
+          // Success! Save the new passcode
+          savePasscode(slot8PublicKey, newPasscode);
+          console.log("📱 NFC: New passcode worked, saved for this card");
+
+          return result.signature.ether as Hex;
+        } catch (retryError) {
+          console.error("NFC signing failed with new passcode:", retryError);
+          throw new Error("Unable to authenticate with Burner card");
+        }
+      } else {
+        // User-provided passcode was wrong
+        throw new Error("Incorrect passcode");
+      }
+    } else {
+      // Some other error - pass it through
+      throw errorObj;
+    }
   }
 };
 

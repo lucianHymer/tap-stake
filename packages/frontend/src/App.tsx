@@ -12,6 +12,7 @@ import { StatsPage } from "./pages/StatsPage";
 import { TestPage as TestSetupPage } from "./pages/TestPage";
 import { WithdrawPage } from "./pages/WithdrawPage";
 import Slot8Test from "./pages/Slot8Test";
+import { DebugPage } from "./pages/DebugPage";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -78,6 +79,9 @@ function App() {
 
               {/* Public stats page */}
               <Route path="/stats" element={<StatsPage />} />
+
+              {/* Debug page - works in production and testnet */}
+              <Route path="/debug" element={<DebugPage />} />
 
               {/* Admin and demos */}
               <Route path="/admin" element={<AdminPage />} />
